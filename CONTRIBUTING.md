@@ -27,30 +27,31 @@ Full list: [`AGENTS.md`](AGENTS.md).
 ## Consistency tooling
 
 ```sh
-npm install
+npm ci                  # lockfile install; lifecycle scripts disabled via .npmrc
+npm run audit:npm       # high+ audit, registry signatures, lockfile lint
 npm run build:styles    # Sass → dist/stylesheets/application.css
 npm start               # example service at http://127.0.0.1:3000
 npm test                # baseline, Sass pipeline, fixtures, and the example service; 100% coverage
-npm run verify          # docs + build:styles + lint:go + tests
+npm run verify          # docs + audit:npm + build:styles + lint:go + tests
 npm run sync:template   # shared paths from Nooshu/govuk-frontend-example
 ```
 
-See [`docs/syncing-from-template.md`](docs/syncing-from-template.md). Dotfiles and lint setup match the language-agnostic template. Go adds `go test`, `npm run lint:go` (`go vet`, `go fix -diff`, `staticcheck`), and 100% coverage on `./internal/...`. Node remains for the Frontend pin, Sass, and the shared baseline tests.
+See [`docs/syncing-from-template.md`](docs/syncing-from-template.md) and [`docs/npm-security.md`](docs/npm-security.md). Go adds `go test`, `npm run lint:go` (`go vet`, `go fix -diff`, `staticcheck`), and 100% coverage on `./internal/...`. Node remains for the Frontend pin, Sass, and the shared baseline tests — keep that tree minimal and lockfile-strict.
 
 ### Dotfiles (do not bypass)
 
-| File                              | Role                                                   |
-| --------------------------------- | ------------------------------------------------------ |
-| `.editorconfig`                   | Indentation, charset, newlines across editors          |
-| `.gitignore` / `.gitattributes`   | Ignore hygiene + line endings                          |
-| `.nvmrc` / `.npmrc`               | Node version + npm behaviour for Frontend/docs tooling |
-| `.prettierrc` / `.prettierignore` | Shared formatting                                      |
-| `.markdownlint-cli2.jsonc`        | Markdown consistency                                   |
-| `staticcheck.conf`                | Staticcheck defaults for `npm run lint:go`             |
-| `.air.toml`                       | Optional live-reload for local `air` users             |
-| `.vscode/`                        | Shared editor defaults, Gopls, tasks, launch config    |
-| `.cursor/rules/`                  | Agent consistency rules                                |
-| `.github/`                        | PR template, Dependabot, CI                            |
+| File                              | Role                                                           |
+| --------------------------------- | -------------------------------------------------------------- |
+| `.editorconfig`                   | Indentation, charset, newlines across editors                  |
+| `.gitignore` / `.gitattributes`   | Ignore hygiene + line endings                                  |
+| `.nvmrc` / `.npmrc`               | Node version + npm supply-chain policy (ignore-scripts, audit) |
+| `.prettierrc` / `.prettierignore` | Shared formatting                                              |
+| `.markdownlint-cli2.jsonc`        | Markdown consistency                                           |
+| `staticcheck.conf`                | Staticcheck defaults for `npm run lint:go`                     |
+| `.air.toml`                       | Optional live-reload for local `air` users                     |
+| `.vscode/`                        | Shared editor defaults, Gopls, tasks, launch config            |
+| `.cursor/rules/`                  | Agent consistency rules                                        |
+| `.github/`                        | PR template, Dependabot, CI                                    |
 
 ## Pull requests
 

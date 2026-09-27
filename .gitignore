@@ -33,7 +33,6 @@ coverage/
 .next/
 .nuxt/
 .svelte-kit/
-*.tsbuildinfo
 
 # Env & secrets
 .env

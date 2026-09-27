@@ -8,7 +8,8 @@
     "#baseline": "./baseline/index.mjs"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "npm": ">=10"
   },
   "scripts": {
     "build:styles": "node scripts/build-styles-cli.mjs",
@@ -17,12 +18,13 @@
     "lint:md": "markdownlint-cli2",
     "verify:docs": "npm run format:check && npm run lint:md",
     "lint:go": "go vet ./... && go fix -diff ./... && go tool staticcheck ./...",
+    "audit:npm": "npm audit --audit-level=high && npm audit signatures && node scripts/check-npm-lockfile.mjs",
     "start": "npm run build:styles && go run ./cmd/server",
     "test:baseline": "node --test --experimental-test-coverage --test-coverage-include='baseline/**/*.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/baseline.test.mjs",
     "test:styles": "node --test --experimental-test-coverage --test-coverage-include='scripts/build-styles.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/styles.test.mjs",
     "test:go": "go test ./internal/... -race -count=1 -covermode=atomic -coverprofile=coverage.out && node scripts/check-go-coverage.mjs",
     "test": "npm run test:baseline && npm run test:styles && npm run build:styles && npm run test:go",
-    "verify": "npm run verify:docs && npm run build:styles && npm run lint:go && npm test",
+    "verify": "npm run verify:docs && npm run audit:npm && npm run build:styles && npm run lint:go && npm test",
     "sync:template": "./scripts/sync-from-template.sh"
   },
   "devDependencies": {

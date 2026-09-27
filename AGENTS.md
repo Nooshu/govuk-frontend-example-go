@@ -88,6 +88,7 @@ Using this repo does **not** make a service assessment-ready. See [`docs/service
 | Page shell                          | [`docs/page-shell.md`](docs/page-shell.md)                             |
 | Frontend performance                | [`docs/frontend-performance.md`](docs/frontend-performance.md)         |
 | Frontend security                   | [`docs/frontend-security.md`](docs/frontend-security.md)               |
+| npm tooling security                | [`docs/npm-security.md`](docs/npm-security.md)                         |
 | Accessibility                       | [`docs/accessibility.md`](docs/accessibility.md)                       |
 | Content & forms                     | [`docs/content-and-forms.md`](docs/content-and-forms.md)               |
 | Design tokens (colour, type, space) | [`docs/design-tokens.md`](docs/design-tokens.md)                       |

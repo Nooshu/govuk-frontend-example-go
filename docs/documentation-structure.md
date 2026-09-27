@@ -12,7 +12,7 @@ Canonical agent index: [`AGENTS.md`](../AGENTS.md). Doc map: [`README.md`](READM
 4. **Skill + rules encode habits** — [`.cursor/skills/`](../.cursor/skills/) for workflows; [`.cursor/rules/`](../.cursor/rules/) for always-on consistency.
 5. **Official URLs win** — [guidance-sources.md](guidance-sources.md) before inventing policy.
 6. **No silent behaviour** — if code or config changes how someone builds, runs, secures, styles, or tests the service, docs change in the same change set.
-7. **Latest language practice** — document and implement the current best practices for the recorded wrapper language ([tech-stack.md](tech-stack.md)); do not fossilise outdated patterns.
+7. **Latest Go practice** — document and implement current Go best practices ([tech-stack.md](tech-stack.md), [go-conventions.md](go-conventions.md)); do not fossilise outdated patterns.
 
 ## Audience cues
 

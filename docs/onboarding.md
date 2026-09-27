@@ -91,7 +91,8 @@ More pitfalls: [creating-components.md](creating-components.md).
 ## Consistency tooling
 
 ```sh
-npm install
+npm ci                # preferred; respects .npmrc ignore-scripts
+npm run audit:npm     # high+ audit, signatures, lockfile lint
 npm run build:styles  # Sass → dist/stylesheets/application.css
 npm start
 npm test              # baseline, Sass pipeline, then the Go suite
@@ -100,7 +101,7 @@ npm run verify:docs   # Prettier + markdownlint
 npm run verify
 ```
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md). Dotfiles: `.editorconfig`, `.prettierrc.json`, `.markdownlint-cli2.jsonc`, `.nvmrc`, `.vscode/` (including Go), `staticcheck.conf`, `.cursor/rules/`, `.github/`. Conventions: [go-conventions.md](go-conventions.md).
+See [CONTRIBUTING.md](../CONTRIBUTING.md) and [npm-security.md](npm-security.md). Dotfiles: `.editorconfig`, `.prettierrc.json`, `.markdownlint-cli2.jsonc`, `.nvmrc`, `.npmrc`, `.vscode/` (including Go), `staticcheck.conf`, `.cursor/rules/`, `.github/`. Conventions: [go-conventions.md](go-conventions.md).
 
 ## Next reads
 

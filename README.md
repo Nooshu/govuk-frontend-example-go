@@ -22,12 +22,13 @@ Dual-audience map: [`docs/documentation-structure.md`](docs/documentation-struct
 ## Quick local checks
 
 ```sh
-npm install
+npm ci                  # lockfile install (scripts disabled — see docs/npm-security.md)
+npm run audit:npm       # high+ audit, signatures, lockfile lint
 npm run build:styles    # Sass → dist/stylesheets/application.css
 npm start               # build:styles, then go run ./cmd/server
 npm test                # baseline, Sass pipeline, Go fixture parity, and service tests
 npm run lint:go         # go vet + go fix -diff + staticcheck
-npm run verify          # docs + build:styles + lint:go + tests
+npm run verify          # docs + audit:npm + build:styles + lint:go + tests
 npm run sync:template   # pull shared docs/dotfiles from the agnostic template
 ```
 

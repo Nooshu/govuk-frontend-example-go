@@ -1,6 +1,6 @@
 # Frontend security
 
-Shared OWASP response-header baseline for this template and every language line that syncs from it. The machine-readable contract is [`baseline/policy.json`](../baseline/policy.json). Node services call [`baseline/index.mjs`](../baseline/index.mjs). Other languages apply the same rules and can diff their headers against the Node helper.
+Shared OWASP response-header baseline for this template and every language line that syncs from it. The machine-readable contract is [`baseline/policy.json`](../baseline/policy.json). This **Go** line applies it in [`internal/baseline`](../internal/baseline). The Node helpers under [`baseline/*.mjs`](../baseline/) are the shared oracle for tests; they are not used on the Go request path.
 
 Authoritative sources:
 
@@ -15,10 +15,11 @@ Performance cache rules live in [frontend-performance.md](frontend-performance.m
 
 Sync the whole `baseline/` directory with this repo. Do not fork a weaker header set in the language line.
 
-| Stack                      | How to apply it                                                                                                    |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Node (TypeScript included) | `import { applyResponseHeaders } from './baseline/index.mjs'` on every response                                    |
-| Any other language         | Read `baseline/policy.json` and match `buildResponseHeaders`. Use the Node helper as the oracle when you add tests |
+| Stack              | How to apply it                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **Go (this line)** | `internal/baseline` reads `policy.json` and applies headers on every response                                      |
+| Node tooling       | `baseline/*.mjs` — shared test oracle (`npm run test:baseline`); optional reference `import` for other Node lines  |
+| Any other language | Read `baseline/policy.json` and match `buildResponseHeaders`. Use the Node helper as the oracle when you add tests |
 
 ```sh
 node --input-type=module -e "import { buildResponseHeaders } from './baseline/index.mjs'; console.log(JSON.stringify(buildResponseHeaders({ kind: 'document', secureTransport: true }), null, 2))"

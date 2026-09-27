@@ -1,18 +1,16 @@
 # Paths copied from the `template` remote on sync (one path per line).
-# Do not list TypeScript-specific files (tech-stack, package.json, README, AGENTS, src/, …).
-# baseline/ is shared on purpose: this line calls it, and does not keep a second header policy.
+# Do not list Go-specific files (tech-stack, why-go, testing-components, creating-components,
+# govuk-components, frontend-security, package.json, README, AGENTS, go.mod, internal/, cmd/, …).
+# baseline/ is shared on purpose: this line implements it in Go, and does not keep a second header policy.
 # See docs/syncing-from-template.md
 
 baseline
 docs/accessibility.md
 docs/authoritative-references.md
 docs/content-and-forms.md
-docs/creating-components.md
 docs/creating-patterns.md
 docs/design-tokens.md
 docs/frontend-performance.md
-docs/frontend-security.md
-docs/govuk-components.md
 docs/govuk-frontend-roadmap.md
 docs/guidance-sources.md
 docs/layout-chrome.md
@@ -23,15 +21,11 @@ docs/service-assessment-readiness.md
 docs/service-standard.md
 docs/styles.md
 docs/technology-code-of-practice.md
-docs/testing-components.md
-docs/upgrading-govuk-frontend.md
 .editorconfig
-.gitattributes
 .prettierignore
 .prettierrc.json
 .markdownlint-cli2.jsonc
 .nvmrc
-.npmrc
 .env.example
 LICENSE
 SECURITY.md

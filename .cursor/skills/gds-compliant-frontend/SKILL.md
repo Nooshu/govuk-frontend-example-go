@@ -61,7 +61,7 @@ Local index: [`docs/guidance-sources.md`](../../../docs/guidance-sources.md).
 
 ## Workflow reminders
 
-1. This line is **Go**. Prefer the standard library. Record exceptions in [`docs/tech-stack.md`](../../../docs/tech-stack.md).
+1. This line is **Go**. Prefer the standard library. Record exceptions in [`docs/tech-stack.md`](../../../docs/tech-stack.md). Keep the npm tree minimal and lockfile-strict ([`docs/npm-security.md`](../../../docs/npm-security.md)); use `npm ci` / `npm run audit:npm`.
 2. Never hand-paste `govuk-*` component HTML; call `internal/govuk` / the page renderer.
 3. Upgrade only after reviewing the [latest release](https://github.com/alphagov/govuk-frontend/releases/latest).
 4. New components: [`docs/creating-components.md`](../../../docs/creating-components.md). Patterns: [`docs/creating-patterns.md`](../../../docs/creating-patterns.md).

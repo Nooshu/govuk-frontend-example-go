@@ -6,13 +6,13 @@ Official fixture guidance: [https://frontend.design-system.service.gov.uk/testin
 
 Related docs: [govuk-components.md](govuk-components.md), [testing-components.md](testing-components.md), [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md), [preview-server.md](preview-server.md).
 
-**Stack note:** Structure the _wrapper_ using the **chosen language’s best practices** ([tech-stack.md](tech-stack.md)). Prefer calling **GOV.UK Frontend Nunjucks macros** for component HTML rather than copy-pasting HTML from each release. Official `fixtures.json` enables extensive **100% parity** testing of backend output.
+**Stack note:** This line is **Go**. Port each component in `internal/govuk` using current Go practice ([tech-stack.md](tech-stack.md), [go-conventions.md](go-conventions.md)). Track Frontend **Nunjucks macros** / `template.njk` as the behaviour reference — do **not** copy-paste HTML from releases, and do **not** shell out to Node to render. Official `fixtures.json` enables extensive **100% parity** testing of **Go** output.
 
 ## Goals (non-negotiable)
 
 1. **GOV.UK Frontend is the source of truth** — official CSS/JS and `fixtures.json` from the **same** pinned `govuk-frontend` Node package.
 2. **Options mirror Nunjucks macros** — names/shapes align with `macro-options.json` / fixture `options`.
-3. **Exact HTML parity (backend vs fixtures)** — the **backend language’s** output equals each fixture’s `html` byte-for-byte (ordinal equality). Cover every fixture. A Nunjucks-vs-fixture check is freshness only; it does not replace backend parity. See [testing-components.md](testing-components.md).
+3. **Exact HTML parity (Go vs fixtures)** — **`govuk.Render`** output equals each fixture’s `html` byte-for-byte (ordinal equality). Cover every fixture. A Nunjucks-vs-fixture check is freshness only; it does not replace Go parity. See [testing-components.md](testing-components.md).
 4. **Never hand-write component markup in pages** — pages invoke the library API.
 5. **No ad-hoc custom CSS** — Sass pipeline + `govuk-overrides.scss` only; no `!important` ([styles.md](styles.md)).
 6. **Register in navigation** — every shipped component appears on `/components` (the preview homepage) with a preview link. The service start page links to that catalogue when demos are enabled.
@@ -30,20 +30,14 @@ Related docs: [govuk-components.md](govuk-components.md), [testing-components.md
 Exact filenames and folders follow [tech-stack.md](tech-stack.md). Conceptually each component needs:
 
 ```text
-component unit (name idiomatic for the wrapper language)
-  options / model types
-  public API entry
-  renderer                         # builds exact HTML string
-  options mapper                   # fixtures.json options → model
-  fixtures.json                    # from govuk-frontend (do not invent html)
+internal/govuk/
+  components_*.go                  # renderers (strings.Builder / helpers)
+  params.go / nunjucks.go          # ordered Params + Nunjucks-parity escape
+  render.go                        # Render registry
+  *_test.go                        # Go vs every fixture html
 
-preview surface                    # Dev/Testing only — selected fixture
-raw fixture endpoint               # fragment only; Dev/Testing only
-
-parity + structural tests          # wrapper language
-tests/govuk-fixtures/…             # Nunjucks verification (Node)
-  <kebab-name>.fixtures.json
-  render-<kebab-name>-fixtures.mjs
+node_modules/govuk-frontend/…      # pinned fixtures.json (do not invent html)
+app demos /components/…            # preview surfaces (demos enabled)
 ```
 
 ## Recommended work order
@@ -68,7 +62,7 @@ tests/govuk-fixtures/…             # Nunjucks verification (Node)
 
 ### 2. Models (Nunjucks-aligned)
 
-- Root model mirrors macro options (`id`, `classes`, `attributes`, …) using types idiomatic for the wrapper language.
+- Options mirror macro names (`id`, `classes`, `attributes`, …) via ordered `govuk.Params`.
 - Use a text/html pair: prefer `text` (encoded); `html` only for **trusted** markup; if both set, `html` wins; sanitise untrusted input.
 - Map JSON carefully (`headingLevel` → idiomatic name in the language).
 - Handle edge cases: falsy array entries, **tri-state booleans** (unset vs `false`), nested `label` / `hint` / `errorMessage` / `formGroup` / i18n maps.
@@ -104,7 +98,7 @@ Other rules:
 
 ### 4. Public API
 
-Thin wrapper: accept the options model, return rendered HTML in whatever form is idiomatic (string, safe HTML type, component result). Pages call the library — they do not paste markup.
+Thin API: accept `*govuk.Params` (or page maps via `govukrender`), return the HTML string. Pages call the library — they do not paste markup.
 
 ### 5. Options mapper
 
@@ -126,16 +120,16 @@ Map fixture `options` → model without losing edge cases: nested text/html, att
 ### 8. Tests
 
 1. Structural/smoke: index lists preview; no embedded demo on index.
-2. Parity (**primary**): one case per fixture name; in-process mapper + **backend** renderer; ordinal string equality to fixture `html`; cache fixtures. This is the wrapper language’s interpretation under test.
-3. Optional HTTP smoke for fixture + preview surfaces when the stack has an HTTP app.
-4. Use the wrapper language’s normal test isolation patterns.
+2. Parity (**primary**): one case per fixture name; in-process **`govuk.Render`**; ordinal string equality to fixture `html`; cache fixtures. This is the Go port under test.
+3. Optional HTTP smoke for fixture + preview surfaces when demos are enabled.
+4. Use ordinary Go tests (`testing`, table-driven `t.Run`).
 
 ### 9. Nunjucks fixture verification (Node)
 
 - Depend on the same `govuk-frontend` pin via npm/Node.
 - Script renders each fixture through Frontend’s Nunjucks macros and compares to stored `html` (trim trailing newline only if needed).
-- Purpose: catch **stale fixtures** only. Library / backend parity tests catch **renderer drift**.
-- A green Nunjucks suite without a green backend parity suite is **not** done.
+- Purpose: catch **stale fixtures** only. Go parity tests catch **renderer drift**.
+- A green Nunjucks suite without a green Go parity suite is **not** done.
 - Typical shape: `tests/govuk-fixtures/render-<kebab-name>-fixtures.mjs` — document the exact runner in [tech-stack.md](tech-stack.md).
 
 ### 10. Navigation + docs
@@ -150,23 +144,22 @@ Use the preview server; hard-refresh after rebuilds. Confirm the component is li
 
 ## Common pitfalls
 
-| Symptom                        | Likely cause                                         |
-| ------------------------------ | ---------------------------------------------------- |
-| Whitespace-only parity failure | Indentation ≠ Nunjucks; `{%-` strips spaces/newlines |
-| `'` or `                       |                                                      |
-| `                              | Framework encoder instead of Nunjucks `escape`       |
-| Attribute order differs        | Code property order ≠ `template.njk` order           |
-| Numbers wrong/missing          | JSON numbers not mapped like Nunjucks                |
-| Tri-state bool wrong           | Coerced missing → `false`                            |
-| i18n key order wrong           | Plural map order not preserved                       |
-| Composed control fails         | Nested macros not implemented                        |
-| IDs off by one                 | Skipped falsy items; must preserve positions         |
-| Fixture route is a full page   | Must return fragment only                            |
-| Preview back goes to `/home`   | Used fixture href for chrome                         |
-| Editing fixtures “fixes” tests | Update renderer instead                              |
+| Symptom                        | Likely cause                                          |
+| ------------------------------ | ----------------------------------------------------- |
+| Whitespace-only parity failure | Indentation ≠ Nunjucks; `{%-` strips spaces/newlines  |
+| `'` or `\` encoding differs    | Used `html.EscapeString` instead of Nunjucks `escape` |
+| Attribute order differs        | Code property order ≠ `template.njk` / Params order   |
+| Numbers wrong/missing          | JSON numbers not mapped like Nunjucks                 |
+| Tri-state bool wrong           | Coerced missing → `false`                             |
+| i18n key order wrong           | Plural map order not preserved                        |
+| Composed control fails         | Nested macros not implemented                         |
+| IDs off by one                 | Skipped falsy items; must preserve positions          |
+| Fixture route is a full page   | Must return fragment only                             |
+| Preview back goes to `/home`   | Used fixture href for chrome                          |
+| Editing fixtures “fixes” tests | Update renderer instead                               |
 
 ## Do / don’t
 
-**Do:** start from fixtures + Nunjucks `template.njk` + closest sibling; keep one coherent unit per component; prove **backend vs fixture** parity before calling done; use idiomatic types/modules/tests for the wrapper language; keep a Node Nunjucks suite for fixture freshness.
+**Do:** start from fixtures + Nunjucks `template.njk` + closest sibling; keep one coherent renderer per component; prove **Go vs fixture** parity before calling done; follow [go-conventions.md](go-conventions.md); treat Node as tooling (pin, Sass, optional freshness) only.
 
-**Don’t:** hand-paste `govuk-`\* into pages; ship without nav/preview; embed demos on index; add ad-hoc CSS or `!important`; normalise HTML in tests; invent fixture HTML; nest incompatible components; pretend Frontend is not Node/Nunjucks upstream; ship the prebuilt minified Frontend CSS instead of the Sass pipeline; claim parity from Nunjucks-only checks without backend vs fixture tests.
+**Don’t:** hand-paste `govuk-`\* into pages; ship without nav/preview; embed demos on index; add ad-hoc CSS or `!important`; normalise HTML in tests; invent fixture HTML; nest incompatible components; shell out to Node for request-time HTML; ship the prebuilt minified Frontend CSS instead of the Sass pipeline; claim parity from Nunjucks-only checks without Go vs fixture tests.

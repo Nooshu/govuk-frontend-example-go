@@ -100,17 +100,18 @@ Shared Node tooling (Sass pipeline, `baseline/` JS tests, docs scripts) stays ES
 ## Consistency tooling
 
 ```sh
-npm install
+npm ci                 # preferred install (lockfile + .npmrc ignore-scripts)
+npm run audit:npm      # high+ audit, registry signatures, lockfile lint
 npm run build:styles   # Sass → dist/stylesheets/application.css
 npm start              # build:styles, then go run ./cmd/server — http://127.0.0.1:3000
 npm test               # baseline, Sass, then go test ./… (fixture parity + service); 100% coverage
 npm run verify:docs    # Prettier + markdownlint
 npm run lint:go        # go vet + go fix -diff + staticcheck (go tool)
-npm run verify         # docs + build:styles + lint:go + tests
+npm run verify         # docs + audit:npm + build:styles + lint:go + tests
 npm run sync:template  # pull shared paths from language-agnostic template
 ```
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md).
+npm supply-chain policy: [npm-security.md](npm-security.md). Contributor workflow: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Shared baseline
 

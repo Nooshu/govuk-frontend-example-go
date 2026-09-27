@@ -44,9 +44,9 @@ Whatever the wrapper tooling, an upgrade must (and will usually involve **Node**
 4. **Keep a manifest of shipped components** in sync so the sync step knows which fixture sets to update.
 5. **Map upstream package names** to this repo’s names where they differ (e.g. Design System “Text input” ↔ upstream `input`).
 6. **Prefer a single entrypoint** that can dry-run, sync-only, or sync-then-verify — exact flags are stack-specific; Node scripts are the usual way to talk to `govuk-frontend`.
-7. **Run verification** after sync (fixture identity checks + **backend/library parity vs fixtures** + Nunjucks freshness suite).
+7. **Run verification** after sync (fixture identity checks + **Go parity vs fixtures** + optional Nunjucks freshness suite).
 
-Implement these outcomes with the **chosen wrapper language’s best practices**, plus Node where Frontend requires it. Record the concrete entrypoint in [tech-stack.md](tech-stack.md).
+Implement these outcomes with **current Go best practices** ([tech-stack.md](tech-stack.md), [go-conventions.md](go-conventions.md)), plus Node where Frontend requires it (pin, Sass, fixtures on disk).
 
 ### 2. Renderer / mapper fixes
 
@@ -54,8 +54,8 @@ If parity fails:
 
 - [ ] Diff failing fixture `html` vs renderer output (whitespace, attributes, encoding).
 - [ ] Re-read Nunjucks `template.njk` (+ imported macros) for the new version.
-- [ ] Update models only when macro options changed (idiomatic types for the wrapper language).
-- [ ] Fix encoding via the shared helper that matches **Nunjucks** `escape` — not the framework default encoder if it differs.
+- [ ] Update `govuk.Params` handling only when macro options changed.
+- [ ] Fix encoding via the shared Nunjucks-parity helper — not `html.EscapeString` alone if it differs.
 
 ### 3. Page template / layout
 
