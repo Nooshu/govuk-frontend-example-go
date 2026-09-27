@@ -2,61 +2,26 @@ package govuk
 
 import (
 	"encoding/json"
-	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
-// tokenScript feeds parseValue tokens the encoding/json decoder does not produce on its own.
-type tokenScript struct {
-	tokens   []json.Token
-	mores    []bool
-	tokenErr error
-	failOn   int
-	token    int
-	more     int
-}
-
-func (s *tokenScript) Token() (json.Token, error) {
-	if s.tokenErr != nil && s.token == s.failOn {
-		s.token++
-		return nil, s.tokenErr
+func TestParseJSONRejectsMalformedInput(t *testing.T) {
+	for _, raw := range []string{`{"a":true`, `{`, `[1,`, `]`, `{"a":`} {
+		if _, err := parseJSON([]byte(raw)); err == nil {
+			t.Fatalf("accepted %s", raw)
+		}
 	}
-	tok := s.tokens[s.token]
-	s.token++
-	return tok, nil
-}
-
-func (s *tokenScript) More() bool {
-	more := s.mores[s.more]
-	s.more++
-	return more
-}
-
-func TestParseValueScriptedTokens(t *testing.T) {
-	_, err := parseValue(&tokenScript{tokens: []json.Token{json.Delim(']')}})
-	if err == nil || !strings.Contains(err.Error(), "unexpected JSON delimiter") {
-		t.Fatalf("unexpected delimiter: %v", err)
+	if _, err := parseJSON([]byte(`{"a":1} trailing`)); err == nil {
+		t.Fatal("accepted trailing data")
 	}
-
-	_, err = parseValue(&tokenScript{
-		tokens: []json.Token{json.Delim('{'), true},
-		mores:  []bool{true},
-	})
-	if err == nil || !strings.Contains(err.Error(), "object key is not a string") {
-		t.Fatalf("non-string key: %v", err)
+	if _, err := parseJSON([]byte(`true`)); err != nil {
+		t.Fatalf("literal true: %v", err)
 	}
-
-	_, err = parseValue(&tokenScript{
-		tokens:   []json.Token{json.Delim('{')},
-		mores:    []bool{false},
-		tokenErr: errors.New("truncated"),
-		failOn:   1,
-	})
-	if err == nil || err.Error() != "truncated" {
-		t.Fatalf("object close: %v", err)
+	if got, err := parseJSON([]byte(`null`)); err != nil || got != nil {
+		t.Fatalf("literal null: got %#v err=%v", got, err)
 	}
 }
 
@@ -152,7 +117,7 @@ func TestParamsEdges(t *testing.T) {
 		t.Fatalf("%#v", params.Keys())
 	}
 
-	mustPanic(t, "odd", func() { NewParams("only") })
+	mustPanic(t, "odd", func() { NewParams(oddPairs()...) })
 	mustPanic(t, "key", func() { NewParams(1, "value") })
 
 	var decoded Params
@@ -177,7 +142,7 @@ func TestParamsEdges(t *testing.T) {
 	if _, err := parseJSON([]byte(`[true`)); err == nil {
 		t.Fatal("unclosed array accepted")
 	}
-	direct := []string{``, `]`, `{"a":1} 2`, `{`, `{"a":`, `[`, `[1,`, `{,}`, `{true}`, `[}`, `{"a":1,}`}
+	direct := []string{``, `]`, `}`, `{"a":1} 2`, `{`, `{"a":`, `[`, `[1,`, `{,}`, `{true}`, `[}`, `{"a":1,}`}
 	for _, raw := range direct {
 		if _, err := parseJSON([]byte(raw)); err == nil {
 			t.Fatalf("parseJSON accepted %q", raw)
@@ -320,3 +285,7 @@ func mustPanic(t *testing.T, name string, fn func()) {
 	}()
 	fn()
 }
+
+// oddPairs returns a one-element slice so NewParams can be called with an odd number of
+// arguments without staticcheck SA5012 flagging a literal variadic call site.
+func oddPairs() []any { return []any{"only"} }

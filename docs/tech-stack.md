@@ -9,7 +9,7 @@ Sync shared docs/dotfiles from the language-agnostic template: [syncing-from-tem
 | Layer                          | Stack                                                                                               | Notes                                                                                                                                    |
 | ------------------------------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **GOV.UK Frontend (upstream)** | **Node** package (`govuk-frontend`), **Nunjucks** macros (`template.njk`), official `fixtures.json` | Fixed by GDS. Node is for install, fixtures, Sass, and optional freshness checks — **not** for request-time HTML in this line.           |
-| **This line (wrapper)**        | **Go** (≥1.25), module `github.com/Nooshu/govuk-frontend-example-go`                                | Server-side HTML generated **natively in Go**. Tracks Frontend macros/`template.njk` and proves **backend ≡ every fixture**. No SPA UIs. |
+| **This line (wrapper)**        | **Go** (≥1.27), module `github.com/Nooshu/govuk-frontend-example-go`                                | Server-side HTML generated **natively in Go**. Tracks Frontend macros/`template.njk` and proves **backend ≡ every fixture**. No SPA UIs. |
 
 ## Prefer the Go standard library
 
@@ -26,7 +26,7 @@ Build on packages that ship with Go before inventing helpers or pulling framewor
 | Page document shell             | `html/template` + `embed`                                                                          | Hand-pasted full page HTML; React/Vue/etc. for UI                                                   |
 | Component HTML                  | Idiomatic Go ports in `internal/govuk` (`strings.Builder` / helpers) matching fixtures             | Shelling out to Node/Nunjucks; incomplete third-party wrappers that skip fixture parity             |
 | Text escaping (Nunjucks parity) | Small local escaper (`&quot;`, `&#39;`, `\` → `&#92;`) in `internal/govuk` / `internal/htmlutil`   | Relying only on `html.EscapeString` / `html/template` for fixture text — they do not match Nunjucks |
-| JSON (fixtures, policy)         | `encoding/json`                                                                                    |                                                                                                     |
+| JSON (fixtures, policy)         | `encoding/json/v2` (+ `jsontext` for ordered `govuk.Params`)                                       | Unordered `map` marshal into HTML without `Deterministic(true)` (breaks ETags)                      |
 | Gzip                            | `compress/gzip`                                                                                    |                                                                                                     |
 | Brotli                          | [`github.com/andybalholm/brotli`](https://github.com/andybalholm/brotli) (no stdlib Brotli)        | Reimplementing Brotli                                                                               |
 | Sessions / tokens / ETags       | `crypto/rand`, `crypto/sha256`; in-memory `session.Store`                                          |                                                                                                     |
@@ -69,12 +69,29 @@ This line splits HTML into two jobs. Different tools fit each:
 
 **Every** feature and code change must follow **current Go** best practices for the pinned major version:
 
-- Module path matches the public repo; `go 1.25` (or newer) in `go.mod`
+- Module path matches the public repo; `go 1.27.0` and a `toolchain` line in `go.mod` (reproducible builds; CI uses `go-version-file: go.mod`)
 - Standard layout: `cmd/server`, `internal/…` for non-exportable packages
 - Exported identifiers documented; package comments on every package
-- Table-driven tests; **100%** function / branch / statement coverage for application packages (see [testing-components.md](testing-components.md))
-- `go test ./…`, `go vet ./…`, `go fmt` / `gofmt` before verify
+- Table-driven tests with `t.Parallel()` where safe; **100%** statement coverage for `./internal/...` (see [testing-components.md](testing-components.md)); `cmd/server` is excluded
+- `go test ./internal/... -race`, `npm run lint:go` (`go vet`, `go fix -diff`, `staticcheck`), `gofmt` before verify
+- Prefer stdlib APIs introduced for the pinned Go version when they fit (see below)
 - Component options use the same names as Frontend macros so fixture options decode cleanly
+
+### Go 1.25–1.27 practices this line follows
+
+| Practice                                                          | Status here                                                                                                                            |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `net/http` method/path ServeMux (1.22+)                           | In use                                                                                                                                 |
+| `log/slog`, graceful `Shutdown`, server timeouts                  | In use (`cmd/server`)                                                                                                                  |
+| `http.MaxBytesReader`, `http.Cookie`, `crypto/subtle`             | In use                                                                                                                                 |
+| `go` + `toolchain` in `go.mod`; Dependabot `gomod`                | In use                                                                                                                                 |
+| CI `actions/setup-go` + coverage/`-race` gate on `./internal/...` | In use (`npm run test:go`)                                                                                                             |
+| `testing/synctest` for concurrent units (1.25+)                   | In use — `session.Store` races and client-timeout clock tests                                                                          |
+| `httptest.NewTestServer` (1.27) for in-memory HTTP + synctest     | In use — health / timeout client tests; most handler tests keep `httptest` recorders                                                   |
+| `encoding/json/v2` + `encoding/json/jsontext`                     | In use — policy/fixtures/config via `json/v2`; ordered `govuk.Params` via `jsontext`. Map marshal into HTML uses `Deterministic(true)` |
+| `go fix` modernizers / `staticcheck` via `go tool`                | In use — `npm run lint:go` (pinned `tool` in `go.mod`)                                                                                 |
+
+Do **not** chase frameworks or template engines that weaken Frontend fixture parity ([HTML rendering](#html-rendering-two-layers)).
 
 Shared Node tooling (Sass pipeline, `baseline/` JS tests, docs scripts) stays ESM / Node 22+. Dual-audience documentation: [documentation-structure.md](documentation-structure.md).
 
@@ -86,7 +103,8 @@ npm run build:styles   # Sass → dist/stylesheets/application.css
 npm start              # build:styles, then go run ./cmd/server — http://127.0.0.1:3000
 npm test               # baseline, Sass, then go test ./… (fixture parity + service); 100% coverage
 npm run verify:docs    # Prettier + markdownlint
-npm run verify         # docs + build:styles + go vet + tests
+npm run lint:go        # go vet + go fix -diff + staticcheck (go tool)
+npm run verify         # docs + build:styles + lint:go + tests
 npm run sync:template  # pull shared paths from language-agnostic template
 ```
 
@@ -112,7 +130,7 @@ Details: [frontend-performance.md](frontend-performance.md), [frontend-security.
 
 | Item                              | Value                                                                                                                                                                                |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Implementation language           | Go 1.25+                                                                                                                                                                             |
+| Implementation language           | Go 1.27+ (`go 1.27.0` / `toolchain go1.27.1` in `go.mod`)                                                                                                                            |
 | Templating / component approach   | Native Go HTML (`internal/govuk`, `html/template` page shell); tracks Frontend macros; **no** Node render at request time                                                            |
 | `govuk-frontend` (Node)           | **6.5.1** — [v6.5.1](https://github.com/alphagov/govuk-frontend/releases/tag/v6.5.1) (reviewed against [latest release](https://github.com/alphagov/govuk-frontend/releases/latest)) |
 | Sass pipeline                     | `styles/application.scss` → `npm run build:styles` → `dist/stylesheets/application.css` ([styles.md](styles.md))                                                                     |
@@ -123,7 +141,7 @@ Details: [frontend-performance.md](frontend-performance.md), [frontend-security.
 | Fixture testing guide             | https://frontend.design-system.service.gov.uk/testing-your-html/                                                                                                                     |
 | Example service                   | [example-service.md](example-service.md) — `npm start`                                                                                                                               |
 | Response baseline                 | [`baseline/policy.json`](../baseline/policy.json) via `internal/baseline` — [frontend-performance.md](frontend-performance.md), [frontend-security.md](frontend-security.md)         |
-| Upgrade / test / preview commands | `npm run build:styles`, `npm start`, `npm test`, `npm run verify`; Frontend upgrade per [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md)                                   |
+| Upgrade / test / preview commands | `npm run build:styles`, `npm start`, `npm test`, `npm run lint:go`, `npm run verify`; Frontend upgrade per [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md)                |
 
 ## Hard constraints (always)
 

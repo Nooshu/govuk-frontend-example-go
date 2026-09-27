@@ -9,9 +9,11 @@ package baseline
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"os"
+
+	"encoding/json/jsontext"
+	jsonv2 "encoding/json/v2"
 )
 
 // Response kinds. Each one selects a Cache-Control value and, for documents, the full set of
@@ -105,7 +107,7 @@ func Load(path string) (*Policy, error) {
 // policy.json is reported at start-up instead of producing responses with holes in them.
 func Parse(raw []byte) (*Policy, error) {
 	var policy Policy
-	if err := json.Unmarshal(raw, &policy); err != nil {
+	if err := jsonv2.Unmarshal(raw, &policy); err != nil {
 		return nil, fmt.Errorf("baseline: parsing policy: %w", err)
 	}
 	switch {
@@ -135,7 +137,7 @@ var keyOrder = objectKeys
 
 func (d *directives) UnmarshalJSON(raw []byte) error {
 	var sources map[string][]string
-	if err := json.Unmarshal(raw, &sources); err != nil {
+	if err := jsonv2.Unmarshal(raw, &sources); err != nil {
 		return err
 	}
 	names, err := keyOrder(raw)
@@ -150,41 +152,30 @@ func (d *directives) UnmarshalJSON(raw []byte) error {
 	return nil
 }
 
-// objectDecoder is the part of [json.Decoder] objectKeys uses.
-type objectDecoder interface {
-	Token() (json.Token, error)
-	More() bool
-	Decode(any) error
-}
-
-// objectKeys returns the keys of a JSON object in document order.
+// objectKeys returns the keys of a JSON object in document order using jsontext.
+//
+// Non-string member names fail inside [jsontext.Decoder.ReadToken]; they never surface as a
+// successful non-string token the way encoding/json's Token API could.
 func objectKeys(raw []byte) ([]string, error) {
-	return objectKeysFrom(json.NewDecoder(bytes.NewReader(raw)))
-}
-
-func objectKeysFrom(decoder objectDecoder) ([]string, error) {
-	token, err := decoder.Token()
+	dec := jsontext.NewDecoder(bytes.NewReader(raw))
+	tok, err := dec.ReadToken()
 	if err != nil {
 		return nil, err
 	}
-	if delim, ok := token.(json.Delim); !ok || delim != '{' {
+	if tok.Kind().String() != "{" {
 		return nil, fmt.Errorf("baseline: expected a JSON object")
 	}
 	var keys []string
-	for decoder.More() {
-		key, err := decoder.Token()
+	for dec.PeekKind().String() != "}" {
+		key, err := dec.ReadToken()
 		if err != nil {
 			return nil, err
 		}
-		name, ok := key.(string)
-		if !ok {
-			return nil, fmt.Errorf("baseline: expected an object key")
-		}
-		keys = append(keys, name)
-		var value json.RawMessage
-		if err := decoder.Decode(&value); err != nil {
+		keys = append(keys, key.String())
+		if err := dec.SkipValue(); err != nil {
 			return nil, err
 		}
 	}
-	return keys, nil
+	_, err = dec.ReadToken() // consume '}'
+	return keys, err
 }

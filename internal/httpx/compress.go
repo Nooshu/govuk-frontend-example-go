@@ -69,7 +69,7 @@ func compressWith(body []byte, newWriter func(io.Writer) io.WriteCloser) ([]byte
 
 func encodings(header string) map[string]bool {
 	found := map[string]bool{}
-	for _, part := range strings.Split(header, ",") {
+	for part := range strings.SplitSeq(header, ",") {
 		token := strings.TrimSpace(strings.ToLower(part))
 		if index := strings.Index(token, ";"); index != -1 {
 			token = strings.TrimSpace(token[:index])

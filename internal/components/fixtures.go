@@ -1,12 +1,13 @@
 package components
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
 	"sync"
+
+	jsonv2 "encoding/json/v2"
 )
 
 // Fixture is one official example from a component's fixtures.json.
@@ -116,7 +117,7 @@ func ParseFixtures(component string, raw []byte) (ComponentFixtures, error) {
 			Description string         `json:"description"`
 		} `json:"fixtures"`
 	}
-	if err := json.Unmarshal(raw, &document); err != nil {
+	if err := jsonv2.Unmarshal(raw, &document); err != nil {
 		return ComponentFixtures{}, fmt.Errorf("components: invalid fixtures for %q: %w", component, err)
 	}
 	if document.Fixtures == nil {

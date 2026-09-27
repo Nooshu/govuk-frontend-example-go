@@ -8,12 +8,13 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	jsonv2 "encoding/json/v2"
 )
 
 // ServiceName is the English service name used in the header, page titles, and phase banner.
@@ -162,7 +163,7 @@ func frontendVersion(packageFile string) (string, error) {
 	var meta struct {
 		Version string `json:"version"`
 	}
-	if err := json.Unmarshal(raw, &meta); err != nil {
+	if err := jsonv2.Unmarshal(raw, &meta); err != nil {
 		return "", fmt.Errorf("config: reading %s: %w", packageFile, err)
 	}
 	if meta.Version == "" {

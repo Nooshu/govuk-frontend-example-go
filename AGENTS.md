@@ -44,7 +44,7 @@ Details: [`docs/priorities.md`](docs/priorities.md).
 | Stack / language (Go)       | [`docs/tech-stack.md`](docs/tech-stack.md)                                                                              |
 | Sync from agnostic template | [`docs/syncing-from-template.md`](docs/syncing-from-template.md)                                                        |
 
-**Language rule:** This line is **Go**. **Every** feature and code change must follow Go’s **latest** best practices (modules, `internal/`, tests, `go vet`, packaging) as recorded in [`docs/tech-stack.md`](docs/tech-stack.md) — without weakening the non-negotiables below. Prefer the standard library (`net/http`, `html/template`, `compress/gzip`, `crypto/*`, `log/slog`) and only well-known deps where stdlib lacks a feature (e.g. `andybalholm/brotli`). Generate HTML **natively in Go**; do not call Node to render.
+**Language rule:** This line is **Go**. **Every** feature and code change must follow Go’s **latest** best practices (modules, `internal/`, tests, `npm run lint:go`, packaging) as recorded in [`docs/tech-stack.md`](docs/tech-stack.md) — without weakening the non-negotiables below. Prefer the standard library (`net/http`, `html/template`, `compress/gzip`, `crypto/*`, `log/slog`, `encoding/json/v2`) and only well-known deps where stdlib lacks a feature (e.g. `andybalholm/brotli`). Generate HTML **natively in Go**; do not call Node to render.
 
 **GOV.UK Frontend’s own stack:** Frontend ships as a **Node** package with **Nunjucks** macros, official `fixtures.json`, and `template.njk` sources. Use Node for install, fixtures, Sass, and optional freshness checks. Refer to Nunjucks for macro options and escape behaviour when porting.
 

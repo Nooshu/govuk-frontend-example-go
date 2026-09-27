@@ -65,8 +65,7 @@ func ReadBody(request *http.Request, maxBytes int64) (*Body, error) {
 	defer limited.Close()
 	raw, err := io.ReadAll(limited)
 	if err != nil {
-		var maxErr *http.MaxBytesError
-		if errors.As(err, &maxErr) {
+		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
 			return nil, &BodyError{Status: http.StatusRequestEntityTooLarge, Message: "Payload too large"}
 		}
 		return nil, &BodyError{Status: http.StatusBadRequest, Message: "Could not read the request body"}

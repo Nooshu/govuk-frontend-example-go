@@ -280,11 +280,11 @@ func mustScriptHref(t *testing.T, assets *httpx.Assets) string {
 	}
 	const marker = "from '"
 	text := string(module.Body)
-	start := strings.Index(text, marker)
-	if start < 0 {
+	_, after, ok := strings.Cut(text, marker)
+	if !ok {
 		t.Fatalf("module = %s", text)
 	}
-	rest := text[start+len(marker):]
+	rest := after
 	end := strings.Index(rest, "'")
 	return rest[:end]
 }

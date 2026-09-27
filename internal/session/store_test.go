@@ -1,7 +1,9 @@
 package session_test
 
 import (
+	"sync"
 	"testing"
+	"testing/synctest"
 
 	"github.com/Nooshu/govuk-frontend-example-go/internal/session"
 )
@@ -48,4 +50,28 @@ func TestReferenceFor(t *testing.T) {
 	if got := session.ReferenceFor("ab"); got != "RLAB" {
 		t.Fatalf("short id: got %q", got)
 	}
+}
+
+// TestMemoryStoreConcurrentUsesSynctest exercises Create/Get/Save from many goroutines inside a
+// synctest bubble so the race detector and scheduler run without wall-clock waits.
+func TestMemoryStoreConcurrentUsesSynctest(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		store := session.NewMemoryStore()
+		const workers = 32
+		var wg sync.WaitGroup
+		wg.Add(workers)
+		for range workers {
+			go func() {
+				defer wg.Done()
+				created := store.Create()
+				created.CookieChoice = session.ChoiceAccept
+				store.Save(created)
+				got, ok := store.Get(created.ID)
+				if !ok || got.CookieChoice != session.ChoiceAccept {
+					t.Errorf("session %q missing after save", created.ID)
+				}
+			}()
+		}
+		wg.Wait()
+	})
 }

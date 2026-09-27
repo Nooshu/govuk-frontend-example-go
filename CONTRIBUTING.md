@@ -31,11 +31,11 @@ npm install
 npm run build:styles    # Sass → dist/stylesheets/application.css
 npm start               # example service at http://127.0.0.1:3000
 npm test                # baseline, Sass pipeline, fixtures, and the example service; 100% coverage
-npm run verify          # docs + build:styles + go vet + tests
+npm run verify          # docs + build:styles + lint:go + tests
 npm run sync:template   # shared paths from Nooshu/govuk-frontend-example
 ```
 
-See [`docs/syncing-from-template.md`](docs/syncing-from-template.md). Dotfiles and lint setup match the language-agnostic template. Go adds `go test` and `go vet`. Node remains for the Frontend pin, Sass, and the shared baseline tests.
+See [`docs/syncing-from-template.md`](docs/syncing-from-template.md). Dotfiles and lint setup match the language-agnostic template. Go adds `go test`, `npm run lint:go` (`go vet`, `go fix -diff`, `staticcheck`), and 100% coverage on `./internal/...`. Node remains for the Frontend pin, Sass, and the shared baseline tests.
 
 ### Dotfiles (do not bypass)
 

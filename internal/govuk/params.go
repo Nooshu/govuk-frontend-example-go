@@ -1,21 +1,3 @@
-// Package govuk renders GOV.UK Frontend components to HTML in Go.
-//
-// GOV.UK Frontend ships its components as Nunjucks macros. This package is a native Go port
-// of those macros: no Node process is started and no JavaScript template engine is embedded.
-// The parity gate is the official fixtures.json shipped with each release — [Render] must
-// return byte-for-byte the same HTML as the fixture for every fixture of every component.
-//
-// Because the macros were written for a JavaScript template engine, this package reproduces
-// the handful of JavaScript and Nunjucks behaviours the macros rely on:
-//
-//   - object key order is significant, because it decides attribute order, so options are
-//     held in an ordered [Params] rather than a Go map;
-//   - `undefined` (absent) and `null` are different values, because several macros test for
-//     one but not the other;
-//   - text is escaped exactly as Nunjucks escapes it, including the backslash;
-//   - HTML options are trusted and emitted unescaped, matching `| safe` upstream.
-//
-// The entry points are [Render], [Names], and [LoadFixtures].
 package govuk
 
 import (
@@ -24,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+
+	"encoding/json/jsontext"
 )
 
 // Params is an ordered set of component options, the Go equivalent of the object literal a
@@ -112,7 +96,8 @@ func (p *Params) Len() int {
 // UnmarshalJSON decodes a JSON object while preserving key order.
 //
 // Numbers are kept as [encoding/json.Number] so they are rendered with their original spelling,
-// the way JavaScript would have printed the value it parsed.
+// the way JavaScript would have printed the value it parsed. Decoding uses
+// [encoding/json/jsontext] (Go 1.25+) for streaming tokens.
 func (p *Params) UnmarshalJSON(data []byte) error {
 	value, err := parseJSON(data)
 	if err != nil {
@@ -140,70 +125,63 @@ type Safe string
 // parseJSON decodes JSON into the value model this package uses: *Params for objects, []any for
 // arrays, string, bool, [encoding/json.Number], and nil for null.
 func parseJSON(data []byte) (any, error) {
-	dec := json.NewDecoder(bytes.NewReader(data))
-	dec.UseNumber()
+	dec := jsontext.NewDecoder(bytes.NewReader(data))
 	value, err := parseValue(dec)
 	if err != nil {
 		return nil, err
 	}
-	if _, err := dec.Token(); !errors.Is(err, io.EOF) {
+	if _, err := dec.ReadToken(); err == nil {
 		return nil, errors.New("govuk: unexpected data after JSON value")
+	} else if !errors.Is(err, io.EOF) {
+		return nil, err
 	}
 	return value, nil
 }
 
-// tokenDecoder is the part of [json.Decoder] parseValue uses. Tests supply a scripted
-// decoder for token sequences the standard library never yields, such as a non-string object key.
-type tokenDecoder interface {
-	Token() (json.Token, error)
-	More() bool
-}
-
-func parseValue(dec tokenDecoder) (any, error) {
-	token, err := dec.Token()
+func parseValue(dec *jsontext.Decoder) (any, error) {
+	tok, err := dec.ReadToken()
 	if err != nil {
 		return nil, err
 	}
-	delim, ok := token.(json.Delim)
-	if !ok {
-		return token, nil
-	}
-	switch delim {
-	case '{':
+	switch tok.Kind() {
+	case jsontext.KindBeginObject:
 		object := &Params{}
-		for dec.More() {
-			key, err := dec.Token()
+		for dec.PeekKind() != jsontext.KindEndObject {
+			keyTok, err := dec.ReadToken()
 			if err != nil {
 				return nil, err
 			}
-			name, ok := key.(string)
-			if !ok {
-				return nil, fmt.Errorf("govuk: object key is not a string: %v", key)
-			}
+			// Capture the name before parseValue advances the decoder; Tokens are voided afterward.
+			name := keyTok.String()
 			value, err := parseValue(dec)
 			if err != nil {
 				return nil, err
 			}
 			object.Set(name, value)
 		}
-		if _, err := dec.Token(); err != nil {
-			return nil, err
-		}
-		return object, nil
-	case '[':
+		_, err := dec.ReadToken() // consume '}'
+		return object, err
+	case jsontext.KindBeginArray:
 		items := []any{}
-		for dec.More() {
+		for dec.PeekKind() != jsontext.KindEndArray {
 			value, err := parseValue(dec)
 			if err != nil {
 				return nil, err
 			}
 			items = append(items, value)
 		}
-		if _, err := dec.Token(); err != nil {
-			return nil, err
-		}
-		return items, nil
+		_, err := dec.ReadToken() // consume ']'
+		return items, err
+	case jsontext.KindString:
+		return tok.String(), nil
+	case jsontext.KindNumber:
+		// Preserve spelling (e.g. 1.50) for Nunjucks/JavaScript number stringification parity.
+		return json.Number(tok.String()), nil
+	case jsontext.KindTrue, jsontext.KindFalse:
+		return tok.Bool(), nil
 	default:
-		return nil, fmt.Errorf("govuk: unexpected JSON delimiter %v", delim)
+		// KindNull. jsontext.ReadToken errors on any other kind at value position, so a
+		// successful token that is not handled above is always null.
+		return nil, nil
 	}
 }

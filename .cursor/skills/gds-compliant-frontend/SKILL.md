@@ -68,5 +68,5 @@ Local index: [`docs/guidance-sources.md`](../../../docs/guidance-sources.md).
 5. HTTP responses use [`baseline/`](../../../baseline/) through `internal/baseline`. Compress with Brotli (`br`); Gzip is only the fallback when the client does not advertise `br`. Playbooks: [`docs/frontend-performance.md`](../../../docs/frontend-performance.md), [`docs/frontend-security.md`](../../../docs/frontend-security.md).
 6. Compile CSS via Sass (`styles/application.scss` → Frontend `@use` → `govuk-overrides.scss` last). Never use `!important` in service CSS. Playbook: [`docs/styles.md`](../../../docs/styles.md).
 7. Document every change for **humans and agents** in the same change set ([`docs/documentation-structure.md`](../../../docs/documentation-structure.md)).
-8. Follow current Go best practices (`go test`, `go vet`, `gofmt`, table-driven tests). Shared Node tooling stays ESM.
+8. Follow current Go best practices (`go test`, `npm run lint:go`, `gofmt`, table-driven tests; see [`docs/tech-stack.md`](../../../docs/tech-stack.md)). Shared Node tooling stays ESM.
 9. When a coherent piece of work is finished, split it into focused commits with comprehensive messages.

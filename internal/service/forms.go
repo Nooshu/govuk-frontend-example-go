@@ -1,6 +1,7 @@
 package service
 
 import (
+	"maps"
 	"time"
 
 	"github.com/Nooshu/govuk-frontend-example-go/internal/htmlutil"
@@ -446,9 +447,7 @@ func textInput(id, label, value string, errors []FieldError, extra map[string]an
 		"label": map[string]any{"text": label},
 		"value": value,
 	}
-	for key, item := range extra {
-		field[key] = item
-	}
+	maps.Copy(field, extra)
 	addError(field, errors, id)
 	return field
 }

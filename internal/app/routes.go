@@ -31,10 +31,10 @@ func (a *App) routes() *http.ServeMux {
 
 	// Start pages. "/{$}" matches only the root, not everything below it.
 	mux.Handle("GET /{$}", a.page(func(*session.Session, *http.Request) (outcome, error) {
-		return outcome{view: pointer(startView(pages.LangEN))}, nil
+		return outcome{view: new(startView(pages.LangEN))}, nil
 	}))
 	mux.Handle("GET /cy", a.page(func(*session.Session, *http.Request) (outcome, error) {
-		return outcome{view: pointer(startView(pages.LangCY))}, nil
+		return outcome{view: new(startView(pages.LangCY))}, nil
 	}))
 	mux.Handle("GET /new-application", a.page(func(current *session.Session, _ *http.Request) (outcome, error) {
 		current.Application = service.NewApplication()
@@ -43,7 +43,7 @@ func (a *App) routes() *http.ServeMux {
 
 	// The application itself.
 	mux.Handle("GET /task-list", a.page(func(current *session.Session, _ *http.Request) (outcome, error) {
-		return outcome{view: pointer(taskListView(current))}, nil
+		return outcome{view: new(taskListView(current))}, nil
 	}))
 	mux.Handle("GET /check-answers", a.page(func(current *session.Session, _ *http.Request) (outcome, error) {
 		return a.checkAnswersGet(current), nil
@@ -71,7 +71,7 @@ func (a *App) routes() *http.ServeMux {
 
 	// Cookies.
 	mux.Handle("GET /cookies", a.page(func(current *session.Session, _ *http.Request) (outcome, error) {
-		return outcome{view: pointer(a.cookiesView(current))}, nil
+		return outcome{view: new(a.cookiesView(current))}, nil
 	}))
 	mux.Handle("POST /cookies", a.form(func(current *session.Session, body *httpx.Body, _ *http.Request) (outcome, error) {
 		return a.postCookies(body, current), nil
@@ -106,7 +106,7 @@ func (a *App) demoRoutes(mux *http.ServeMux) {
 			return outcome{}, err
 		}
 		if view == nil {
-			return outcome{view: pointer(notFoundView())}, nil
+			return outcome{view: new(notFoundView())}, nil
 		}
 		return outcome{view: view}, nil
 	}))
@@ -155,7 +155,7 @@ func (a *App) page(handle func(*session.Session, *http.Request) (outcome, error)
 // static adapts a page that depends on nothing but its own content.
 func (a *App) static(build func() pages.View) http.Handler {
 	return a.page(func(*session.Session, *http.Request) (outcome, error) {
-		return outcome{view: pointer(build())}, nil
+		return outcome{view: new(build())}, nil
 	})
 }
 
@@ -173,8 +173,7 @@ func (a *App) form(handle func(*session.Session, *httpx.Body, *http.Request) (ou
 		current := a.openSession(r)
 		body, err := readBody(r, config.MaxBodyBytes)
 		if err != nil {
-			var bodyError *httpx.BodyError
-			if errors.As(err, &bodyError) {
+			if bodyError, ok := errors.AsType[*httpx.BodyError](err); ok {
 				a.writeText(w, r, bodyError.Status, bodyError.Message)
 				return
 			}
@@ -345,7 +344,7 @@ func uploadedName(body *httpx.Body) (string, bool) {
 func (a *App) fixtureFragment(name, fixtureName string) outcome {
 	fixture, ok := a.library.Fixture(name, fixtureName)
 	if !ok {
-		return outcome{view: pointer(notFoundView())}
+		return outcome{view: new(notFoundView())}
 	}
 	return outcome{raw: &rawResponse{
 		status:      http.StatusOK,
@@ -429,8 +428,6 @@ func safeReturn(value string) string {
 	}
 	return value
 }
-
-func pointer[T any](value T) *T { return &value }
 
 // fixtureLink is one entry in the fixture list on a component page.
 type fixtureLink struct {

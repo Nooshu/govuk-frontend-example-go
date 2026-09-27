@@ -1,7 +1,6 @@
 package baseline
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
@@ -93,38 +92,6 @@ func TestObjectKeysRejectsNonObjects(t *testing.T) {
 	}
 	if _, err := objectKeys([]byte(`{true}`)); err == nil {
 		t.Fatal("a non-string object key was accepted")
-	}
-}
-
-type scriptedObject struct {
-	tokens    []json.Token
-	mores     []bool
-	decodeErr error
-	token     int
-	more      int
-}
-
-func (s *scriptedObject) Token() (json.Token, error) {
-	tok := s.tokens[s.token]
-	s.token++
-	return tok, nil
-}
-
-func (s *scriptedObject) More() bool {
-	more := s.mores[s.more]
-	s.more++
-	return more
-}
-
-func (s *scriptedObject) Decode(any) error { return s.decodeErr }
-
-func TestObjectKeysFromRejectsNonStringKey(t *testing.T) {
-	_, err := objectKeysFrom(&scriptedObject{
-		tokens: []json.Token{json.Delim('{'), true},
-		mores:  []bool{true},
-	})
-	if err == nil || !strings.Contains(err.Error(), "expected an object key") {
-		t.Fatalf("non-string key: %v", err)
 	}
 }
 
@@ -296,10 +263,12 @@ func TestPreloadLinkHeader(t *testing.T) {
 }
 
 func TestStrongETagAndDocumentKinds(t *testing.T) {
-	if StrongETag([]byte("a")) != StrongETag([]byte("a")) {
+	first := StrongETag([]byte("a"))
+	second := StrongETag([]byte("a"))
+	if first != second {
 		t.Fatal("ETag is not stable")
 	}
-	if !strings.HasPrefix(StrongETag([]byte("a")), `"`) {
+	if !strings.HasPrefix(first, `"`) {
 		t.Fatal("ETag is not a strong quoted validator")
 	}
 	if IsDocument(KindDocument) != true || IsDocument(KindSensitiveDocument) != true || IsDocument(KindStaticAsset) != false {
@@ -352,7 +321,7 @@ func TestSetCookie(t *testing.T) {
 		{"session", "a", CookieOptions{HostPrefix: true}},
 		{"__Host-session", "a", CookieOptions{Secure: &secure}},
 		{"__Host-session", "a", CookieOptions{Secure: &host, Path: "/app"}},
-		{"ok", "a", CookieOptions{MaxAge: intPtr(-1)}},
+		{"ok", "a", CookieOptions{MaxAge: new(-1)}},
 	}
 	for _, tc := range bad {
 		if _, err := policy.SetCookie(tc.name, tc.value, tc.options); err == nil {
@@ -376,5 +345,3 @@ func TestContentSecurityPolicyEmptySources(t *testing.T) {
 		t.Fatal("empty permissions policy was not empty")
 	}
 }
-
-func intPtr(v int) *int { return &v }

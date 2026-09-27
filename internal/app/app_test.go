@@ -2,7 +2,6 @@ package app_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -16,6 +15,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	jsonv2 "encoding/json/v2"
 
 	"github.com/Nooshu/govuk-frontend-example-go/internal/app"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/config"
@@ -34,7 +35,8 @@ var now = time.Date(2026, time.March, 1, 12, 0, 0, 0, time.UTC)
 // answer reached the right component without depending on that component's markup.
 func stubComponents() render.Renderer {
 	return render.Func(func(name string, params map[string]any) (string, error) {
-		encoded, err := json.Marshal(params)
+		// Deterministic keeps map key order stable so ETag / If-None-Match tests stay reliable.
+		encoded, err := jsonv2.Marshal(params, jsonv2.Deterministic(true))
 		if err != nil {
 			return "", err
 		}

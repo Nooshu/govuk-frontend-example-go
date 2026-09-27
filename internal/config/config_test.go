@@ -85,8 +85,8 @@ func TestNewReportsAMissingOrBrokenFrontendInstall(t *testing.T) {
 		want        string
 	}{
 		"not installed": {packageJSON: nil, want: "npm install"},
-		"not json":      {packageJSON: ptr("not json"), want: "reading"},
-		"no version":    {packageJSON: ptr(`{"name":"govuk-frontend"}`), want: "no version"},
+		"not json":      {packageJSON: new("not json"), want: "reading"},
+		"no version":    {packageJSON: new(`{"name":"govuk-frontend"}`), want: "no version"},
 	}
 
 	for name, test := range tests {
@@ -224,5 +224,3 @@ func env(name, value string) func(string) string {
 		return ""
 	}
 }
-
-func ptr(value string) *string { return &value }

@@ -50,13 +50,13 @@ Detail: [example-service.md](example-service.md) and [tech-stack.md](tech-stack.
 
 ## Run modes
 
-| Mode    | Command                | Purpose                                                                               |
-| ------- | ---------------------- | ------------------------------------------------------------------------------------- |
-| Styles  | `npm run build:styles` | Compile `styles/` → `dist/stylesheets/application.css` ([styles.md](styles.md))       |
-| Preview | `npm start`            | build:styles, then example service, component catalogue, and fixture previews         |
-| Test    | `npm test`             | Baseline, Sass pipeline, fixture parity, and service tests. Fails below 100% coverage |
-| Verify  | `npm run verify`       | Docs, build:styles, typecheck, and the full test suite                                |
-| Upgrade | see the playbook       | Frontend bump — [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md)            |
+| Mode    | Command                | Purpose                                                                                                       |
+| ------- | ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Styles  | `npm run build:styles` | Compile `styles/` → `dist/stylesheets/application.css` ([styles.md](styles.md))                               |
+| Preview | `npm start`            | build:styles, then example service, component catalogue, and fixture previews                                 |
+| Test    | `npm test`             | Baseline, Sass pipeline, fixture parity, and service tests. Fails below 100% coverage                         |
+| Verify  | `npm run verify`       | Docs, build:styles, `lint:go` (vet / fix / staticcheck), and the full test suite (Go `-race` + 100% coverage) |
+| Upgrade | see the playbook       | Frontend bump — [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md)                                    |
 
 ## Testing mindset
 
