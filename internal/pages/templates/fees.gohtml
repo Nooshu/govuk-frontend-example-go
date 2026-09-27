@@ -1,0 +1,5 @@
+{{ template "two-thirds-open" . }}
+        <h1 class="govuk-heading-l">{{ .Heading }}</h1>
+        <p class="govuk-body">These are example fees for this service. A live service would take payment after you check your answers.</p>
+        {{ component "table" .Context.table }}
+{{- template "columns-close" . }}

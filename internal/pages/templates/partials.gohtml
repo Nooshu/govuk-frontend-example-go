@@ -1,0 +1,46 @@
+{{- /*
+Shared wrappers for page content. They replace the Nunjucks macros the other language lines use
+for grid columns and the question-page form, so every page opens and closes the same markup.
+*/ -}}
+{{- define "two-thirds-open" -}}
+<div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+{{- end -}}
+
+{{- define "full-width-open" -}}
+<div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+{{- end -}}
+
+{{- define "columns-close" }}
+      </div>
+    </div>
+{{- end -}}
+
+{{- /*
+form-open starts a question page: the error summary, then a form that posts back to the same
+path. novalidate turns off the browser's own validation so the applicant always sees the GOV.UK
+error summary and messages instead.
+*/ -}}
+{{- define "form-open" -}}
+<div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+{{- with .Context.errorSummary }}
+        {{ component "error-summary" . }}
+{{- end }}
+        <form method="post" novalidate{{ with .Context.enctype }} enctype="{{ . }}"{{ end }}>
+          <input type="hidden" name="csrf" value="{{ .CSRF }}">
+{{- with .Context.returnTo }}
+          <input type="hidden" name="returnTo" value="{{ . }}">
+{{- end }}
+{{- end -}}
+
+{{- define "form-close" }}
+        </form>
+      </div>
+    </div>
+{{- end -}}
+
+{{- define "continue-button" }}
+          {{ component "button" (dict "text" "Continue") }}
+{{- end -}}

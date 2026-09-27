@@ -1,0 +1,6 @@
+{{ template "two-thirds-open" . }}
+        <h1 class="govuk-heading-l">{{ .Heading }}</h1>
+        {{ component "warning-text" (dict "text" "Use this component only on services where someone may be in danger." "iconFallbackText" "Warning") }}
+        {{ component "inset-text" (dict "text" "This page is an example of the component. It is not part of the rod licence application. Choosing the button leaves this example and opens the BBC weather forecast.") }}
+        <p class="govuk-body">The button is the first thing on the page, which matches the component guidance.</p>
+{{- template "columns-close" . }}

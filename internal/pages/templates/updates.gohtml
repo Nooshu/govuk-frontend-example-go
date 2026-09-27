@@ -1,0 +1,5 @@
+{{ template "two-thirds-open" . }}
+        <h1 class="govuk-heading-l">{{ .Heading }}</h1>
+        <p class="govuk-body">{{ .Context.body }}</p>
+        {{ component "pagination" .Context.pagination }}
+{{- template "columns-close" . }}

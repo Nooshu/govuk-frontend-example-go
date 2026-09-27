@@ -1,0 +1,4 @@
+{{ template "full-width-open" . }}
+        <h1 class="govuk-heading-l">{{ .Heading }}</h1>
+        {{ component "tabs" .Context.tabs }}
+{{- template "columns-close" . }}

@@ -1,0 +1,5 @@
+{{ template "two-thirds-open" . }}
+        <h1 class="govuk-heading-l">{{ .Heading }}</h1>
+        <p class="govuk-body">Help for this example service.</p>
+        {{ component "accordion" .Context.accordion }}
+{{- template "columns-close" . }}

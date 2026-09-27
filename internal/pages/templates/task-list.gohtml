@@ -1,0 +1,8 @@
+{{ template "two-thirds-open" . }}
+        <h1 class="govuk-heading-xl">{{ .Heading }}</h1>
+        <p class="govuk-body">Complete every section before you check your answers.</p>
+{{- range .Context.sections }}
+        <h2 class="govuk-heading-m">{{ .Heading }}</h2>
+        {{ component "task-list" (dict "idPrefix" .IDPrefix "items" .Items) }}
+{{- end }}
+{{- template "columns-close" . }}

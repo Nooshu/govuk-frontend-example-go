@@ -1,0 +1,10 @@
+{{ template "two-thirds-open" . }}
+        {{ component "notification-banner" .Context.notification }}
+        <h1 class="govuk-heading-xl">{{ .Heading }}</h1>
+        <p class="govuk-body-l">{{ .Context.lede }}</p>
+        {{ component "button" .Context.startButton }}
+        <p class="govuk-body">{{ .Context.timing }}</p>
+        {{ component "warning-text" .Context.warning }}
+        {{ component "inset-text" .Context.inset }}
+        {{ component "details" .Context.details }}
+{{- template "columns-close" . }}

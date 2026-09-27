@@ -1,0 +1,14 @@
+{{- /*
+The four address inputs are rendered first and passed to the fieldset, so the legend that acts
+as the page h1 groups them for a screen reader.
+*/ -}}
+{{ template "form-open" . }}
+          {{ component "inset-text" .Context.inset }}
+{{- $lines := concat
+    (component "input" .Context.line1)
+    (component "input" .Context.line2)
+    (component "input" .Context.town)
+    (component "input" .Context.postcode) }}
+          {{ component "fieldset" (merge .Context.fieldset "html" $lines) }}
+{{- template "continue-button" . }}
+{{- template "form-close" . }}

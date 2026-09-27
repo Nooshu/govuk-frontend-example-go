@@ -1,0 +1,11 @@
+{{- with .Context.notice }}
+<div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        {{ component "notification-banner" . }}
+      </div>
+    </div>
+{{ end -}}
+{{ template "form-open" . }}
+          {{ component "radios" .Context.radios }}
+          {{ component "button" (dict "text" "Save cookie settings") }}
+{{- template "form-close" . }}

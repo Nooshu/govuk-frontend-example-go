@@ -1,0 +1,12 @@
+{{ template "two-thirds-open" . }}
+        <h1 class="govuk-heading-l">{{ .Heading }}</h1>
+        <p class="govuk-body">Every GOV.UK Frontend component in version {{ .FrontendVersion }}, with a preview for each fixture. This page lists links only.</p>
+        <ul class="govuk-list">
+{{- range .Context.components }}
+          <li>
+            <a class="govuk-link" href="/components/{{ .Name }}">{{ .Title }}</a>
+            <p class="govuk-body">{{ .Description }}</p>
+          </li>
+{{- end }}
+        </ul>
+{{- template "columns-close" . }}

@@ -1,0 +1,7 @@
+{{ template "form-open" . }}
+{{- with .Context.currentFile }}
+          <p class="govuk-body">Current file: {{ . }}</p>
+{{- end }}
+          {{ component "file-upload" .Context.upload }}
+{{- template "continue-button" . }}
+{{- template "form-close" . }}

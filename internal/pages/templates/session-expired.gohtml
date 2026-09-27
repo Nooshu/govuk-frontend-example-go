@@ -1,0 +1,5 @@
+{{ template "two-thirds-open" . }}
+        <h1 class="govuk-heading-l">{{ .Heading }}</h1>
+        <p class="govuk-body">Your answer was not saved. Start again.</p>
+        {{ component "button" (dict "text" "Start again" "href" "/new-application") }}
+{{- template "columns-close" . }}

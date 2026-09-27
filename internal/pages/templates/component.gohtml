@@ -1,0 +1,22 @@
+{{ template "full-width-open" . }}
+        <h1 class="govuk-heading-l">{{ .Context.componentTitle }}</h1>
+        <p class="govuk-body"><a class="govuk-link" href="{{ .Context.designSystemUrl }}">{{ .Context.componentTitle }} on the GOV.UK Design System</a></p>
+        <h2 class="govuk-heading-m">Fixtures</h2>
+        <ul class="govuk-list">
+{{- range .Context.fixtures }}
+          <li>
+{{- if .Current }}
+            <strong>{{ .Name }}</strong>
+{{- else }}
+            <a class="govuk-link" href="/components/{{ $.Context.componentName }}?fixture={{ .Name }}">{{ .Name }}</a>
+{{- end }}
+          </li>
+{{- end }}
+        </ul>
+        {{ component "notification-banner" .Context.parity }}
+{{- with .Context.description }}
+        {{ component "inset-text" (dict "text" .) }}
+{{- end }}
+        <h2 class="govuk-heading-m">{{ .Context.fixtureName }}</h2>
+        {{ .Context.rendered }}
+{{- template "columns-close" . }}

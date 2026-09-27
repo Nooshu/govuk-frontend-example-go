@@ -1,0 +1,125 @@
+package service_test
+
+import (
+	"testing"
+
+	"github.com/Nooshu/govuk-frontend-example-go/internal/service"
+)
+
+func TestTheJourneyIsAChainOfQuestions(t *testing.T) {
+	t.Parallel()
+	steps := service.Steps()
+	if len(steps) == 0 {
+		t.Fatal("the journey has no questions")
+	}
+	for index, step := range steps {
+		if step.Path != "/"+string(step.ID) {
+			t.Errorf("%s is served from %q, want /%s", step.ID, step.Path, step.ID)
+		}
+		if step.Heading == "" {
+			t.Errorf("%s has no heading", step.ID)
+		}
+		next, hasNext := service.NextStep(step.ID)
+		if index == len(steps)-1 {
+			if hasNext {
+				t.Errorf("the last question has a next step: %s", next.ID)
+			}
+		} else if !hasNext || next.ID != steps[index+1].ID {
+			t.Errorf("after %s comes %s, want %s", step.ID, next.ID, steps[index+1].ID)
+		}
+		previous, hasPrevious := service.PreviousStep(step.ID)
+		if index == 0 {
+			if hasPrevious {
+				t.Errorf("the first question has a previous step: %s", previous.ID)
+			}
+		} else if !hasPrevious || previous.ID != steps[index-1].ID {
+			t.Errorf("before %s comes %s, want %s", step.ID, previous.ID, steps[index-1].ID)
+		}
+	}
+}
+
+func TestStepsAreFoundByIDAndPath(t *testing.T) {
+	t.Parallel()
+	step, ok := service.StepByID("name")
+	if !ok || step.Path != "/name" {
+		t.Errorf("StepByID(\"name\") = %+v, %t", step, ok)
+	}
+	if _, ok := service.StepByID("not-a-step"); ok {
+		t.Error("an unknown id was treated as a question")
+	}
+	step, ok = service.StepByPath("/create-a-password")
+	if !ok || step.ID != service.StepCreateAPassword {
+		t.Errorf("StepByPath(\"/create-a-password\") = %+v, %t", step, ok)
+	}
+	if _, ok := service.StepByPath("/fees"); ok {
+		t.Error("a content page was treated as a question")
+	}
+	if _, ok := service.NextStep("not-a-step"); ok {
+		t.Error("an unknown id has a next step")
+	}
+	if _, ok := service.PreviousStep("not-a-step"); ok {
+		t.Error("an unknown id has a previous step")
+	}
+}
+
+func TestMarkingStepsCompleteDoesNotDuplicateThem(t *testing.T) {
+	t.Parallel()
+	completed := service.MarkCompleted(nil, service.StepName)
+	completed = service.MarkCompleted(completed, service.StepName)
+	if len(completed) != 1 {
+		t.Errorf("marking twice gave %v", completed)
+	}
+	completed = service.MarkCompleted(completed, service.StepEmail)
+	completed = service.UnmarkCompleted(completed, service.StepName)
+	if len(completed) != 1 || completed[0] != service.StepEmail {
+		t.Errorf("after unmarking, completed = %v", completed)
+	}
+	if got := service.UnmarkCompleted(completed, service.StepAddress); len(got) != 1 {
+		t.Errorf("unmarking a step that was never complete changed the list: %v", got)
+	}
+}
+
+func TestOnlyOptionalQuestionsCanBeSkipped(t *testing.T) {
+	t.Parallel()
+	application := service.NewApplication()
+	if service.RequiredStepsComplete(application) {
+		t.Fatal("an empty application is ready to submit")
+	}
+	first, ok := service.FirstIncompleteStep(application)
+	if !ok || first.ID != service.StepName {
+		t.Errorf("the first incomplete question is %s, want name", first.ID)
+	}
+
+	for _, step := range service.Steps() {
+		if service.Optional(step.ID) {
+			continue
+		}
+		application.Completed = service.MarkCompleted(application.Completed, step.ID)
+	}
+	if !service.RequiredStepsComplete(application) {
+		t.Error("an application with every required question answered is not ready")
+	}
+	if _, ok := service.FirstIncompleteStep(application); ok {
+		t.Error("a ready application still reports an incomplete question")
+	}
+	if !service.Optional(service.StepEvidence) || !service.Optional(service.StepAdditionalDetails) {
+		t.Error("the optional questions are not marked optional")
+	}
+	if service.Optional(service.StepName) {
+		t.Error("the name question is optional")
+	}
+	if !application.IsCompleted(service.StepName) {
+		t.Error("IsCompleted does not see a completed step")
+	}
+}
+
+func TestANewApplicationIsEmpty(t *testing.T) {
+	t.Parallel()
+	application := service.NewApplication()
+	if len(application.Completed) != 0 || len(application.Regions) != 0 {
+		t.Errorf("a new application is not empty: %+v", application)
+	}
+	if application.Submitted || application.PasswordCreated {
+		t.Error("a new application is already submitted")
+	}
+}
