@@ -70,6 +70,8 @@ Thumbs.db
 !.cursor/rules/**/*
 
 # Go build output and coverage profiles
+/server
+*.exe
 *.test
 coverage.out
 coverage.html
