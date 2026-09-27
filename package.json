@@ -1,8 +1,8 @@
 {
-  "name": "govuk-frontend-example-typescript",
+  "name": "govuk-frontend-example-go",
   "version": "0.0.0",
   "private": true,
-  "description": "TypeScript line of the GDS-compliant GOV.UK Frontend template. Server-rendered HTML via Node/TypeScript + Nunjucks; no SPA UI frameworks.",
+  "description": "Go line of the GDS-compliant GOV.UK Frontend template. Server-rendered HTML from Go; GOV.UK Frontend Nunjucks macros render every component; no SPA UI frameworks.",
   "type": "module",
   "imports": {
     "#baseline": "./baseline/index.mjs"
@@ -12,27 +12,24 @@
   },
   "scripts": {
     "build:styles": "node scripts/build-styles-cli.mjs",
+    "render:component": "node scripts/render-component.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint:md": "markdownlint-cli2",
     "verify:docs": "npm run format:check && npm run lint:md",
-    "typecheck": "tsc --noEmit",
-    "start": "npm run build:styles && tsx src/main.ts",
+    "start": "npm run build:styles && go run ./cmd/server",
     "test:baseline": "node --test --experimental-test-coverage --test-coverage-include='baseline/**/*.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/baseline.test.mjs",
     "test:styles": "node --test --experimental-test-coverage --test-coverage-include='scripts/build-styles.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/styles.test.mjs",
-    "test": "npm run test:baseline && npm run test:styles && npm run build:styles && c8 --all --src src --include 'src/**/*.ts' --exclude 'src/**/*.test.ts' --exclude 'src/**/*.d.ts' --exclude 'src/main.ts' --reporter=text --check-coverage --lines 100 --statements 100 --branches 100 --functions 100 -- node --import tsx --test 'src/**/*.test.ts'",
-    "verify": "npm run verify:docs && npm run build:styles && npm run typecheck && npm test",
+    "test:render": "node --test --experimental-test-coverage --test-coverage-include='scripts/render-component.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/render-component.test.mjs",
+    "test:go": "go test ./...",
+    "test": "npm run test:baseline && npm run test:styles && npm run test:render && npm run build:styles && npm run test:go",
+    "verify": "npm run verify:docs && npm run build:styles && go vet ./... && npm test",
     "sync:template": "./scripts/sync-from-template.sh"
   },
   "devDependencies": {
-    "@types/node": "24.5.2",
-    "@types/nunjucks": "3.2.6",
-    "c8": "12.0.0",
     "markdownlint-cli2": "0.23.3",
     "prettier": "3.6.2",
-    "sass": "1.105.0",
-    "tsx": "4.20.5",
-    "typescript": "7.0.2"
+    "sass": "1.105.0"
   },
   "dependencies": {
     "govuk-frontend": "6.5.1",

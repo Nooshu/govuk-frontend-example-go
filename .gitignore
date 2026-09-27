@@ -69,6 +69,11 @@ Thumbs.db
 !.cursor/rules/
 !.cursor/rules/**/*
 
+# Go build output and coverage profiles
+*.test
+coverage.out
+coverage.html
+
 # Test / fixture noise
 tmp/
 temp/
