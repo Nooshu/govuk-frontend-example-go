@@ -1,0 +1,45 @@
+# Paths copied from the `template` remote on sync (one path per line).
+# Do not list TypeScript-specific files (tech-stack, package.json, README, AGENTS, src/, …).
+# baseline/ is shared on purpose: this line calls it, and does not keep a second header policy.
+# See docs/syncing-from-template.md
+
+baseline
+docs/accessibility.md
+docs/authoritative-references.md
+docs/content-and-forms.md
+docs/creating-components.md
+docs/creating-patterns.md
+docs/design-tokens.md
+docs/frontend-performance.md
+docs/frontend-security.md
+docs/govuk-components.md
+docs/govuk-frontend-roadmap.md
+docs/guidance-sources.md
+docs/layout-chrome.md
+docs/page-shell.md
+docs/preview-server.md
+docs/priorities.md
+docs/service-assessment-readiness.md
+docs/service-standard.md
+docs/styles.md
+docs/technology-code-of-practice.md
+docs/testing-components.md
+docs/upgrading-govuk-frontend.md
+.editorconfig
+.gitattributes
+.prettierignore
+.prettierrc.json
+.markdownlint-cli2.jsonc
+.nvmrc
+.npmrc
+.env.example
+LICENSE
+SECURITY.md
+.github/PULL_REQUEST_TEMPLATE.md
+.github/dependabot.yml
+.github/workflows/docs.yml
+scripts/build-styles.mjs
+scripts/build-styles-cli.mjs
+styles
+tests/baseline.test.mjs
+tests/styles.test.mjs

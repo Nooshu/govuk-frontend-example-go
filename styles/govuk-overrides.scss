@@ -1,0 +1,23 @@
+// Service-level CSS overrides — last file in the cascade after GOV.UK Frontend.
+//
+// Rules:
+// - Prefer equal or higher specificity so these declarations win without !important.
+// - Never use !important in this file (or elsewhere in styles/). Frontend’s own
+//   govuk-!- utility classes may contain !important; that is upstream, not ours.
+// - Prefer GOV.UK Frontend component options and Design System patterns first.
+// - Keep selectors on govuk-* classes or app-prefixed wrappers composed with them.
+// - Do not restyle focus (yellow focus ring) or invent parallel UI chrome.
+//
+// Example (specificity via a composed class, not !important):
+//
+// .govuk-button.app-button--confirm {
+//   // Service-specific adjustment using Frontend tokens where possible
+// }
+
+@use 'pkg:govuk-frontend/base' as *;
+
+// Marker so tests can assert this file lands after Frontend in the cascade.
+// Service overrides go below. Prefer specificity over !important.
+:root {
+  --app-stylesheet-layer: govuk-overrides;
+}

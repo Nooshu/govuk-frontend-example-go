@@ -1,0 +1,21 @@
+---
+description: GDS-compliant frontend template — stack shape, priorities, and doc/agent conventions
+alwaysApply: true
+---
+
+# Template consistency
+
+- This repo is the **TypeScript** line of the GDS template: Node/TypeScript HTML + **GOV.UK Frontend** only. **No** React/Vue/Angular/Svelte for UI.
+- Prefer **Nunjucks macros** over copy-pasted component HTML. Compare **TypeScript-rendered HTML** (`renderComponent`) to official fixtures for every fixture (primary gate); Nunjucks-vs-fixture without the library API is freshness only. See [`docs/testing-components.md`](docs/testing-components.md).
+- Sync shared docs from `template` remote (`npm run sync:template`) — do not overwrite `docs/tech-stack.md`, `package.json`, or `src/` casually.
+- Language-agnostic sibling: https://github.com/Nooshu/govuk-frontend-example
+- Priorities: frontend web performance → frontend security → reduced maintenance → accessibility → inclusive design.
+- Keep [`AGENTS.md`](AGENTS.md) slim; put detail in [`docs/`](docs/README.md). Dual audience: see [`docs/documentation-structure.md`](docs/documentation-structure.md).
+- Every feature or prompt-driven change must update dual-audience docs (humans + agents) in the right place — same change set as the code.
+- Follow TypeScript / Node’s **latest** best practices from [`docs/tech-stack.md`](docs/tech-stack.md) for all new code.
+- Before upgrading Frontend: read https://github.com/alphagov/govuk-frontend/releases/latest then [`docs/upgrading-govuk-frontend.md`](docs/upgrading-govuk-frontend.md).
+- Respect EditorConfig / Prettier / markdownlint; run `npm run verify:docs` after doc changes.
+- 100% coverage (functions, branches, statements) for application code when it exists; never edit fixture `html` to pass tests.
+- Serve pages and assets with [`baseline/`](baseline/) (cache kinds and OWASP headers). Compress with Brotli (`br`); Gzip is only the fallback when the client does not advertise `br`. Playbooks: [`docs/frontend-performance.md`](docs/frontend-performance.md), [`docs/frontend-security.md`](docs/frontend-security.md).
+- Compile CSS with Sass (`styles/` → Frontend `@use` → `govuk-overrides.scss` last). Never use `!important` in service CSS. See [`docs/styles.md`](docs/styles.md).
+- When work is complete, split it into focused commits with comprehensive messages.

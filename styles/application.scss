@@ -1,0 +1,11 @@
+// Application stylesheet entry.
+//
+// Cascade (source order = cascade order):
+// 1. GOV.UK Frontend (via Dart Sass @use — not the prebuilt dist CSS)
+// 2. Service overrides in govuk-overrides (last, so equal or higher specificity wins)
+
+@use 'pkg:govuk-frontend' as * with (
+  $govuk-assets-path: '/assets/'
+);
+
+@use 'govuk-overrides';

@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "sources": [
+    "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html",
+    "https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html",
+    "https://frontend.design-system.service.gov.uk/import-javascript/",
+    "https://gds-way.digital.cabinet-office.gov.uk/standards/optimise-frontend-perf.html",
+    "https://www.gov.uk/service-manual/technology/how-to-test-frontend-performance"
+  ],
+  "jsEnabledSnippet": "document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');",
+  "jsEnabledScriptHash": "sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw=",
+  "hsts": {
+    "maxAge": 63072000,
+    "includeSubDomains": true
+  },
+  "headers": {
+    "all": {
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "X-XSS-Protection": "0",
+      "X-Permitted-Cross-Domain-Policies": "none",
+      "Cross-Origin-Resource-Policy": "same-origin"
+    },
+    "document": {
+      "X-Frame-Options": "DENY",
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp"
+    }
+  },
+  "remove": [
+    "Server",
+    "X-Powered-By",
+    "X-AspNet-Version",
+    "X-AspNetMvc-Version",
+    "Public-Key-Pins",
+    "Public-Key-Pins-Report-Only",
+    "Expect-CT"
+  ],
+  "cacheControl": {
+    "document": "no-cache",
+    "sensitive-document": "no-store",
+    "fingerprinted-asset": "public, max-age=31536000, immutable",
+    "static-asset": "no-cache",
+    "download": "private, no-cache",
+    "sensitive-download": "no-store"
+  },
+  "contentTypes": {
+    "document": "text/html; charset=utf-8",
+    "sensitive-document": "text/html; charset=utf-8",
+    "download": "application/octet-stream",
+    "sensitive-download": "application/octet-stream"
+  },
+  "csp": {
+    "directives": {
+      "default-src": ["'self'"],
+      "script-src": ["'self'"],
+      "script-src-attr": ["'none'"],
+      "style-src": ["'self'"],
+      "style-src-attr": ["'none'"],
+      "img-src": ["'self'"],
+      "font-src": ["'self'"],
+      "connect-src": ["'self'"],
+      "media-src": ["'self'"],
+      "object-src": ["'none'"],
+      "frame-src": ["'none'"],
+      "frame-ancestors": ["'none'"],
+      "base-uri": ["'none'"],
+      "form-action": ["'self'"],
+      "manifest-src": ["'self'"],
+      "worker-src": ["'self'"],
+      "upgrade-insecure-requests": []
+    }
+  },
+  "permissionsPolicy": [
+    "accelerometer",
+    "attribution-reporting",
+    "autoplay",
+    "bluetooth",
+    "browsing-topics",
+    "camera",
+    "display-capture",
+    "document-domain",
+    "encrypted-media",
+    "fullscreen",
+    "gamepad",
+    "geolocation",
+    "gyroscope",
+    "hid",
+    "identity-credentials-get",
+    "idle-detection",
+    "interest-cohort",
+    "local-fonts",
+    "magnetometer",
+    "microphone",
+    "midi",
+    "otp-credentials",
+    "payment",
+    "picture-in-picture",
+    "publickey-credentials-create",
+    "publickey-credentials-get",
+    "screen-wake-lock",
+    "serial",
+    "storage-access",
+    "sync-xhr",
+    "usb",
+    "web-share",
+    "window-management",
+    "xr-spatial-tracking"
+  ],
+  "performance": {
+    "httpMinimum": "h2",
+    "httpPreferred": "h3",
+    "compression": {
+      "standard": "br",
+      "fallback": "gzip"
+    },
+    "coreWebVitals": {
+      "lcpMs": 2500,
+      "inpMs": 200,
+      "cls": 0.1
+    },
+    "budgets": {
+      "htmlCompressedBytes": 50000,
+      "cssCompressedBytes": 32768,
+      "jsCompressedBytes": 32768,
+      "thirdPartyRequests": 0
+    },
+    "assetPlacement": {
+      "css": "document-head",
+      "javascript": "external-type-module",
+      "jsEnabled": "inline-snippet-allowed-by-csp-hash"
+    }
+  },
+  "nonce": {
+    "bytes": 16,
+    "minLength": 24
+  },
+  "cookie": {
+    "sameSite": "Lax",
+    "secure": true,
+    "httpOnly": true,
+    "path": "/"
+  }
+}

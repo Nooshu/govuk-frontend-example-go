@@ -1,0 +1,29 @@
+# Normalize text files; keep binaries intact
+* text=auto eol=lf
+
+*.{png,jpg,jpeg,gif,webp,ico,pdf,woff,woff2,ttf,eot} binary
+*.{zip,gz,tgz,bz2} binary
+
+# Explicit text types used in this template
+*.md text eol=lf
+*.mdc text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.njk text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.go text eol=lf
+*.py text eol=lf
+*.cs text eol=lf
+Makefile text eol=lf
+
+# Shell scripts always LF (CI / macOS / Linux)
+*.sh text eol=lf
