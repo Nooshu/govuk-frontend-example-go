@@ -16,7 +16,8 @@ Stay consistent with the [GOV.UK page template](https://design-system.service.go
     <!-- Header (masthead) + service navigation inside govuk-template__header -->
     <div class="govuk-width-container">
       <!-- BeforeContent: phase banner / breadcrumbs / back link (not breadcrumbs + back link) -->
-      <main id="content" class="govuk-main-wrapper">
+      <main id="main-content" class="govuk-main-wrapper">
+        <!-- Site-wide Important notification: live demo, not a real government service -->
         <div class="govuk-grid-row">
           <div class="govuk-grid-column-two-thirds">
             <!-- One h1; page content via components -->
@@ -38,9 +39,15 @@ The `js-enabled` snippet must be that exact one line. The CSP hash in [`baseline
 2. Skip link as first focusable element
 3. GOV.UK header (+ service navigation when needed)
 4. Width container wrapping main content
-5. `main` with `id="content"` (must match skip-link href)
-6. Grid row with appropriate column width
-7. Footer (OGL + Crown copyright)
+5. Phase banner (Example / demonstration — not a live government service)
+6. `main` with `id="main-content"` (must match skip-link href)
+7. Site-wide **Important** notification banner (live demo warning), then page content
+8. Grid row with appropriate column width
+9. Footer (OGL + Crown copyright)
+
+## Search indexing
+
+This example must not appear in search results. The shell sets `<meta name="robots" content="noindex, nofollow">`. HTML responses also send `X-Robots-Tag: noindex, nofollow`. `/robots.txt` returns `Disallow: /` for all user agents.
 
 ## Frontend 6+ header rules
 

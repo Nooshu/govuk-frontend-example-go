@@ -29,6 +29,10 @@ func (a *App) routes() *http.ServeMux {
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		a.writeText(w, r, http.StatusOK, "ok")
 	})
+	mux.HandleFunc("GET /robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		// Disallow everything — this example must not appear in search results.
+		a.writeText(w, r, http.StatusOK, "User-agent: *\nDisallow: /\n")
+	})
 	mux.HandleFunc("GET /assets/", a.serveAsset)
 
 	// Start pages. "/{$}" matches only the root, not everything below it.

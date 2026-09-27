@@ -513,6 +513,28 @@ func TestHealthIsServedWithoutASession(t *testing.T) {
 	}
 }
 
+func TestPagesAreExcludedFromSearchIndexes(t *testing.T) {
+	t.Parallel()
+	c := newClient(t)
+
+	page := c.get("/")
+	if page.Header().Get("X-Robots-Tag") != "noindex, nofollow" {
+		t.Errorf("X-Robots-Tag = %q, want noindex, nofollow", page.Header().Get("X-Robots-Tag"))
+	}
+	body := page.Body.String()
+	if !strings.Contains(body, `name="robots" content="noindex, nofollow"`) {
+		t.Fatal("HTML robots meta missing noindex, nofollow")
+	}
+	if !strings.Contains(body, "This is a live demo. It is not a real government service.") {
+		t.Fatal("demo warning banner missing from the start page")
+	}
+
+	robots := c.get("/robots.txt")
+	if robots.Code != http.StatusOK || !strings.Contains(robots.Body.String(), "Disallow: /") {
+		t.Fatalf("GET /robots.txt = %d %q", robots.Code, robots.Body.String())
+	}
+}
+
 func TestStartingAgainClearsTheAnswers(t *testing.T) {
 	t.Parallel()
 	c := newClient(t)

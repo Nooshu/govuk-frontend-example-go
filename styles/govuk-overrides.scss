@@ -33,3 +33,10 @@
   border: $govuk-border-width-form-element dotted $govuk-border-colour;
   padding: govuk-spacing(4);
 }
+
+// Site-wide demo warning — same notification-banner chrome as default, but yellow
+// instead of brand blue (mirrors how --success swaps the colour custom properties).
+.govuk-notification-banner.app-demo-banner {
+  --_govuk-notification-banner-colour: #{govuk-colour('yellow')};
+  --_govuk-notification-banner-title-text-colour: #{govuk-colour('black')};
+}

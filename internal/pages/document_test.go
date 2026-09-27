@@ -26,7 +26,18 @@ func TestRenderDocuments(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"lang=\"en\"", "Skip to main content", "returnPath\" value=\"/start?from=home\"", "<script>snippet</script>", "/assets/application.css", "homepageUrl:/"} {
+	for _, want := range []string{
+		"lang=\"en\"",
+		"Skip to main content",
+		"returnPath\" value=\"/start?from=home\"",
+		"<script>snippet</script>",
+		"/assets/application.css",
+		"homepageUrl:/",
+		`name="robots" content="noindex, nofollow"`,
+		"not a real government service",
+		"not a live government service",
+		"app-demo-banner",
+	} {
 		if !strings.Contains(html, want) {
 			t.Errorf("english document missing %q", want)
 		}
@@ -50,6 +61,9 @@ func TestRenderDocuments(t *testing.T) {
 	}
 	if !strings.Contains(welshHTML, "lang=\"cy\"") || !strings.Contains(welshHTML, "Neidio") {
 		t.Fatal("welsh chrome missing")
+	}
+	if !strings.Contains(welshHTML, "Nid gwasanaeth llywodraeth go iawn mohono") {
+		t.Fatal("welsh demo warning banner missing")
 	}
 	if !strings.Contains(welshHTML, "homepageUrl:/cy") {
 		t.Fatal("welsh header does not link the logo to /cy")

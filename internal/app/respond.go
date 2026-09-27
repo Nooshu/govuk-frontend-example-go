@@ -12,6 +12,9 @@ import (
 	"github.com/Nooshu/govuk-frontend-example-go/internal/session"
 )
 
+// robotsTag keeps this example out of search indexes (matches the HTML meta robots tag).
+const robotsTag = "noindex, nofollow"
+
 // writePage renders a view and sends it with the document baseline.
 //
 // A page that shows the applicant's answers is sent as a sensitive document, which is no-store:
@@ -44,6 +47,7 @@ func (a *App) writePage(w http.ResponseWriter, r *http.Request, view pages.View,
 		a.writeText(w, r, http.StatusInternalServerError, "Sorry, there is a problem with the service")
 		return
 	}
+	header.Set("X-Robots-Tag", robotsTag)
 	a.setSessionCookie(w, r, current)
 
 	raw := []byte(body)
@@ -84,6 +88,9 @@ func (a *App) writeRaw(w http.ResponseWriter, r *http.Request, raw rawResponse) 
 		a.logger.Error("applying response headers failed", "error", err)
 		a.writeText(w, r, http.StatusInternalServerError, "Sorry, there is a problem with the service")
 		return
+	}
+	if baseline.IsDocument(raw.kind) {
+		header.Set("X-Robots-Tag", robotsTag)
 	}
 	a.writeBody(w, r, raw.status, raw.body, header.Get("Content-Type"))
 }

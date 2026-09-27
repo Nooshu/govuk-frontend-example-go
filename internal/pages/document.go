@@ -128,13 +128,15 @@ type pageData struct {
 
 	ServiceNavigation map[string]any
 	PhaseBanner       map[string]any
-	Footer            map[string]any
-	CookieBanner      map[string]any
-	Feedback          map[string]any
-	BackLink          map[string]any
-	Breadcrumbs       map[string]any
-	ExitThisPage      map[string]any
-	ShowFeedback      bool
+	// DemoBanner is the site-wide "not a real government service" notification.
+	DemoBanner   map[string]any
+	Footer       map[string]any
+	CookieBanner map[string]any
+	Feedback     map[string]any
+	BackLink     map[string]any
+	Breadcrumbs  map[string]any
+	ExitThisPage map[string]any
+	ShowFeedback bool
 
 	DemosEnabled    bool
 	FrontendVersion string
@@ -189,6 +191,7 @@ func (r *Renderer) Render(view View, current *session.Session, currentPath strin
 		JSEnabledSnippet:  template.JS(r.options.JSEnabledSnippet),
 		ServiceNavigation: navigation,
 		PhaseBanner:       phaseBanner(lang),
+		DemoBanner:        demoBanner(lang),
 		Footer:            r.footer(lang),
 		CookieBanner:      cookieBanner(current),
 		Feedback:          feedback,
@@ -342,13 +345,33 @@ func phaseBanner(lang string) map[string]any {
 	if lang == LangCY {
 		return map[string]any{
 			"tag":  map[string]any{"text": "Enghraifft"},
-			"html": `Mae hon yn wasanaeth enghreifftiol – bydd eich <a class="govuk-link" href="/about">adborth</a> yn ein helpu i wella’r gwasanaeth.`,
+			"html": `Mae hon yn arddangosiad – nid gwasanaeth llywodraeth byw mohono. Bydd eich <a class="govuk-link" href="/about">adborth</a> yn helpu i wella’r enghraifft.`,
 		}
 	}
 	return map[string]any{
 		"tag":  map[string]any{"text": "Example"},
-		"html": `This is an example service – your <a class="govuk-link" href="/about">feedback</a> will help us to improve it.`,
+		"html": `This is a demonstration – it is not a live government service. Your <a class="govuk-link" href="/about">feedback</a> will help us improve the example.`,
 	}
+}
+
+// demoBanner is the Important notification shown at the top of every page.
+//
+// classes app-demo-banner turns the banner yellow (see styles/govuk-overrides.scss) so it
+// stands out from the blue header and footer. titleId is unique so a page that also has its
+// own notification banner does not duplicate ids.
+func demoBanner(lang string) map[string]any {
+	banner := map[string]any{
+		"classes": "app-demo-banner",
+		"titleId": "app-demo-banner-title",
+	}
+	if lang == LangCY {
+		banner["titleText"] = "Pwysig"
+		banner["text"] = "Mae hwn yn arddangosiad byw. Nid gwasanaeth llywodraeth go iawn mohono."
+		return banner
+	}
+	banner["titleText"] = "Important"
+	banner["text"] = "This is a live demo. It is not a real government service."
+	return banner
 }
 
 // cookieBanner returns the banner to show, or nil when there is nothing to say.

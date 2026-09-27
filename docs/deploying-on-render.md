@@ -49,7 +49,8 @@ Uses the committed [`render.yaml`](../render.yaml).
 - [ ] `https://<your-service>.onrender.com/health` returns `ok`
 - [ ] Start page loads with GOV.UK styling (`/`)
 - [ ] Component catalogue works (`/components`) — Blueprint sets `DEMOS_ENABLED=true`
-- [ ] Start page shows **Developer previews** / Preview GOV.UK components
+- [ ] Start page shows the **Important** demo warning and **Developer previews**
+- [ ] View source (or headers) shows `noindex, nofollow`; `/robots.txt` disallows `/`
 - [ ] A form POST in the licence journey retains the session (cookie)
 
 ## Option B — Manual Web Service
