@@ -34,15 +34,15 @@ Details: [`docs/priorities.md`](docs/priorities.md).
 
 ## Start here
 
-| Audience                | Doc                                                                                                                     |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Human developers**    | [`docs/onboarding.md`](docs/onboarding.md), [`CONTRIBUTING.md`](CONTRIBUTING.md)                                        |
-| **AI agents (this file)** | Keep reading; skill: [`.cursor/skills/gds-compliant-frontend/SKILL.md`](.cursor/skills/gds-compliant-frontend/SKILL.md) |
-| Dual-audience docs map  | [`docs/documentation-structure.md`](docs/documentation-structure.md), [`docs/README.md`](docs/README.md)                |
-| Project purpose         | [`docs/project-purpose.md`](docs/project-purpose.md)                                                                    |
-| Official guidance URLs  | [`docs/guidance-sources.md`](docs/guidance-sources.md)                                                                  |
-| Stack / language (Go)   | [`docs/tech-stack.md`](docs/tech-stack.md)                                                                              |
-| Sync from agnostic template | [`docs/syncing-from-template.md`](docs/syncing-from-template.md)                                                    |
+| Audience                    | Doc                                                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Human developers**        | [`docs/onboarding.md`](docs/onboarding.md), [`CONTRIBUTING.md`](CONTRIBUTING.md)                                        |
+| **AI agents (this file)**   | Keep reading; skill: [`.cursor/skills/gds-compliant-frontend/SKILL.md`](.cursor/skills/gds-compliant-frontend/SKILL.md) |
+| Dual-audience docs map      | [`docs/documentation-structure.md`](docs/documentation-structure.md), [`docs/README.md`](docs/README.md)                |
+| Project purpose             | [`docs/project-purpose.md`](docs/project-purpose.md)                                                                    |
+| Official guidance URLs      | [`docs/guidance-sources.md`](docs/guidance-sources.md)                                                                  |
+| Stack / language (Go)       | [`docs/tech-stack.md`](docs/tech-stack.md)                                                                              |
+| Sync from agnostic template | [`docs/syncing-from-template.md`](docs/syncing-from-template.md)                                                        |
 
 **Language rule:** This line is **Go**. **Every** feature and code change must follow Go’s **latest** best practices (modules, `internal/`, tests, `go vet`, packaging) as recorded in [`docs/tech-stack.md`](docs/tech-stack.md) — without weakening the non-negotiables below. Prefer the standard library (`net/http`, `html/template`, `compress/gzip`, `crypto/*`, `log/slog`) and only well-known deps where stdlib lacks a feature (e.g. `andybalholm/brotli`). Generate HTML **natively in Go**; do not call Node to render.
 

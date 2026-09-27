@@ -28,14 +28,14 @@ Detail for humans: [`docs/project-purpose.md`](../../../docs/project-purpose.md)
 
 ## Non-negotiable stack shape
 
-| Layer               | Choice                                                                                                           |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| UI                  | GOV.UK Frontend only (`govuk-*`, official JS via `initAll()`)                                                   |
-| HTML generation     | Native Go in `internal/govuk` and `internal/pages`; tracks macros; fixture-parity                               |
-| Frontend frameworks | **Forbidden** for UI                                                                                             |
-| Parity              | Official `fixtures.json` + ordinal HTML equality of **Go** output vs **every** fixture `html`                   |
-| Upstream            | Node package + Nunjucks / `template.njk` / fixtures (install, Sass, freshness — not request-time HTML)          |
-| HTTP                | `net/http` ServeMux, [`baseline/policy.json`](../../../baseline/policy.json) via `internal/baseline`            |
+| Layer               | Choice                                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
+| UI                  | GOV.UK Frontend only (`govuk-*`, official JS via `initAll()`)                                          |
+| HTML generation     | Native Go in `internal/govuk` and `internal/pages`; tracks macros; fixture-parity                      |
+| Frontend frameworks | **Forbidden** for UI                                                                                   |
+| Parity              | Official `fixtures.json` + ordinal HTML equality of **Go** output vs **every** fixture `html`          |
+| Upstream            | Node package + Nunjucks / `template.njk` / fixtures (install, Sass, freshness — not request-time HTML) |
+| HTTP                | `net/http` ServeMux, [`baseline/policy.json`](../../../baseline/policy.json) via `internal/baseline`   |
 
 ## Authoritative guidance (search these first)
 
