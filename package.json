@@ -2,7 +2,7 @@
   "name": "govuk-frontend-example-go",
   "version": "0.0.0",
   "private": true,
-  "description": "Go line of the GDS-compliant GOV.UK Frontend template. Server-rendered HTML from Go; GOV.UK Frontend Nunjucks macros render every component; no SPA UI frameworks.",
+  "description": "Go line of the GDS-compliant GOV.UK Frontend template. Server-rendered HTML from Go (native component renderers); Node only for govuk-frontend pin, Sass, and shared baseline tests; no SPA UI frameworks.",
   "type": "module",
   "imports": {
     "#baseline": "./baseline/index.mjs"
@@ -12,7 +12,6 @@
   },
   "scripts": {
     "build:styles": "node scripts/build-styles-cli.mjs",
-    "render:component": "node scripts/render-component.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint:md": "markdownlint-cli2",
@@ -20,9 +19,8 @@
     "start": "npm run build:styles && go run ./cmd/server",
     "test:baseline": "node --test --experimental-test-coverage --test-coverage-include='baseline/**/*.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/baseline.test.mjs",
     "test:styles": "node --test --experimental-test-coverage --test-coverage-include='scripts/build-styles.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/styles.test.mjs",
-    "test:render": "node --test --experimental-test-coverage --test-coverage-include='scripts/render-component.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/render-component.test.mjs",
     "test:go": "go test ./...",
-    "test": "npm run test:baseline && npm run test:styles && npm run test:render && npm run build:styles && npm run test:go",
+    "test": "npm run test:baseline && npm run test:styles && npm run build:styles && npm run test:go",
     "verify": "npm run verify:docs && npm run build:styles && go vet ./... && npm test",
     "sync:template": "./scripts/sync-from-template.sh"
   },
@@ -32,7 +30,6 @@
     "sass": "1.105.0"
   },
   "dependencies": {
-    "govuk-frontend": "6.5.1",
-    "nunjucks": "3.2.4"
+    "govuk-frontend": "6.5.1"
   }
 }
