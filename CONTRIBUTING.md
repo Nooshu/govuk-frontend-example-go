@@ -5,7 +5,7 @@ Thanks for helping maintain this **GDS-compliant frontend** template. This guide
 ## Before you start
 
 1. Read [`docs/project-purpose.md`](docs/project-purpose.md) and [`docs/onboarding.md`](docs/onboarding.md).
-2. Confirm the stack in [`docs/tech-stack.md`](docs/tech-stack.md) (TypeScript on Node).
+2. Confirm the stack in [`docs/tech-stack.md`](docs/tech-stack.md) (Go; Node only pins Frontend, compiles Sass, and runs shared baseline tests).
 3. Prefer official guidance listed in [`docs/guidance-sources.md`](docs/guidance-sources.md).
 4. Sync shared playbooks from the agnostic template when needed: [`docs/syncing-from-template.md`](docs/syncing-from-template.md).
 5. Priorities: frontend web performance → frontend security → reduced maintenance → accessibility → inclusive design.
@@ -13,14 +13,14 @@ Thanks for helping maintain this **GDS-compliant frontend** template. This guide
 ## Non-negotiables (short)
 
 - GOV.UK Frontend only for UI — **no** React/Vue/Angular/Svelte (etc.).
-- Prefer **Nunjucks macros** over copy-pasted HTML from releases.
-- Official fixtures for **100% HTML parity** of **TypeScript** output vs every fixture `html`; never edit fixture `html` to pass tests. Nunjucks-only checks are not enough.
+- Generate component HTML with the **native Go renderers** in `internal/govuk`, which track Frontend macros. Do not shell out to Node to render, and do not copy-paste HTML from releases.
+- Official fixtures for **100% HTML parity** of **Go** output vs every fixture `html`; never edit fixture `html` to pass tests. A Nunjucks-only check is not enough.
 - **100%** code coverage (functions, branches, statements) when application code exists.
 - Before upgrading Frontend, read https://github.com/alphagov/govuk-frontend/releases/latest.
 - HTTP responses use the shared [`baseline/`](baseline/). Compress with Brotli; Gzip is only the fallback when the client does not advertise `br`.
 - Compile CSS via Sass (`styles/` → Frontend `@use` → `govuk-overrides.scss` last). Never use `!important` in service CSS. See [`docs/styles.md`](docs/styles.md).
 - Document every change for **humans and agents** ([docs/documentation-structure.md](docs/documentation-structure.md)).
-- Follow the **latest** TypeScript / Node best practices in [docs/tech-stack.md](docs/tech-stack.md).
+- Follow the **latest** Go best practices in [docs/tech-stack.md](docs/tech-stack.md). Shared Node tooling stays ESM.
 
 Full list: [`AGENTS.md`](AGENTS.md).
 
@@ -31,11 +31,11 @@ npm install
 npm run build:styles    # Sass → dist/stylesheets/application.css
 npm start               # example service at http://127.0.0.1:3000
 npm test                # baseline, Sass pipeline, fixtures, and the example service; 100% coverage
-npm run verify          # docs + build:styles + typecheck + tests
+npm run verify          # docs + build:styles + go vet + tests
 npm run sync:template   # shared paths from Nooshu/govuk-frontend-example
 ```
 
-See [`docs/syncing-from-template.md`](docs/syncing-from-template.md). Dotfiles and lint setup match the language-agnostic template; TypeScript adds `tsc` and Node’s test runner.
+See [`docs/syncing-from-template.md`](docs/syncing-from-template.md). Dotfiles and lint setup match the language-agnostic template. Go adds `go test` and `go vet`. Node remains for the Frontend pin, Sass, and the shared baseline tests.
 
 ### Dotfiles (do not bypass)
 
@@ -53,7 +53,7 @@ See [`docs/syncing-from-template.md`](docs/syncing-from-template.md). Dotfiles a
 ## Pull requests
 
 - Keep changes focused; update `/docs` (and `AGENTS.md` links) when behaviour or process changes — dual audience, same PR.
-- Follow TypeScript / Node’s latest best practices; do not introduce outdated stack idioms.
+- Follow Go’s latest best practices; do not introduce outdated stack idioms. Prefer the standard library.
 - Split finished work into focused commits with comprehensive messages (see [`AGENTS.md`](AGENTS.md)).
 - Use the PR template checklist.
 - For Frontend bumps: follow [`docs/upgrading-govuk-frontend.md`](docs/upgrading-govuk-frontend.md).

@@ -5,14 +5,14 @@ alwaysApply: true
 
 # Template consistency
 
-- This repo is the **TypeScript** line of the GDS template: Node/TypeScript HTML + **GOV.UK Frontend** only. **No** React/Vue/Angular/Svelte for UI.
-- Prefer **Nunjucks macros** over copy-pasted component HTML. Compare **TypeScript-rendered HTML** (`renderComponent`) to official fixtures for every fixture (primary gate); Nunjucks-vs-fixture without the library API is freshness only. See [`docs/testing-components.md`](docs/testing-components.md).
-- Sync shared docs from `template` remote (`npm run sync:template`) — do not overwrite `docs/tech-stack.md`, `package.json`, or `src/` casually.
+- This repo is the **Go** line of the GDS template: native Go HTML + **GOV.UK Frontend** only. **No** React/Vue/Angular/Svelte for UI. Node pins `govuk-frontend`, compiles Sass, and runs shared baseline tests — it does not render HTML.
+- Component HTML comes from `internal/govuk`, which tracks Frontend macros. Compare **Go-rendered HTML** (`Render`) to official fixtures for every fixture (primary gate). See [`docs/testing-components.md`](docs/testing-components.md).
+- Sync shared docs from `template` remote (`npm run sync:template`) — do not overwrite `docs/tech-stack.md`, `package.json`, or `internal/` casually.
 - Language-agnostic sibling: https://github.com/Nooshu/govuk-frontend-example
 - Priorities: frontend web performance → frontend security → reduced maintenance → accessibility → inclusive design.
 - Keep [`AGENTS.md`](AGENTS.md) slim; put detail in [`docs/`](docs/README.md). Dual audience: see [`docs/documentation-structure.md`](docs/documentation-structure.md).
 - Every feature or prompt-driven change must update dual-audience docs (humans + agents) in the right place — same change set as the code.
-- Follow TypeScript / Node’s **latest** best practices from [`docs/tech-stack.md`](docs/tech-stack.md) for all new code.
+- Follow Go’s **latest** best practices from [`docs/tech-stack.md`](docs/tech-stack.md) for all new code. Prefer the standard library.
 - Before upgrading Frontend: read https://github.com/alphagov/govuk-frontend/releases/latest then [`docs/upgrading-govuk-frontend.md`](docs/upgrading-govuk-frontend.md).
 - Respect EditorConfig / Prettier / markdownlint; run `npm run verify:docs` after doc changes.
 - 100% coverage (functions, branches, statements) for application code when it exists; never edit fixture `html` to pass tests.

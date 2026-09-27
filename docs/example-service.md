@@ -2,7 +2,7 @@
 
 **Apply for a rod fishing licence** is the reference GOV.UK service in this repository. It is an example. It does not take payment, send email, or issue a licence.
 
-Pages are TypeScript on Node. Component HTML comes from **GOV.UK Frontend Nunjucks macros**. The pin is **6.5.1**. See [tech-stack.md](tech-stack.md).
+Pages are **Go**. Component HTML comes from **native Go renderers** that track GOV.UK Frontend macros and match every official fixture. The pin is **6.5.1**. See [tech-stack.md](tech-stack.md).
 
 ## Run it
 
@@ -56,9 +56,9 @@ The server compresses with Brotli when the browser sends `Accept-Encoding: br`. 
 npm test
 ```
 
-This runs the shared baseline suite at **100%** line, branch, and function coverage, then the Node test runner. The application suite fails if code is below **100%** function, branch, statement, or line coverage. `src/main.ts` is the process entry and is excluded.
+This runs the shared baseline suite and the Sass pipeline tests at **100%** line, branch, and function coverage, compiles the stylesheet, then runs `go test ./...`. Application packages are held to **100%** function, branch, and statement coverage. `cmd/server` is the process entry and is excluded.
 
-Component tests render **every** official fixture shipped with the pinned `govuk-frontend` release, including hidden fixtures. The comparison is the fixture `html` string. The renderer trims only the outer whitespace of its own output so that output can equal the fixture. Tests do not edit fixture HTML and do not normalise it before comparing.
+Component tests render **every** official fixture shipped with the pinned `govuk-frontend` release, including hidden fixtures. The comparison is Go `Render` output against the fixture `html` string. The renderer trims only the outer whitespace of its own output so that output can equal the fixture. Tests do not edit fixture HTML and do not normalise it before comparing.
 
 The service tests walk the licence journey, including validation, retained answers, check your answers, confirmation, cookies, Welsh, file upload, and the catalogue.
 

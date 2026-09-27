@@ -1,42 +1,59 @@
 # Tech stack
 
-**Status: TypeScript (Node)** — this is the TypeScript specialised line of [govuk-frontend-example](https://github.com/Nooshu/govuk-frontend-example).
+**Status: Go** — this is the Go specialised line of [govuk-frontend-example](https://github.com/Nooshu/govuk-frontend-example).
 
 Sync shared docs/dotfiles from the language-agnostic template: [syncing-from-template.md](syncing-from-template.md).
 
 ## Two layers
 
-| Layer                          | Stack                                                                                               | Notes                                                                                                |
-| ------------------------------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **GOV.UK Frontend (upstream)** | **Node** package (`govuk-frontend`), **Nunjucks** macros (`template.njk`), official `fixtures.json` | Fixed by GDS. Always name Node/Nunjucks for install, fixtures, macros, encoding, verification.       |
-| **This line (wrapper)**        | **TypeScript** on **Node** (≥22), ESM (`"type": "module"`)                                          | Server-side HTML from Frontend **macros** (prefer Nunjucks). **No** React/Vue/Angular/Svelte for UI. |
+| Layer                          | Stack                                                                                               | Notes                                                                                                                                    |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **GOV.UK Frontend (upstream)** | **Node** package (`govuk-frontend`), **Nunjucks** macros (`template.njk`), official `fixtures.json` | Fixed by GDS. Node is for install, fixtures, Sass, and optional freshness checks — **not** for request-time HTML in this line.           |
+| **This line (wrapper)**        | **Go** (≥1.25), module `github.com/Nooshu/govuk-frontend-example-go`                                | Server-side HTML generated **natively in Go**. Tracks Frontend macros/`template.njk` and proves **backend ≡ every fixture**. No SPA UIs. |
 
-## TypeScript conventions
+## Prefer the Go standard library
 
-**Every** feature and code change must follow **TypeScript / Node’s latest** best practices for the pinned major versions (not outdated tutorials):
+Build on packages that ship with Go before inventing helpers or pulling frameworks:
 
-- TypeScript **7.0.2** (`typescript` on npm). `tsc` is the native compiler.
-- `strict`, plus `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedLocals`, `noUnusedParameters`, `noUncheckedSideEffectImports`, `verbatimModuleSyntax`, `isolatedModules`, and `erasableSyntaxOnly`
-- `module` and `moduleResolution` are `NodeNext`. `target` and `lib` are `ES2024`, which Node 22 runs.
-- `erasableSyntaxOnly` keeps the source free of enums, runtime namespaces, and parameter properties, so the types can be stripped
-- ESM only, with `import type` for types
-- **TSDoc** on exported functions, classes, and types (`/** … */`, `@param`, `@returns`). That is the TypeScript equivalent of JSDoc. Comments describe the API; they do not replace the types in the signature
-- Prefer calling **Nunjucks macros** from `govuk-frontend` for component HTML; thin TypeScript wrappers around options → HTML only when needed — still fixture-parity
-- Tests: Node’s built-in test runner via `tsx` (`npm test`)
-- Coverage gate: **100%** functions, branches, statements, and lines for application code (see [testing-components.md](testing-components.md))
+| Concern                         | Prefer                                                                                           | Avoid / notes                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| HTTP server and routing         | `net/http` (Go 1.22+ method/path `ServeMux`)                                                     | Gin, Echo, Chi — extra surface without benefit for this example                         |
+| Page document shell             | `html/template` + `embed`                                                                        | Hand-pasted full page HTML                                                              |
+| Component HTML                  | Idiomatic Go ports in `internal/govuk` (`strings.Builder` / helpers) matching fixtures           | Shelling out to Node/Nunjucks; incomplete third-party wrappers that skip fixture parity |
+| Text escaping (Nunjucks parity) | Small local escaper (`&quot;`, `&#39;`, `\` → `&#92;`) in `internal/govuk` / `internal/htmlutil` | Relying only on `html.EscapeString` for fixture text — it does not escape `\`           |
+| JSON (fixtures, policy)         | `encoding/json`                                                                                  |                                                                                         |
+| Gzip                            | `compress/gzip`                                                                                  |                                                                                         |
+| Brotli                          | [`github.com/andybalholm/brotli`](https://github.com/andybalholm/brotli) (no stdlib Brotli)      | Reimplementing Brotli                                                                   |
+| Sessions / tokens / ETags       | `crypto/rand`, `crypto/sha256`                                                                   |                                                                                         |
+| Multipart uploads               | `mime/multipart` via `net/http`                                                                  |                                                                                         |
+| Logging                         | `log/slog`                                                                                       | Ad-hoc `fmt.Println` in handlers                                                        |
+| Tests                           | `testing`, `net/http/httptest`; optional `github.com/google/go-cmp` for HTML diffs               |                                                                                         |
+| Collections                     | `maps`, `slices`, `strings`                                                                      |                                                                                         |
 
-Shared Node tooling (Sass pipeline, `baseline/`, docs scripts) already uses current ESM / Node 22+ practice; keep it that way. Dual-audience documentation for stack notes: [documentation-structure.md](documentation-structure.md).
+**Evaluated and not adopted as the primary renderer:** [`github.com/0xnu/govuk-frontend-go`](https://pkg.go.dev/github.com/0xnu/govuk-frontend-go) — uses `html/template`, but component models are incomplete relative to Frontend macros, the recommended path is Gin-centric, assets are embedded separately from this pin, and it does not prove official `fixtures.json` byte-parity. Study patterns if useful; do not replace `internal/govuk`.
+
+## Go conventions
+
+**Every** feature and code change must follow **current Go** best practices for the pinned major version:
+
+- Module path matches the public repo; `go 1.25` (or newer) in `go.mod`
+- Standard layout: `cmd/server`, `internal/…` for non-exportable packages
+- Exported identifiers documented; package comments on every package
+- Table-driven tests; **100%** function / branch / statement coverage for application packages (see [testing-components.md](testing-components.md))
+- `go test ./…`, `go vet ./…`, `go fmt` / `gofmt` before verify
+- Component options use the same names as Frontend macros so fixture options decode cleanly
+
+Shared Node tooling (Sass pipeline, `baseline/` JS tests, docs scripts) stays ESM / Node 22+. Dual-audience documentation: [documentation-structure.md](documentation-structure.md).
 
 ## Consistency tooling
 
 ```sh
 npm install
 npm run build:styles   # Sass → dist/stylesheets/application.css
-npm start              # build:styles, then example service — http://127.0.0.1:3000
-npm test               # baseline, Sass, TypeScript vs every fixture, service tests; 100% coverage
-npm run typecheck
+npm start              # build:styles, then go run ./cmd/server — http://127.0.0.1:3000
+npm test               # baseline, Sass, then go test ./… (fixture parity + service); 100% coverage
 npm run verify:docs    # Prettier + markdownlint
-npm run verify         # docs + build:styles + typecheck + tests
+npm run verify         # docs + build:styles + go vet + tests
 npm run sync:template  # pull shared paths from language-agnostic template
 ```
 
@@ -44,19 +61,17 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Shared baseline
 
-[`baseline/`](../baseline/) is synced from the language-agnostic template. This line calls it. It does not keep a second header or cache policy.
+[`baseline/`](../baseline/) is synced from the language-agnostic template. This line **implements the same policy in Go** (`internal/baseline`), reading [`baseline/policy.json`](../baseline/policy.json). It does not call the Node helpers at request time.
 
-| Piece                                             | How this line uses it                                                                                          |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| [`baseline/policy.json`](../baseline/policy.json) | OWASP header values, CSP directives (including the Frontend `js-enabled` hash), cache kinds, Brotli budgets    |
-| [`baseline/index.mjs`](../baseline/index.mjs)     | `applyResponseHeaders` on every response, `buildSetCookie` for the session cookie, `strongEtag` on public HTML |
-| [`styles/`](../styles/)                           | Sass entry compiling Frontend via `@use`, then `govuk-overrides.scss` ([styles.md](styles.md))                 |
+| Piece                                             | How this line uses it                                                                                   |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| [`baseline/policy.json`](../baseline/policy.json) | OWASP header values, CSP (including the Frontend `js-enabled` hash), cache kinds, Brotli budgets        |
+| [`baseline/*.mjs`](../baseline/)                  | Shared contract + Node test gate (`npm run test:baseline`); Go mirrors behaviour in `internal/baseline` |
+| [`styles/`](../styles/)                           | Sass entry compiling Frontend via `@use`, then `govuk-overrides.scss` ([styles.md](styles.md))          |
 
-`npm run test:baseline` is the template's 100% line, branch, and function gate for `baseline/`. `npm run test:styles` is the same gate for `scripts/build-styles.mjs`. `npm test` runs both, then `build:styles`, then the TypeScript coverage gate.
+Local `npm start` is plain HTTP, so responses omit HSTS and the session cookie is `rod_session` without `Secure`. An `https:` request URL, or `X-Forwarded-Proto: https`, sends HSTS and `__Host-session`. Public HTML that sets a cookie uses `private, no-cache`. Pages that show the application use `sensitive-document` (`no-store`). The fingerprinted compiled stylesheet, Frontend script, `initAll()` module, and hashed fonts use `public, max-age=31536000, immutable`. Unhashed asset URLs use `no-cache`. Do not serve `govuk-frontend.min.css` as the long-term CSS source.
 
-Local `npm start` is plain HTTP, so responses omit HSTS and the session cookie is `rod_session` without `Secure`. An `https:` request URL, or `X-Forwarded-Proto: https`, sends HSTS and `__Host-session`. Public HTML that sets a cookie uses `private, no-cache`. Pages that show the application use `sensitive-document` (`no-store`). The fingerprinted compiled stylesheet (`/assets/application.*.css`), Frontend script, `initAll()` module, and hashed fonts use `public, max-age=31536000, immutable`. Unhashed asset URLs use `no-cache`. Do not serve `govuk-frontend.min.css` as the long-term CSS source.
-
-The server compresses with Brotli when the client advertises `br`, and Gzip otherwise. `Vary: Accept-Encoding` comes from the baseline.
+The server compresses with Brotli when the client advertises `br`, and Gzip otherwise (`compress/gzip` + `andybalholm/brotli`). `Vary: Accept-Encoding` comes from the baseline.
 
 Details: [frontend-performance.md](frontend-performance.md), [frontend-security.md](frontend-security.md).
 
@@ -64,20 +79,19 @@ Details: [frontend-performance.md](frontend-performance.md), [frontend-security.
 
 | Item                              | Value                                                                                                                                                                                |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Implementation language           | TypeScript 7.0.2 on Node ≥22                                                                                                                                                         |
-| Templating / component approach   | Prefer Nunjucks macros from `govuk-frontend`; TypeScript for app/library logic                                                                                                       |
+| Implementation language           | Go 1.25+                                                                                                                                                                             |
+| Templating / component approach   | Native Go HTML (`internal/govuk`, `html/template` page shell); tracks Frontend macros; **no** Node render at request time                                                            |
 | `govuk-frontend` (Node)           | **6.5.1** — [v6.5.1](https://github.com/alphagov/govuk-frontend/releases/tag/v6.5.1) (reviewed against [latest release](https://github.com/alphagov/govuk-frontend/releases/latest)) |
 | Sass pipeline                     | `styles/application.scss` → `npm run build:styles` → `dist/stylesheets/application.css` ([styles.md](styles.md))                                                                     |
-| Nunjucks                          | 3.2.4, with Frontend’s `trimBlocks` and `lstripBlocks`                                                                                                                               |
-| Backend parity (primary)          | `npm test` — TypeScript `renderComponent` ≡ every official `fixtures.json` `html` (including hidden) ([testing-components.md](testing-components.md))                                |
-| Nunjucks freshness (secondary)    | Fixtures and macros come from the same pinned `govuk-frontend` package; optional separate Nunjucks-only suite — never a substitute for backend parity                                |
+| Compression                       | Brotli via `andybalholm/brotli`; Gzip via `compress/gzip`                                                                                                                            |
+| Backend parity (primary)          | `go test` — Go `Render` ≡ every official `fixtures.json` `html` (including hidden) ([testing-components.md](testing-components.md))                                                  |
+| Nunjucks freshness (secondary)    | Optional; fixtures and macros come from the same pinned package — never a substitute for backend parity                                                                              |
 | Page template reference           | https://design-system.service.gov.uk/styles/page-template/                                                                                                                           |
 | Fixture testing guide             | https://frontend.design-system.service.gov.uk/testing-your-html/                                                                                                                     |
 | Example service                   | [example-service.md](example-service.md) — `npm start`                                                                                                                               |
-| Response baseline                 | [`baseline/`](../baseline/) via `applyResponseHeaders` — [frontend-performance.md](frontend-performance.md), [frontend-security.md](frontend-security.md)                            |
-| Upgrade / test / preview commands | `npm run build:styles`, `npm start`, `npm test`, `npm run typecheck`, `npm run verify`; Frontend upgrade per [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md)              |
+| Response baseline                 | [`baseline/policy.json`](../baseline/policy.json) via `internal/baseline` — [frontend-performance.md](frontend-performance.md), [frontend-security.md](frontend-security.md)         |
+| Upgrade / test / preview commands | `npm run build:styles`, `npm start`, `npm test`, `npm run verify`; Frontend upgrade per [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md)                                   |
 
 ## Hard constraints (always)
 
-Same as the language-agnostic template: one Frontend pin, macros over pasted HTML, **backend vs fixture** parity for every fixture (Nunjucks-only is not enough), Sass pipeline with `govuk-overrides.scss` last (never `!important` in service CSS), no SPA UI frameworks, 100% coverage for application code, review https://github.com/alphagov/govuk-frontend/releases/latest before upgrades.
-See [`AGENTS.md`](../AGENTS.md), [guidance-sources.md](guidance-sources.md), [creating-components.md](creating-components.md).
+See [`AGENTS.md`](../AGENTS.md): Frontend fixture parity, no SPA UI frameworks, Sass pipeline (no `!important` in service CSS), baseline headers, Brotli-first compression, 100% coverage, dual-audience docs.

@@ -1,6 +1,6 @@
-# GOV.UK Frontend example (TypeScript)
+# GOV.UK Frontend example (Go)
 
-**TypeScript** specialised line of the GDS-compliant frontend template: **Node + TypeScript** generates HTML; **[GOV.UK Frontend](https://frontend.design-system.service.gov.uk/)** macros (**prefer Nunjucks**) — **no** React/Vue/Angular/Svelte for UI. Official fixtures enable **100% HTML parity** of TypeScript output vs every fixture `html`.
+**Go** specialised line of the GDS-compliant frontend template: **Go** generates HTML natively; **[GOV.UK Frontend](https://frontend.design-system.service.gov.uk/)** macros/`template.njk` are the behaviour reference — **no** React/Vue/Angular/Svelte for UI. Official fixtures enable **100% HTML parity** of Go output vs every fixture `html`. Node is used only to pin `govuk-frontend`, compile Sass, and run shared baseline tests — not to render HTML at request time.
 
 Language-agnostic sibling (shared playbooks): [Nooshu/govuk-frontend-example](https://github.com/Nooshu/govuk-frontend-example). Sync: [`docs/syncing-from-template.md`](docs/syncing-from-template.md).
 
@@ -24,9 +24,9 @@ Dual-audience map: [`docs/documentation-structure.md`](docs/documentation-struct
 ```sh
 npm install
 npm run build:styles    # Sass → dist/stylesheets/application.css
-npm start               # build:styles, then example pages and component demos
-npm test                # baseline, Sass pipeline, fixture parity, and service tests
-npm run verify          # docs + build:styles + typecheck + tests
+npm start               # build:styles, then go run ./cmd/server
+npm test                # baseline, Sass pipeline, Go fixture parity, and service tests
+npm run verify          # docs + build:styles + go vet + tests
 npm run sync:template   # pull shared docs/dotfiles from the agnostic template
 ```
 
