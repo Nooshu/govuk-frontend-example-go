@@ -39,6 +39,8 @@ Prefer, in order:
 2. Frontend’s documented spacing / width / typography override **classes** (`govuk-!-…`) in HTML
 3. Cascade rules in `govuk-overrides.scss` using specificity (compose an `app-` class with a `govuk-` class)
 
+Service preview chrome (for example `.app-component-preview` on `/components/:name`) is allowed here when it only frames developer tooling around fixture output — not parallel GOV.UK UI.
+
 Do not:
 
 - Restyle yellow focus

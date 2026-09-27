@@ -263,8 +263,24 @@ func TestAMatchingRendererReportsFixtureParity(t *testing.T) {
 	t.Parallel()
 	c := newClient(t)
 	page := c.get("/components/back-link?fixture=default")
-	if !strings.Contains(page.Body.String(), "HTML matches the fixture") {
-		t.Fatalf("preview did not report a match:\n%s", page.Body.String())
+	body := page.Body.String()
+	if !strings.Contains(body, "HTML matches the fixture") {
+		t.Fatalf("preview did not report a match:\n%s", body)
+	}
+	if !strings.Contains(body, "Current version: default") {
+		t.Fatalf("preview missing current version heading:\n%s", body)
+	}
+	if !strings.Contains(body, "Versions (Fixtures)") {
+		t.Fatalf("preview missing versions heading:\n%s", body)
+	}
+	if !strings.Contains(body, `aria-current="true"`) {
+		t.Fatalf("preview does not mark the current version with aria-current:\n%s", body)
+	}
+	if !strings.Contains(body, `data-component="tag"`) {
+		t.Fatalf("preview does not tag the current version in the list:\n%s", body)
+	}
+	if !strings.Contains(body, "Component preview") || !strings.Contains(body, "app-component-preview__frame") {
+		t.Fatalf("preview missing component preview frame:\n%s", body)
 	}
 }
 

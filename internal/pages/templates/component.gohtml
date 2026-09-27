@@ -1,23 +1,31 @@
 {{ template "full-width-open" . }}
         <h1 class="govuk-heading-l">{{ .Context.componentTitle }}</h1>
-        <p class="govuk-body">Preview of the Go renderer for this component. Choose a fixture below to compare the Go HTML with the official fixture from GOV.UK Frontend {{ .FrontendVersion }}.</p>
+        <p class="govuk-body">Preview of the Go renderer for this component. Choose a version below to compare the Go HTML with the official fixture from GOV.UK Frontend {{ .FrontendVersion }}.</p>
         <p class="govuk-body"><a class="govuk-link" href="{{ .Context.designSystemUrl }}">{{ .Context.componentTitle }} on the GOV.UK Design System</a></p>
-        <h2 class="govuk-heading-m">Fixtures</h2>
-        <ul class="govuk-list">
-{{- range .Context.fixtures }}
-          <li>
-{{- if .Current }}
-            <strong>{{ .Name }}</strong>
-{{- else }}
-            <a class="govuk-link" href="/components/{{ $.Context.componentName }}?fixture={{ .Name }}">{{ .Name }}</a>
-{{- end }}
-          </li>
-{{- end }}
-        </ul>
+        <h2 class="govuk-heading-m">Current version: {{ .Context.fixtureName }}</h2>
         {{ component "notification-banner" .Context.parity }}
 {{- with .Context.description }}
         {{ component "inset-text" (dict "text" .) }}
 {{- end }}
-        <h2 class="govuk-heading-m">{{ .Context.fixtureName }}</h2>
-        {{ .Context.rendered }}
+        <div class="app-component-preview">
+          <h3 class="govuk-heading-s">Component preview</h3>
+          <div class="app-component-preview__frame">
+            {{ .Context.rendered }}
+          </div>
+        </div>
+        <h2 class="govuk-heading-m">Versions (Fixtures)</h2>
+        <nav aria-label="Versions">
+          <ul class="govuk-list">
+{{- range .Context.fixtures }}
+            <li>
+{{- if .Current }}
+              <strong aria-current="true">{{ .Name }}</strong>
+              {{ component "tag" (dict "text" "Current") }}
+{{- else }}
+              <a class="govuk-link" href="/components/{{ $.Context.componentName }}?fixture={{ .Name }}">{{ .Name }}</a>
+{{- end }}
+            </li>
+{{- end }}
+          </ul>
+        </nav>
 {{- template "columns-close" . }}

@@ -10,7 +10,7 @@ Local server for human parity checks and pattern demos.
 
 - Service start page links to `/components` when demos are enabled (`DEMOS_ENABLED=true`, or `NODE_ENV` is not `production`).
 - `/components` is the component preview homepage: lists components (and patterns via `/examples`) as **links only** — no embedded live demos.
-- A preview surface per component (`/components/:name`) loads official fixtures with ordered option keys and renders via Go `govuk.Render` (same as the parity suite), with a parity banner vs official `html`.
+- A preview surface per component (`/components/:name`) loads official fixtures with ordered option keys and renders via Go `govuk.Render` (same as the parity suite), with a parity banner vs official `html`. The page leads with **Current version: …**, a **Component preview** frame (dotted border) around the rendered HTML, then a **Versions (Fixtures)** list that marks the selected entry with a Current tag.
 - A raw-fixture surface returns an HTML **fragment** for automation.
 - Preview and fixture surfaces are Development / Testing only.
 - Preview responses use the same [`baseline/`](../baseline/) headers as production. On local HTTP, pass `secureTransport: false` so HSTS is not sent.

@@ -1,7 +1,7 @@
 {{ template "two-thirds-open" . }}
         <h1 class="govuk-heading-l">{{ .Heading }}</h1>
         <p class="govuk-body">Every GOV.UK Frontend component in version {{ .FrontendVersion }}. This is the preview homepage: each link opens that component’s own page. Markup is rendered by this service’s Go component library, not by Nunjucks at request time.</p>
-        <p class="govuk-body">This page lists links only — live fixtures appear on each component page.</p>
+        <p class="govuk-body">This page lists links only — each component page shows versions (fixtures) and a live preview.</p>
         <ul class="govuk-list">
 {{- range .Context.components }}
           <li>

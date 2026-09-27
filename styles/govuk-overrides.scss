@@ -21,3 +21,15 @@
 :root {
   --app-stylesheet-layer: govuk-overrides;
 }
+
+// Fixture preview chrome on /components/:name — wraps Go-rendered HTML so it is
+// visually distinct from page chrome (parity banner, version list).
+.app-component-preview {
+  margin-top: govuk-spacing(6);
+  margin-bottom: govuk-spacing(6);
+}
+
+.app-component-preview__frame {
+  border: $govuk-border-width-form-element dotted $govuk-border-colour;
+  padding: govuk-spacing(4);
+}
