@@ -143,6 +143,7 @@ Details: [frontend-performance.md](frontend-performance.md), [frontend-security.
 | Page template reference           | https://design-system.service.gov.uk/styles/page-template/                                                                                                                           |
 | Fixture testing guide             | https://frontend.design-system.service.gov.uk/testing-your-html/                                                                                                                     |
 | Example service                   | [example-service.md](example-service.md) — `npm start`                                                                                                                               |
+| Public demo host                  | [Render.com](https://render.com) via [`render.yaml`](../render.yaml) — [deploying-on-render.md](deploying-on-render.md)                                                              |
 | Response baseline                 | [`baseline/policy.json`](../baseline/policy.json) via `internal/baseline` — [frontend-performance.md](frontend-performance.md), [frontend-security.md](frontend-security.md)         |
 | Upgrade / test / preview commands | `npm run build:styles`, `npm start`, `npm test`, `npm run lint:go`, `npm run verify`; Frontend upgrade per [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md)                |
 

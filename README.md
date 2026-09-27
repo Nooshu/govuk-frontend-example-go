@@ -4,7 +4,7 @@
 
 Language-agnostic sibling (shared playbooks): [Nooshu/govuk-frontend-example](https://github.com/Nooshu/govuk-frontend-example). Sync: [`docs/syncing-from-template.md`](docs/syncing-from-template.md).
 
-**Stack:** [`docs/tech-stack.md`](docs/tech-stack.md). **Why Go:** [`docs/why-go.md`](docs/why-go.md). **Architecture:** [`docs/architecture.md`](docs/architecture.md).
+**Stack:** [`docs/tech-stack.md`](docs/tech-stack.md). **Why Go:** [`docs/why-go.md`](docs/why-go.md). **Architecture:** [`docs/architecture.md`](docs/architecture.md). **Deploy demo:** [`docs/deploying-on-render.md`](docs/deploying-on-render.md).
 
 ## Priorities
 

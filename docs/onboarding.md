@@ -59,6 +59,7 @@ Detail: [architecture.md](architecture.md), [example-service.md](example-service
 | ------- | ---------------------- | ------------------------------------------------------------------------------------- |
 | Styles  | `npm run build:styles` | Compile `styles/` → `dist/stylesheets/application.css` ([styles.md](styles.md))       |
 | Preview | `npm start`            | build:styles, then example service, component catalogue, and fixture previews         |
+| Deploy  | see playbook           | Public demo on Render — [deploying-on-render.md](deploying-on-render.md)              |
 | Test    | `npm test`             | Baseline, Sass pipeline, fixture parity, and service tests. Fails below 100% coverage |
 | Lint Go | `npm run lint:go`      | `go vet`, `go fix -diff`, `staticcheck`                                               |
 | Verify  | `npm run verify`       | Docs, build:styles, `lint:go`, and the full test suite (Go `-race` + 100% coverage)   |

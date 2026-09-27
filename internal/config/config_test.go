@@ -206,6 +206,61 @@ func TestResolvePort(t *testing.T) {
 	}
 }
 
+func TestResolveListenAddr(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		environ map[string]string
+		want    string
+		wantErr bool
+	}{
+		"defaults": {
+			want: ":3000",
+		},
+		"port only": {
+			environ: map[string]string{"PORT": "8080"},
+			want:    ":8080",
+		},
+		"explicit all interfaces": {
+			environ: map[string]string{"HOST": "0.0.0.0", "PORT": "10000"},
+			want:    "0.0.0.0:10000",
+		},
+		"loopback only": {
+			environ: map[string]string{"HOST": "127.0.0.1", "PORT": "3000"},
+			want:    "127.0.0.1:3000",
+		},
+		"invalid port": {
+			environ: map[string]string{"PORT": "nope"},
+			wantErr: true,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			getenv := func(key string) string {
+				if test.environ == nil {
+					return ""
+				}
+				return test.environ[key]
+			}
+			got, err := config.ResolveListenAddr(getenv)
+			if test.wantErr {
+				if err == nil {
+					t.Fatalf("ResolveListenAddr = %q, want an error", got)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("ResolveListenAddr: %v", err)
+			}
+			if got != test.want {
+				t.Errorf("ResolveListenAddr = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
 func workingDir(t *testing.T) string {
 	t.Helper()
 

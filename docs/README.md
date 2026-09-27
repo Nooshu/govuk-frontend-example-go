@@ -26,6 +26,7 @@ How we keep docs dual-purpose: [documentation-structure.md](documentation-struct
 | [tech-stack.md](tech-stack.md)                           | Go + Frontend (Nunjucks as reference); Node tooling pins     |
 | [npm-security.md](npm-security.md)                       | Lockfile, ignore-scripts, audit, Dependabot for npm tooling  |
 | [example-service.md](example-service.md)                 | Rod licence example, `npm start`, fixture previews           |
+| [deploying-on-render.md](deploying-on-render.md)         | Host the demo on Render.com (Blueprint + step-by-step)       |
 | [syncing-from-template.md](syncing-from-template.md)     | Pull shared docs/dotfiles from govuk-frontend-example        |
 | [guidance-sources.md](guidance-sources.md)               | Official GDS / Service Manual / Frontend URLs                |
 | [documentation-structure.md](documentation-structure.md) | Dual-audience docs + language practice rules                 |

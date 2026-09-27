@@ -7,11 +7,13 @@ Pages are **Go**. Component HTML comes from **native Go renderers** that track G
 ## Run it
 
 ```sh
-npm install
+npm ci
 npm start
 ```
 
-Opens at <http://127.0.0.1:3000>. Set `PORT` to use another port.
+Opens at <http://127.0.0.1:3000> (server listens on all interfaces by default; use `HOST=127.0.0.1` to bind loopback only). Set `PORT` to use another port.
+
+Public demo hosting: [deploying-on-render.md](deploying-on-render.md).
 
 `NODE_ENV=production` hides the component catalogue and the extra example pages. The licence journey stays available.
 

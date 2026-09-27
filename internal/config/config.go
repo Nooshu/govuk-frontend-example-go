@@ -5,6 +5,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -130,6 +131,7 @@ func DemosEnabled(getenv func(string) string) bool {
 //
 // It returns [DefaultPort] when PORT is unset or empty, and an error when PORT is set to
 // something that is not a port number, so a typo fails loudly instead of silently binding 3000.
+// Cloud hosts such as Render inject PORT automatically.
 func ResolvePort(getenv func(string) string) (int, error) {
 	raw := getenv("PORT")
 	if raw == "" {
@@ -140,6 +142,24 @@ func ResolvePort(getenv func(string) string) (int, error) {
 		return 0, fmt.Errorf("config: invalid PORT: %s", raw)
 	}
 	return port, nil
+}
+
+// ResolveListenAddr returns the TCP address for [net.Listen].
+//
+// PORT chooses the port ([DefaultPort] when unset). HOST chooses the interface:
+//   - unset or empty — all interfaces (`:PORT`), required on Render and similar hosts
+//   - `127.0.0.1` — local-only binding for a locked-down laptop
+//   - `0.0.0.0` — explicit all-interfaces bind
+func ResolveListenAddr(getenv func(string) string) (string, error) {
+	port, err := ResolvePort(getenv)
+	if err != nil {
+		return "", err
+	}
+	host := getenv("HOST")
+	if host == "" {
+		return fmt.Sprintf(":%d", port), nil
+	}
+	return net.JoinHostPort(host, strconv.Itoa(port)), nil
 }
 
 func isRoot(dir string) bool {

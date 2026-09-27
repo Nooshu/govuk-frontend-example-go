@@ -1,0 +1,21 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Step-by-step: docs/deploying-on-render.md
+#
+# Native Go runtime includes Node/npm for the Frontend pin and Sass build.
+# Sessions are in-memory (fine for a public example; not multi-instance durable).
+
+services:
+  - type: web
+    name: govuk-frontend-example-go
+    runtime: go
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /health
+    buildCommand: ./scripts/render-build.sh
+    startCommand: ./bin/server
+    envVars:
+      # Leave NODE_ENV unset so the component catalogue and demos stay visible for the blog example.
+      # Set NODE_ENV=production in the Render dashboard if you want demos off.
+      - key: NODE_VERSION
+        value: "22"

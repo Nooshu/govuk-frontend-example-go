@@ -4,9 +4,10 @@
 // node_modules as data (script, assets, fixtures), the stylesheet is compiled ahead of time by
 // the Sass pipeline, and component HTML comes from the Go port of Frontend's macros.
 //
-// Start it with `npm start`, which compiles the stylesheet first. PORT chooses the port and
-// defaults to 3000; setting NODE_ENV=production turns off the component catalogue and the
-// example pages.
+// Start it with `npm start`, which compiles the stylesheet first. PORT chooses the port
+// (default 3000). HOST selects the bind address (empty = all interfaces, for Render and other
+// cloud hosts; use HOST=127.0.0.1 for local-only). NODE_ENV=production turns off the component
+// catalogue and the example pages.
 package main
 
 import (
@@ -42,7 +43,7 @@ func run(logger *slog.Logger) error {
 	if err != nil {
 		return err
 	}
-	port, err := config.ResolvePort(os.Getenv)
+	addr, err := config.ResolveListenAddr(os.Getenv)
 	if err != nil {
 		return err
 	}
@@ -66,12 +67,12 @@ func run(logger *slog.Logger) error {
 		ErrorLog:          slog.NewLogLogger(logger.Handler(), slog.LevelWarn),
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		return fmt.Errorf("listening on port %d: %w", port, err)
+		return fmt.Errorf("listening on %s: %w", addr, err)
 	}
 	logger.Info("example service started",
-		"url", fmt.Sprintf("http://%s", listener.Addr()),
+		"addr", listener.Addr().String(),
 		"govukFrontend", cfg.FrontendVersion,
 		"demos", config.DemosEnabled(os.Getenv),
 	)

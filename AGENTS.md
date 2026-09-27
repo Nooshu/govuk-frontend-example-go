@@ -85,6 +85,7 @@ Using this repo does **not** make a service assessment-ready. See [`docs/service
 | Layout / chrome                     | [`docs/layout-chrome.md`](docs/layout-chrome.md)                       |
 | Fixture / parity testing            | [`docs/testing-components.md`](docs/testing-components.md)             |
 | Example service                     | [`docs/example-service.md`](docs/example-service.md)                   |
+| Deploy on Render                    | [`docs/deploying-on-render.md`](docs/deploying-on-render.md)           |
 | Page shell                          | [`docs/page-shell.md`](docs/page-shell.md)                             |
 | Frontend performance                | [`docs/frontend-performance.md`](docs/frontend-performance.md)         |
 | Frontend security                   | [`docs/frontend-security.md`](docs/frontend-security.md)               |
