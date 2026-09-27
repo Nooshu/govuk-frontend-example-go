@@ -2,8 +2,6 @@ package app_test
 
 import (
 	"crypto/tls"
-	"encoding/json"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -18,7 +16,6 @@ import (
 	"github.com/Nooshu/govuk-frontend-example-go/internal/app"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/components"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/config"
-	"github.com/Nooshu/govuk-frontend-example-go/internal/render"
 )
 
 func TestEveryQuestionPageRenders(t *testing.T) {
@@ -264,46 +261,69 @@ func TestNewRejectsABrokenSetup(t *testing.T) {
 
 func TestAMatchingRendererReportsFixtureParity(t *testing.T) {
 	t.Parallel()
-	cfg, err := config.Load()
-	if err != nil {
-		t.Fatal(err)
-	}
-	fixture, ok := components.NewLibrary(cfg.ComponentsRoot).Fixture("back-link", "default")
-	if !ok {
-		t.Fatal("default back-link fixture missing")
-	}
-	c := newClient(t, func(options *app.Options) {
-		options.Components = render.Func(func(name string, params map[string]any) (string, error) {
-			if name == "back-link" {
-				return fixture.HTML, nil
-			}
-			encoded, err := json.Marshal(params)
-			if err != nil {
-				return "", err
-			}
-			return fmt.Sprintf("<div data-component=%q>%s</div>", name, encoded), nil
-		})
-	})
+	c := newClient(t)
 	page := c.get("/components/back-link?fixture=default")
 	if !strings.Contains(page.Body.String(), "HTML matches the fixture") {
 		t.Fatalf("preview did not report a match:\n%s", page.Body.String())
 	}
 }
 
-func TestComponentRenderFailureShowsTheProblemPage(t *testing.T) {
+func TestEveryComponentPreviewMatchesItsDefaultFixture(t *testing.T) {
 	t.Parallel()
-	c := newClient(t, func(options *app.Options) {
-		options.Components = render.Func(func(name string, _ map[string]any) (string, error) {
-			if name == "accordion" {
-				return "", io.EOF
-			}
-			return "<div></div>", nil
-		})
-		options.Logger = slog.New(slog.NewTextHandler(io.Discard, nil))
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	library := components.NewLibrary(cfg.ComponentsRoot)
+	names, err := library.Names()
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := newClient(t)
+	for _, name := range names {
+		page := c.get("/components/" + name)
+		if page.Code != http.StatusOK {
+			t.Errorf("GET /components/%s = %d, want 200", name, page.Code)
+			continue
+		}
+		if strings.Contains(page.Body.String(), "HTML does not match the fixture") {
+			t.Errorf("/components/%s reports a fixture mismatch", name)
+		}
+		if !strings.Contains(page.Body.String(), "HTML matches the fixture") {
+			t.Errorf("/components/%s missing parity success banner", name)
+		}
+	}
+}
+
+func TestComponentFixtureLoadFailureShowsTheProblemPage(t *testing.T) {
+	t.Parallel()
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	componentDir := filepath.Join(dir, "accordion")
+	if err := os.Mkdir(componentDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(componentDir, "fixtures.json"), []byte(`{`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	broken := *cfg
+	broken.ComponentsRoot = dir
+	handler, err := app.New(app.Options{
+		Config:       &broken,
+		Components:   stubComponents(),
+		DemosEnabled: true,
+		Logger:       slog.New(slog.NewTextHandler(io.Discard, nil)),
 	})
-	reply := c.get("/components/accordion")
-	if reply.Code != http.StatusInternalServerError || !strings.Contains(reply.Body.String(), "problem with the service") {
-		t.Fatalf("render failure = %d", reply.Code)
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/components/accordion", nil))
+	if recorder.Code != http.StatusInternalServerError || !strings.Contains(recorder.Body.String(), "problem with the service") {
+		t.Fatalf("corrupt fixtures = %d %s", recorder.Code, recorder.Body.String())
 	}
 }
 

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/Nooshu/govuk-frontend-example-go/internal/baseline"
-	"github.com/Nooshu/govuk-frontend-example-go/internal/components"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/config"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/httpx"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/pages"
@@ -432,14 +431,6 @@ func pointer[T any](value T) *T { return &value }
 type fixtureLink struct {
 	Name    string
 	Current bool
-}
-
-func fixtureLinks(fixtures []components.Fixture, selected string) []fixtureLink {
-	links := make([]fixtureLink, 0, len(fixtures))
-	for _, fixture := range fixtures {
-		links = append(links, fixtureLink{Name: fixture.Name, Current: fixture.Name == selected})
-	}
-	return links
 }
 
 func htmlOf(value string) template.HTML { return template.HTML(value) }

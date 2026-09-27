@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Nooshu/govuk-frontend-example-go/internal/components"
+	"github.com/Nooshu/govuk-frontend-example-go/internal/govuk"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/pages"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/service"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/session"
@@ -305,21 +306,30 @@ func (a *App) componentsView() (pages.View, error) {
 	}, nil
 }
 
+// renderComponentFixture is the Go port used by component previews. Tests replace it to
+// exercise the error path without inventing a broken GOV.UK Frontend component.
+var renderComponentFixture = govuk.Render
+
 // componentView previews one fixture and says whether the HTML this service renders matches the
 // official fixture. It returns nil when the component or the named fixture does not exist.
+//
+// Fixtures are loaded and rendered through [govuk.LoadFixtures] and [govuk.Render] — the same
+// path as the parity suite — so attribute key order and JSON number spelling are preserved.
+// Going through map[string]any would re-sort keys and turn numbers into float64, which falsely
+// reports "HTML does not match the fixture" on the preview pages.
 func (a *App) componentView(name, requested string) (*pages.View, error) {
 	if !a.library.Has(name) {
 		return nil, nil
 	}
-	loaded, err := a.library.Load(name)
+	set, err := govuk.LoadFixtures(a.config.ComponentsRoot, name)
 	if err != nil {
 		return nil, err
 	}
-	fixture, ok := components.SelectFixture(loaded.Fixtures, requested)
+	fixture, ok := selectGovukFixture(set.Fixtures, requested)
 	if !ok {
 		return nil, nil
 	}
-	rendered, err := a.components.Render(name, fixture.Options)
+	rendered, err := renderComponentFixture(name, fixture.Options)
 	if err != nil {
 		return nil, err
 	}
@@ -337,9 +347,41 @@ func (a *App) componentView(name, requested string) (*pages.View, error) {
 			"fixtureName":     fixture.Name,
 			"rendered":        htmlOf(rendered),
 			"parity":          components.ParityBanner(rendered == fixture.HTML),
-			"fixtures":        fixtureLinks(loaded.Fixtures, fixture.Name),
+			"fixtures":        govukFixtureLinks(set.Fixtures, fixture.Name),
 		},
 	}, nil
+}
+
+// selectGovukFixture chooses the fixture to preview from an ordered fixture set.
+//
+// A named fixture is used when it exists; otherwise the first visible fixture, falling back to
+// the first fixture of all when every one is hidden.
+func selectGovukFixture(fixtures []govuk.Fixture, requested string) (govuk.Fixture, bool) {
+	if requested != "" {
+		for _, fixture := range fixtures {
+			if fixture.Name == requested {
+				return fixture, true
+			}
+		}
+		return govuk.Fixture{}, false
+	}
+	for _, fixture := range fixtures {
+		if !fixture.Hidden {
+			return fixture, true
+		}
+	}
+	if len(fixtures) > 0 {
+		return fixtures[0], true
+	}
+	return govuk.Fixture{}, false
+}
+
+func govukFixtureLinks(fixtures []govuk.Fixture, selected string) []fixtureLink {
+	links := make([]fixtureLink, 0, len(fixtures))
+	for _, fixture := range fixtures {
+		links = append(links, fixtureLink{Name: fixture.Name, Current: fixture.Name == selected})
+	}
+	return links
 }
 
 func examplesView() pages.View {

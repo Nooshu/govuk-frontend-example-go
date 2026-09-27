@@ -16,6 +16,7 @@ import (
 	"github.com/Nooshu/govuk-frontend-example-go/internal/baseline"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/components"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/config"
+	"github.com/Nooshu/govuk-frontend-example-go/internal/govuk"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/httpx"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/pages"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/render"
@@ -214,6 +215,9 @@ func TestDefaultsAndFailurePaths(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(dir, "button", "fixtures.json"), []byte(`{"fixtures":`), 0o644); err != nil {
 			t.Fatal(err)
 		}
+		cfg := *application.config
+		cfg.ComponentsRoot = dir
+		application.config = &cfg
 		application.library = components.NewLibrary(dir)
 		application.demosEnabled = true
 		application.mux = application.routes()
@@ -221,6 +225,22 @@ func TestDefaultsAndFailurePaths(t *testing.T) {
 		application.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/components/button", nil))
 		if recorder.Code != http.StatusInternalServerError {
 			t.Fatalf("bad fixtures = %d", recorder.Code)
+		}
+	})
+
+	t.Run("a fixture render failure is a problem page", func(t *testing.T) {
+		application := newEdgeApp(t, func(string, map[string]any) (string, error) { return "<div></div>", nil })
+		previous := renderComponentFixture
+		renderComponentFixture = func(string, *govuk.Params) (string, error) {
+			return "", errors.New("render failed")
+		}
+		t.Cleanup(func() { renderComponentFixture = previous })
+		application.demosEnabled = true
+		application.mux = application.routes()
+		recorder := httptest.NewRecorder()
+		application.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/components/button", nil))
+		if recorder.Code != http.StatusInternalServerError {
+			t.Fatalf("render failure = %d", recorder.Code)
 		}
 	})
 

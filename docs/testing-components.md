@@ -67,7 +67,9 @@ Today, before a wrapper language exists, the shared baseline and Sass pipeline a
 
 ## Preview as human parity browser
 
-Previews render **one selected fixture**, show **library/backend HTML** beside official fixture `html`, and display a parity success/fail banner. Details: [preview-server.md](preview-server.md).
+Previews load fixtures with [`govuk.LoadFixtures`](../internal/govuk/fixtures.go) and render with [`govuk.Render`](../internal/govuk/render.go) — the **same path** as the parity suite — so attribute key order and JSON number spelling match. Do not feed fixture options through `map[string]any` for parity checks: that re-sorts keys and widens integers to float64, which falsely reports mismatches.
+
+Previews render **one selected fixture**, show **library/backend HTML**, and display a parity success/fail banner. Details: [preview-server.md](preview-server.md).
 
 ## Adding tests for a new component
 

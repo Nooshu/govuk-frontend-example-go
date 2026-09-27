@@ -16,9 +16,10 @@ import (
 // New returns the [render.Renderer] backed by GOV.UK Frontend's components.
 //
 // It adapts the plain option maps pages build into the ordered [govuk.Params] the component
-// port takes. Keys are converted in sorted order, which is safe because the only option whose
-// key order reaches the HTML is `attributes`, and pages in this service set attributes through
-// named component options instead.
+// port takes. Keys are converted in sorted order so page HTML is deterministic. That is safe
+// for service pages, which set attributes through named component options. Fixture previews
+// must not use this path: they call [govuk.LoadFixtures] and [govuk.Render] directly so
+// attribute key order and JSON number spelling stay identical to the parity suite.
 func New() render.Renderer {
 	return render.Func(func(name string, params map[string]any) (string, error) {
 		return govuk.Render(name, toParams(params))
