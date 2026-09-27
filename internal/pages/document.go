@@ -128,6 +128,9 @@ type pageData struct {
 	ReturnPath     string
 	StylesheetHref string
 	AppModuleHref  string
+	// HomepageURL is where the GOV.UK logo in the header links. It is this service's start
+	// page ("/" or "/cy"), not https://www.gov.uk — clickers stay in the example journey.
+	HomepageURL string
 	// JSEnabledSnippet is typed as JavaScript so html/template writes it verbatim.
 	JSEnabledSnippet template.JS
 
@@ -175,12 +178,17 @@ func (r *Renderer) Render(view View, current *session.Session, currentPath strin
 	if err != nil {
 		return "", err
 	}
+	homepageURL := "/"
+	if lang == LangCY {
+		homepageURL = "/cy"
+	}
 	assets := r.options.Assets()
 	data := &pageData{
 		Heading:           view.Heading,
 		PageTitle:         htmlutil.PageTitle(view.Heading, serviceName, view.HasErrors),
 		HTMLLang:          lang,
 		SkipLinkText:      skipLinkText,
+		HomepageURL:       homepageURL,
 		MainClasses:       view.MainClasses,
 		CSRF:              current.CSRF,
 		ReturnPath:        htmlutil.SafeLocalPath(currentPath),

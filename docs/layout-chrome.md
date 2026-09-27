@@ -4,13 +4,13 @@ Every page must use the shared page template / layout — not a second full HTML
 
 ## Required pieces
 
-| Piece              | Component          | Notes                                                                                                                             |
-| ------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| Skip link          | Skip link          | First focusable control; target `#content` (or matching `main` id)                                                                |
-| Masthead           | GOV.UK header      | Blue brand header; full logotype SVG (`fill="currentcolor"`, `<title>GOV.UK</title>`); `data-module="govuk-header"`               |
-| Service name / nav | Service navigation | **Under** the masthead, inside `<header class="govuk-template__header">` — not inside the blue `govuk-header` block (Frontend 6+) |
-| Footer             | GOV.UK footer      | OGL licence text + Crown copyright; `govuk-footer`                                                                                |
-| Pattern demos      | Back link          | Shared “Back to patterns” in before-content                                                                                       |
+| Piece              | Component          | Notes                                                                                                                                                                                                         |
+| ------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Skip link          | Skip link          | First focusable control; target `#content` (or matching `main` id)                                                                                                                                            |
+| Masthead           | GOV.UK header      | Blue brand header; full logotype SVG (`fill="currentcolor"`, `<title>GOV.UK</title>`); `data-module="govuk-header"`; logo `homepageUrl` is this service’s start page (`/` or `/cy`), not `https://www.gov.uk` |
+| Service name / nav | Service navigation | **Under** the masthead, inside `<header class="govuk-template__header">` — not inside the blue `govuk-header` block (Frontend 6+)                                                                             |
+| Footer             | GOV.UK footer      | OGL licence text + Crown copyright; `govuk-footer`                                                                                                                                                            |
+| Pattern demos      | Back link          | Shared “Back to patterns” in before-content                                                                                                                                                                   |
 
 Prefer static/shared chrome models (one skip link, header, footer definition) rather than rebuilding per request.
 
@@ -19,6 +19,7 @@ Prefer static/shared chrome models (one skip link, header, footer definition) ra
 - Match markup from the pinned Frontend header/footer/page-template fixtures.
 - Keep logotype SVG path data complete.
 - Put the service name in service navigation.
+- Pass `homepageUrl` on the header so the GOV.UK logo returns to this service’s homepage (same path as the service name link). Do not leave the Frontend default (`//gov.uk`).
 
 ## Do not
 

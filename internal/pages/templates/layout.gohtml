@@ -32,7 +32,7 @@ GOV.UK Frontend rather than written here.
     </form>
 {{- end }}
     <header class="govuk-template__header">
-      {{ component "header" nil }}
+      {{ component "header" (dict "homepageUrl" .HomepageURL) }}
       {{ component "service-navigation" .ServiceNavigation }}
     </header>
     <div class="govuk-width-container">

@@ -46,7 +46,8 @@ The `js-enabled` snippet must be that exact one line. The CSP hash in [`baseline
 
 - Masthead is **blue** with white logotype (`fill="currentcolor"`).
 - Homepage link class: `govuk-header__homepage-link` (not `govuk-header__link--homepage`).
-- Service name lives in `govuk-service-navigation` under the masthead.
+- Logo `homepageUrl` is this service’s start page (`/` in English, `/cy` in Welsh) — not the GOV.UK public homepage. Layout passes it via `pageData.HomepageURL`.
+- Service name lives in `govuk-service-navigation` under the masthead (and uses the same home path).
 - Copy from the pinned Frontend templates/fixtures — not outdated blog examples.
 
 ## Layout patterns
