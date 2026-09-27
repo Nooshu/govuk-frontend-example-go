@@ -34,6 +34,9 @@ func main() {
 	}
 }
 
+// run starts the HTTP server and blocks until SIGINT/SIGTERM or a serve error.
+//
+// Timeouts bound slow clients; Shutdown drains in-flight requests for up to 10s.
 func run(logger *slog.Logger) error {
 	cfg, err := config.Load()
 	if err != nil {

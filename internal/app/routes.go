@@ -1,5 +1,7 @@
 package app
 
+// ServeMux route registration for the service, assets, and demos.
+
 import (
 	"crypto/subtle"
 	"errors"

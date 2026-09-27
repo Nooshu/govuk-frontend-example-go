@@ -40,8 +40,9 @@ Details: [`docs/priorities.md`](docs/priorities.md).
 | **AI agents (this file)**   | Keep reading; skill: [`.cursor/skills/gds-compliant-frontend/SKILL.md`](.cursor/skills/gds-compliant-frontend/SKILL.md) |
 | Dual-audience docs map      | [`docs/documentation-structure.md`](docs/documentation-structure.md), [`docs/README.md`](docs/README.md)                |
 | Project purpose             | [`docs/project-purpose.md`](docs/project-purpose.md)                                                                    |
+| Why Go / architecture       | [`docs/why-go.md`](docs/why-go.md), [`docs/architecture.md`](docs/architecture.md)                                      |
 | Official guidance URLs      | [`docs/guidance-sources.md`](docs/guidance-sources.md)                                                                  |
-| Stack / language (Go)       | [`docs/tech-stack.md`](docs/tech-stack.md)                                                                              |
+| Stack / language (Go)       | [`docs/tech-stack.md`](docs/tech-stack.md), [`docs/go-conventions.md`](docs/go-conventions.md)                          |
 | Sync from agnostic template | [`docs/syncing-from-template.md`](docs/syncing-from-template.md)                                                        |
 
 **Language rule:** This line is **Go**. **Every** feature and code change must follow Go’s **latest** best practices (modules, `internal/`, tests, `npm run lint:go`, packaging) as recorded in [`docs/tech-stack.md`](docs/tech-stack.md) — without weakening the non-negotiables below. Prefer the standard library (`net/http`, `html/template`, `compress/gzip`, `crypto/*`, `log/slog`, `encoding/json/v2`) and only well-known deps where stdlib lacks a feature (e.g. `andybalholm/brotli`). Generate HTML **natively in Go**; do not call Node to render.
@@ -92,6 +93,9 @@ Using this repo does **not** make a service assessment-ready. See [`docs/service
 | Design tokens (colour, type, space) | [`docs/design-tokens.md`](docs/design-tokens.md)                       |
 | Styles / Sass cascade               | [`docs/styles.md`](docs/styles.md)                                     |
 | Dual-audience documentation         | [`docs/documentation-structure.md`](docs/documentation-structure.md)   |
+| Why Go                              | [`docs/why-go.md`](docs/why-go.md)                                     |
+| Architecture                        | [`docs/architecture.md`](docs/architecture.md)                         |
+| Go conventions (comments, lint)     | [`docs/go-conventions.md`](docs/go-conventions.md)                     |
 | Guidance sources                    | [`docs/guidance-sources.md`](docs/guidance-sources.md)                 |
 | Authoritative links                 | [`docs/authoritative-references.md`](docs/authoritative-references.md) |
 
@@ -113,7 +117,7 @@ Before finishing a page change:
 - [ ] Backend parity suite green: Go `Render` HTML ≡ every fixture `html` (not only Nunjucks ≡ fixtures)
 - [ ] Fixture parity still green for any touched components
 - [ ] Dual-audience docs updated (humans in `/docs` or CONTRIBUTING; agents via `AGENTS.md` / skill / playbook links if contracts changed)
-- [ ] Code follows Go’s latest best practices ([`docs/tech-stack.md`](docs/tech-stack.md))
+- [ ] Code follows Go’s latest best practices ([`docs/tech-stack.md`](docs/tech-stack.md), [`docs/go-conventions.md`](docs/go-conventions.md))
 
 ## Watching upstream
 

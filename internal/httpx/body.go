@@ -1,6 +1,6 @@
-// Package httpx holds the transport concerns that sit either side of a page: reading form
-// posts, reading cookies, serving static assets, and compressing responses.
 package httpx
+
+// Bounded body reads for urlencoded and multipart form posts.
 
 import (
 	"errors"

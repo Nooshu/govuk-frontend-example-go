@@ -1,5 +1,7 @@
 package service
 
+// Build GOV.UK component option maps for each question page.
+
 import (
 	"maps"
 	"time"

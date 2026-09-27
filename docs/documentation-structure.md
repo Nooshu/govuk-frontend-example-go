@@ -20,7 +20,7 @@ Canonical agent index: [`AGENTS.md`](../AGENTS.md). Doc map: [`README.md`](READM
 | ------------------------------------------------------- | --------------------------------------- |
 | “Start here”, “Repo map”, “Troubleshooting”             | Human onboarding                        |
 | “Non-negotiables”, “Playbook”, “Do / don’t”, checklists | Agent-oriented (still useful to humans) |
-| “Stack note”, “TypeScript conventions”                  | Applies to both; follow tech-stack.md   |
+| “Stack note”, “Go conventions”                          | Applies to both; follow tech-stack.md   |
 
 ## Mandatory documentation for every change
 
@@ -48,10 +48,10 @@ When editing docs:
 
 ## Latest language best practices
 
-Applies to this TypeScript line **and** to the shared Node tooling synced from the agnostic template:
+Applies to this **Go** line **and** to the shared Node tooling synced from the agnostic template:
 
-1. This line records **TypeScript on Node** in [tech-stack.md](tech-stack.md). Follow **that language’s latest** layout, typing, module, test, packaging, and CI norms for **all** new feature work and refactors.
-2. Prefer official or widely accepted current guides for the pinned major versions (TypeScript 7, Node 22+) over outdated tutorials.
+1. This line records **Go** in [tech-stack.md](tech-stack.md) and [go-conventions.md](go-conventions.md). Follow **current Go** layout, modules, tests, packaging, and CI norms for **all** new feature work and refactors.
+2. Prefer official or widely accepted current guides for the pinned major versions (Go 1.27+, Node 22+ for tooling) over outdated tutorials.
 3. Shared Node tooling (`baseline/`, Sass scripts, fixture helpers) already uses current ESM practice; keep it that way.
 4. Do not adopt a “best practice” that conflicts with Frontend macros, fixture parity, the performance/security baseline, or the Sass cascade.
 5. When best practices change upstream, update tech-stack notes and code in focused commits — documentation and implementation together.
@@ -62,9 +62,10 @@ Applies to this TypeScript line **and** to the shared Node tooling synced from t
 
 1. [../README.md](../README.md)
 2. [project-purpose.md](project-purpose.md)
-3. [onboarding.md](onboarding.md)
-4. [tech-stack.md](tech-stack.md)
-5. [../CONTRIBUTING.md](../CONTRIBUTING.md)
+3. [why-go.md](why-go.md) and [architecture.md](architecture.md)
+4. [onboarding.md](onboarding.md)
+5. [tech-stack.md](tech-stack.md) / [go-conventions.md](go-conventions.md)
+6. [../CONTRIBUTING.md](../CONTRIBUTING.md)
 
 **Agent (every session)**
 

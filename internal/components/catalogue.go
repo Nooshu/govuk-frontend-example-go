@@ -1,5 +1,7 @@
 package components
 
+// Catalogue copy and listing for the local demo pages.
+
 const designSystem = "https://design-system.service.gov.uk/components"
 
 // Info is the catalogue entry for one GOV.UK Frontend component.

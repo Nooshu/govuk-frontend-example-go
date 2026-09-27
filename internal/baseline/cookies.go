@@ -1,5 +1,7 @@
 package baseline
 
+// Cookie defaults and Set-Cookie serialisation against policy.
+
 import (
 	"fmt"
 	"net/http"

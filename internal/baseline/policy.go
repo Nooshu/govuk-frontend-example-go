@@ -1,11 +1,6 @@
-// Package baseline applies the shared response policy from baseline/policy.json.
-//
-// policy.json is synced from the language-agnostic template and is the single source of OWASP
-// header values, CSP directives, cache kinds, cookie defaults, and the hash of the js-enabled
-// snippet GOV.UK Frontend's page template inlines. The Node modules next to it serve the shared
-// test suite; this package is the Go reading of the same file, so the Go server never shells out
-// to Node to answer a request.
 package baseline
+
+// Load and validate baseline/policy.json; ordered CSP directives.
 
 import (
 	"bytes"

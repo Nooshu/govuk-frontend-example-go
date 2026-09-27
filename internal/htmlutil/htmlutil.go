@@ -1,5 +1,6 @@
-// Package htmlutil holds the small text helpers shared by the page shell and the service pages.
 package htmlutil
+
+// Shared Escape and Join helpers for page text.
 
 import "strings"
 

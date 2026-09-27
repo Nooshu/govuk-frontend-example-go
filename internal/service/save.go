@@ -1,5 +1,7 @@
 package service
 
+// Persist validated answers onto an Application.
+
 // Each Save… function returns a new [Application] rather than mutating the caller's copy, and
 // marks the step complete only when validation passed. Saving invalid answers keeps what the
 // applicant typed so the question can be shown back to them with their values retained.

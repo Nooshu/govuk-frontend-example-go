@@ -1,5 +1,7 @@
 package app
 
+// Buffered write path: ETag, baseline headers, compression, cookies.
+
 import (
 	"net/http"
 	"os"

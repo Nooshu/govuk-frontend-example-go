@@ -1,5 +1,7 @@
 package govuk
 
+// Ports for form components (input, radios, date-input, …).
+
 import (
 	"strconv"
 	"strings"

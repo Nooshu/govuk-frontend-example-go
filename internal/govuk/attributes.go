@@ -1,5 +1,7 @@
 package govuk
 
+// Attribute and i18n helpers matching Nunjucks macros.
+
 import "strings"
 
 // Attributes renders the `attributes` option the way GOV.UK Frontend's private

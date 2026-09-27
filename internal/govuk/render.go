@@ -1,5 +1,7 @@
 package govuk
 
+// Renderer registry and Render entrypoint for all components.
+
 import (
 	"fmt"
 	"sort"

@@ -1,5 +1,7 @@
 package govuk
 
+// Nunjucks-parity filters: escape, indent, length, and related helpers.
+
 import (
 	"encoding/json"
 	"strconv"

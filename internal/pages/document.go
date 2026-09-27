@@ -1,14 +1,6 @@
-// Package pages composes the GOV.UK page template in Go.
-//
-// Every block of GOV.UK user interface on a page — header, footer, phase banner, inputs, task
-// list — is asked for by name from a [render.Renderer], which returns the HTML GOV.UK Frontend
-// produces. This package only supplies the structure the page template defines around them:
-// the document head, the skip link, the width container, the main landmark, and the footer.
-//
-// Nothing here spawns Node. The layout mirrors dist/govuk/template.njk so the Go output matches
-// what Frontend's own page template would emit, including the js-enabled snippet whose hash is
-// pinned in baseline/policy.json.
 package pages
+
+// Document model and html/template page shell renderer.
 
 import (
 	"bytes"

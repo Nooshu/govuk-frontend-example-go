@@ -24,7 +24,7 @@ The **Go** line of the GDS-compliant frontend template:
 
 Priorities (in order): frontend web performance → frontend security → reduced maintenance → accessibility → inclusive design. See [`docs/priorities.md`](../../../docs/priorities.md).
 
-Detail for humans: [`docs/project-purpose.md`](../../../docs/project-purpose.md), [`docs/onboarding.md`](../../../docs/onboarding.md), [`CONTRIBUTING.md`](../../../CONTRIBUTING.md). Dual-audience map: [`docs/documentation-structure.md`](../../../docs/documentation-structure.md). Playbooks: [`AGENTS.md`](../../../AGENTS.md). Stack: [`docs/tech-stack.md`](../../../docs/tech-stack.md).
+Detail for humans: [`docs/project-purpose.md`](../../../docs/project-purpose.md), [`docs/why-go.md`](../../../docs/why-go.md), [`docs/architecture.md`](../../../docs/architecture.md), [`docs/onboarding.md`](../../../docs/onboarding.md), [`CONTRIBUTING.md`](../../../CONTRIBUTING.md). Dual-audience map: [`docs/documentation-structure.md`](../../../docs/documentation-structure.md). Playbooks: [`AGENTS.md`](../../../AGENTS.md). Stack: [`docs/tech-stack.md`](../../../docs/tech-stack.md). Conventions: [`docs/go-conventions.md`](../../../docs/go-conventions.md).
 
 ## Non-negotiable stack shape
 
@@ -68,5 +68,5 @@ Local index: [`docs/guidance-sources.md`](../../../docs/guidance-sources.md).
 5. HTTP responses use [`baseline/`](../../../baseline/) through `internal/baseline`. Compress with Brotli (`br`); Gzip is only the fallback when the client does not advertise `br`. Playbooks: [`docs/frontend-performance.md`](../../../docs/frontend-performance.md), [`docs/frontend-security.md`](../../../docs/frontend-security.md).
 6. Compile CSS via Sass (`styles/application.scss` → Frontend `@use` → `govuk-overrides.scss` last). Never use `!important` in service CSS. Playbook: [`docs/styles.md`](../../../docs/styles.md).
 7. Document every change for **humans and agents** in the same change set ([`docs/documentation-structure.md`](../../../docs/documentation-structure.md)).
-8. Follow current Go best practices (`go test`, `npm run lint:go`, `gofmt`, table-driven tests; see [`docs/tech-stack.md`](../../../docs/tech-stack.md)). Shared Node tooling stays ESM.
+8. Follow current Go best practices (`go test`, `npm run lint:go`, `gofmt`, table-driven tests, package/exported comments; see [`docs/tech-stack.md`](../../../docs/tech-stack.md) and [`docs/go-conventions.md`](../../../docs/go-conventions.md)). Shared Node tooling stays ESM.
 9. When a coherent piece of work is finished, split it into focused commits with comprehensive messages.

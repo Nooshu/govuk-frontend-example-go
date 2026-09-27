@@ -2,6 +2,8 @@
 
 **Status: Go** — this is the Go specialised line of [govuk-frontend-example](https://github.com/Nooshu/govuk-frontend-example).
 
+Why this language: [why-go.md](why-go.md). Package map: [architecture.md](architecture.md). Comment and lint norms: [go-conventions.md](go-conventions.md).
+
 Sync shared docs/dotfiles from the language-agnostic template: [syncing-from-template.md](syncing-from-template.md).
 
 ## Two layers

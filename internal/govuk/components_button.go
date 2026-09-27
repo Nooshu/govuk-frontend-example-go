@@ -1,5 +1,7 @@
 package govuk
 
+// Ports for button-related Frontend components.
+
 import "strings"
 
 // startIcon is the arrow GOV.UK Frontend appends to a start button. The leading newline is

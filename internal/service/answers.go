@@ -1,5 +1,7 @@
 package service
 
+// Presentation helpers for check-answers and confirmation.
+
 import (
 	"slices"
 	"strconv"

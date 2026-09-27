@@ -1,11 +1,6 @@
-// Package service holds the rod fishing licence journey: the answers an applicant gives, the
-// rules those answers must satisfy, and the GOV.UK Frontend component parameters each question
-// page needs.
-//
-// Nothing in this package writes HTML. Component parameters are plain maps handed to a
-// [github.com/Nooshu/govuk-frontend-example-go/internal/render.Renderer], so the HTML is always
-// produced by GOV.UK Frontend rather than by hand-written markup.
 package service
+
+// Application answers, step graph, and completion helpers.
 
 import "slices"
 

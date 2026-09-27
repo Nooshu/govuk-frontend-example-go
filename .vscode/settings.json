@@ -21,9 +21,38 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[gohtml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "go.useLanguageServer": true,
+  "go.lintTool": "staticcheck",
+  "go.lintOnSave": "package",
+  "go.formatTool": "gofmt",
+  "go.testFlags": ["-race", "-count=1"],
+  "go.toolsManagement.autoUpdate": true,
+  "gopls": {
+    "ui.semanticTokens": true,
+    "ui.diagnostic.analyses": {
+      "nilness": true,
+      "unusedparams": true,
+      "unusedwrite": true,
+      "useany": true
+    }
+  },
   "search.exclude": {
     "**/node_modules": true,
     "**/coverage": true,
-    "**/dist": true
+    "**/dist": true,
+    "**/tmp": true,
+    "**/coverage.out": true
   }
 }

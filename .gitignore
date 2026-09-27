@@ -63,6 +63,7 @@ Thumbs.db
 !.vscode/settings.json
 !.vscode/extensions.json
 !.vscode/tasks.json
+!.vscode/launch.json
 .cursor/*
 !.cursor/skills/
 !.cursor/skills/**/*
@@ -75,6 +76,8 @@ Thumbs.db
 *.test
 coverage.out
 coverage.html
+# air / local build scratch (see .air.toml)
+tmp/
 
 # Test / fixture noise
 tmp/

@@ -16,13 +16,15 @@ How we keep docs dual-purpose: [documentation-structure.md](documentation-struct
 | Doc                                                      | Purpose                                                      |
 | -------------------------------------------------------- | ------------------------------------------------------------ |
 | [project-purpose.md](project-purpose.md)                 | What this template is for                                    |
+| [why-go.md](why-go.md)                                   | Why this specialised line uses Go; advantages and trade-offs |
+| [architecture.md](architecture.md)                       | Packages, request lifecycle, HTML layers                     |
+| [go-conventions.md](go-conventions.md)                   | Comments, layout, lint, testing norms for Go                 |
 | [onboarding.md](onboarding.md)                           | Repo map, run modes, components vs patterns, troubleshooting |
 | [priorities.md](priorities.md)                           | Ordered priorities                                           |
 | [frontend-performance.md](frontend-performance.md)       | Caching, compression, asset placement, budgets               |
 | [frontend-security.md](frontend-security.md)             | OWASP response headers, CSP, cookies                         |
-| [tech-stack.md](tech-stack.md)                           | TypeScript / Node + Frontend Nunjucks                        |
+| [tech-stack.md](tech-stack.md)                           | Go + Frontend (Nunjucks as reference); Node tooling pins     |
 | [example-service.md](example-service.md)                 | Rod licence example, `npm start`, fixture previews           |
-| [prompts.md](prompts.md)                                 | Prompts given to the agent to generate this template         |
 | [syncing-from-template.md](syncing-from-template.md)     | Pull shared docs/dotfiles from govuk-frontend-example        |
 | [guidance-sources.md](guidance-sources.md)               | Official GDS / Service Manual / Frontend URLs                |
 | [documentation-structure.md](documentation-structure.md) | Dual-audience docs + language practice rules                 |

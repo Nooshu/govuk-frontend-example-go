@@ -1,5 +1,7 @@
 package govuk
 
+// Ports for list-like components (table, task-list, summary-list, …).
+
 import (
 	"strconv"
 	"strings"

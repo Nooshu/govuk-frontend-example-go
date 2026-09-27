@@ -1,5 +1,7 @@
 package govuk
 
+// Ports for text components (inset-text, warning-text, tag, …).
+
 import "strings"
 
 // This file ports the components whose template is a single block of text or a short wrapper:

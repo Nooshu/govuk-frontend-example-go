@@ -1,5 +1,7 @@
 package govuk
 
+// Ordered Params and jsontext decoding for macro options.
+
 import (
 	"bytes"
 	"encoding/json"

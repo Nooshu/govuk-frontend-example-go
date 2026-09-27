@@ -4,7 +4,7 @@
 
 Language-agnostic sibling (shared playbooks): [Nooshu/govuk-frontend-example](https://github.com/Nooshu/govuk-frontend-example). Sync: [`docs/syncing-from-template.md`](docs/syncing-from-template.md).
 
-**Stack:** see [`docs/tech-stack.md`](docs/tech-stack.md).
+**Stack:** [`docs/tech-stack.md`](docs/tech-stack.md). **Why Go:** [`docs/why-go.md`](docs/why-go.md). **Architecture:** [`docs/architecture.md`](docs/architecture.md).
 
 ## Priorities
 
@@ -14,7 +14,7 @@ Frontend web performance → frontend security → reduced maintenance → acces
 
 | You are…            | Start here                                                                                                                                                     |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Human developer** | [`docs/onboarding.md`](docs/onboarding.md) → [`CONTRIBUTING.md`](CONTRIBUTING.md) → [`docs/`](docs/README.md)                                                  |
+| **Human developer** | [`docs/onboarding.md`](docs/onboarding.md) → [`docs/why-go.md`](docs/why-go.md) → [`CONTRIBUTING.md`](CONTRIBUTING.md) → [`docs/`](docs/README.md)             |
 | **AI coding agent** | [`AGENTS.md`](AGENTS.md) → [`.cursor/skills/gds-compliant-frontend/`](.cursor/skills/gds-compliant-frontend/SKILL.md) → playbooks in [`docs/`](docs/README.md) |
 
 Dual-audience map: [`docs/documentation-structure.md`](docs/documentation-structure.md).
@@ -26,7 +26,8 @@ npm install
 npm run build:styles    # Sass → dist/stylesheets/application.css
 npm start               # build:styles, then go run ./cmd/server
 npm test                # baseline, Sass pipeline, Go fixture parity, and service tests
-npm run verify          # docs + build:styles + go vet + tests
+npm run lint:go         # go vet + go fix -diff + staticcheck
+npm run verify          # docs + build:styles + lint:go + tests
 npm run sync:template   # pull shared docs/dotfiles from the agnostic template
 ```
 

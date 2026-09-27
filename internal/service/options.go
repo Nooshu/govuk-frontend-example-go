@@ -1,5 +1,7 @@
 package service
 
+// Static option lists (regions, licence lengths, months).
+
 import (
 	"fmt"
 	"time"

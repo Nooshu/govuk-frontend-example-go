@@ -1,10 +1,6 @@
-// Package render defines how this service asks for GOV.UK Frontend component HTML.
-//
-// Pages never write component markup. They build a parameter map and hand it to a [Renderer],
-// which returns the HTML GOV.UK Frontend produces for those options. Keeping that behind an
-// interface means the component implementation can be swapped — and stubbed in tests — without
-// any page knowing.
 package render
+
+// Renderer interface and Func adapter for tests.
 
 import "errors"
 

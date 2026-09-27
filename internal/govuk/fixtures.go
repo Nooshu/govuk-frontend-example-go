@@ -1,5 +1,7 @@
 package govuk
 
+// Fixture loading helpers used by the parity suite.
+
 import (
 	"encoding/json"
 	"fmt"

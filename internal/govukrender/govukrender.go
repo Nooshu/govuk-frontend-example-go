@@ -1,9 +1,6 @@
-// Package govukrender connects the page layer to the Go port of GOV.UK Frontend's macros.
-//
-// It is deliberately the only package that knows about both sides. Pages depend on the
-// [render.Renderer] interface, so the component port can be tested against the official
-// fixtures on its own, and pages can be tested without rendering real components.
 package govukrender
+
+// render.Renderer adapter over govuk.Render.
 
 import (
 	"maps"

@@ -1,5 +1,7 @@
 package httpx
 
+// Request cookie helpers built on net/http.
+
 import (
 	"net/http"
 )

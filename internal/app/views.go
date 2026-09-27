@@ -1,5 +1,7 @@
 package app
 
+// Page handlers and view models for the rod licence journey and demos.
+
 import (
 	"net/http"
 

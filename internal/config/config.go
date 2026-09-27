@@ -1,11 +1,6 @@
-// Package config resolves the paths and settings the example service needs at run time.
-//
-// Go generates every page; Node is only the delivery mechanism for three inputs. GOV.UK
-// Frontend is installed with npm and supplies the script, the assets, and the official
-// fixtures; the stylesheet is compiled by the Sass pipeline; and the shared response policy
-// lives in baseline/policy.json. All three are found relative to the repository root, so the
-// root is resolved once at start-up and passed down rather than recomputed.
 package config
+
+// Repository root, Frontend pin, stylesheet path, PORT, demos.
 
 import (
 	"errors"

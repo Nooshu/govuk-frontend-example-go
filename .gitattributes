@@ -21,6 +21,8 @@
 *.ts text eol=lf
 *.tsx text eol=lf
 *.go text eol=lf
+*.gohtml text eol=lf
+*.toml text eol=lf
 *.py text eol=lf
 *.cs text eol=lf
 Makefile text eol=lf

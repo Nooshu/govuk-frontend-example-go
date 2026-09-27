@@ -1,5 +1,7 @@
 package service
 
+// Server-side validation rules for the rod licence journey.
+
 import (
 	"regexp"
 	"strconv"

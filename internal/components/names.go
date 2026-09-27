@@ -1,10 +1,6 @@
-// Package components reads GOV.UK Frontend's own metadata: the component directories in the
-// pinned package, the official fixtures each one ships, and the catalogue copy this example adds
-// on top.
-//
-// The fixtures are the contract for component HTML. Nothing here renders markup; it supplies the
-// options and the expected HTML that a renderer is measured against.
 package components
+
+// Component name validation and kebab-case helpers.
 
 import (
 	"regexp"

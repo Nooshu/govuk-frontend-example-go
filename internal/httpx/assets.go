@@ -1,5 +1,7 @@
 package httpx
 
+// Static asset map for stylesheet, Frontend JS, and fonts.
+
 import (
 	"crypto/sha256"
 	"encoding/hex"

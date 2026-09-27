@@ -1,5 +1,7 @@
 package baseline
 
+// Apply OWASP and cache headers for a response kind.
+
 import (
 	"crypto/sha256"
 	"encoding/base64"

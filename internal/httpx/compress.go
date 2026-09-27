@@ -1,5 +1,7 @@
 package httpx
 
+// Brotli-first response compression with Gzip fallback.
+
 import (
 	"bytes"
 	"compress/gzip"

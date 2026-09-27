@@ -39,16 +39,18 @@ See [`docs/syncing-from-template.md`](docs/syncing-from-template.md). Dotfiles a
 
 ### Dotfiles (do not bypass)
 
-| File                                        | Role                                                   |
-| ------------------------------------------- | ------------------------------------------------------ |
-| `.editorconfig`                             | Indentation, charset, newlines across editors          |
-| `.gitignore` / `.gitattributes`             | Ignore hygiene + line endings                          |
-| `.nvmrc` / `.npmrc`                         | Node version + npm behaviour for Frontend/docs tooling |
-| `.prettierrc` / `.prettierignore`           | Shared formatting                                      |
-| `.markdownlint-cli2.jsonc`                  | Markdown consistency                                   |
-| `.vscode/settings.json` / `extensions.json` | Shared editor defaults                                 |
-| `.cursor/rules/`                            | Agent consistency rules                                |
-| `.github/`                                  | PR template, Dependabot                                |
+| File                              | Role                                                   |
+| --------------------------------- | ------------------------------------------------------ |
+| `.editorconfig`                   | Indentation, charset, newlines across editors          |
+| `.gitignore` / `.gitattributes`   | Ignore hygiene + line endings                          |
+| `.nvmrc` / `.npmrc`               | Node version + npm behaviour for Frontend/docs tooling |
+| `.prettierrc` / `.prettierignore` | Shared formatting                                      |
+| `.markdownlint-cli2.jsonc`        | Markdown consistency                                   |
+| `staticcheck.conf`                | Staticcheck defaults for `npm run lint:go`             |
+| `.air.toml`                       | Optional live-reload for local `air` users             |
+| `.vscode/`                        | Shared editor defaults, Gopls, tasks, launch config    |
+| `.cursor/rules/`                  | Agent consistency rules                                |
+| `.github/`                        | PR template, Dependabot, CI                            |
 
 ## Pull requests
 

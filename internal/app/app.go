@@ -1,11 +1,6 @@
-// Package app is the HTTP surface of the example service: the route table, the session cookie,
-// and the response baseline every reply goes through.
-//
-// One handler serves every request so that no route can skip the shared behaviour. Each reply
-// gets the OWASP headers and cache kind from baseline/policy.json, a session cookie, and
-// Brotli-first compression; pages that show the applicant's answers are marked so they are
-// never stored.
 package app
+
+// App construction, Options, and the http.Handler entrypoint.
 
 import (
 	"errors"

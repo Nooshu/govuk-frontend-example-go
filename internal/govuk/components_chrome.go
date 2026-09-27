@@ -1,5 +1,7 @@
 package govuk
 
+// Ports for chrome components (header, footer, skip link, …).
+
 import "strings"
 
 // This file ports the page chrome: the GOV.UK logo, the header, the footer, the service and

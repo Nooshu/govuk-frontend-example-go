@@ -1,9 +1,6 @@
-// Package session keeps one applicant's answers between requests.
-//
-// Sessions live in memory for the life of the process. That is enough for an example service and
-// deliberately keeps personal answers off disk; a real service would swap the store for one that
-// survives a restart.
 package session
+
+// Session values and the in-memory Store implementation.
 
 import (
 	"crypto/rand"

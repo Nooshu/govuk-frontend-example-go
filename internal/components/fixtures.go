@@ -1,5 +1,7 @@
 package components
 
+// Load official fixtures.json documents from govuk-frontend.
+
 import (
 	"fmt"
 	"os"

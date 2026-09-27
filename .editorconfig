@@ -17,6 +17,10 @@ max_line_length = off
 [*.{py,go}]
 indent_size = 4
 
+# Go html/template pages (embedded under internal/pages)
+[*.gohtml]
+indent_size = 2
+
 [*.{cs,fs,vb}]
 indent_size = 4
 
