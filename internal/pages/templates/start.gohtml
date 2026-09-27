@@ -7,4 +7,14 @@
         {{ component "warning-text" .Context.warning }}
         {{ component "inset-text" .Context.inset }}
         {{ component "details" .Context.details }}
+{{- if .DemosEnabled }}
+        <h2 class="govuk-heading-m">{{- if eq .HTMLLang "cy" -}}Rhagolygon datblygwyr{{- else -}}Developer previews{{- end -}}</h2>
+        <p class="govuk-body">
+{{- if eq .HTMLLang "cy" }}
+          <a class="govuk-link" href="/components">Rhagolwg o gydrannau GOV.UK</a> — tudalen ar wahân ar gyfer pob cydran, wedi’i rendro gan y llyfrgell Go.
+{{- else }}
+          <a class="govuk-link" href="/components">Preview GOV.UK components</a> — a separate page for each component, rendered by this service’s Go library.
+{{- end }}
+        </p>
+{{- end }}
 {{- template "columns-close" . }}

@@ -15,7 +15,7 @@ Related docs: [govuk-components.md](govuk-components.md), [testing-components.md
 3. **Exact HTML parity (backend vs fixtures)** — the **backend language’s** output equals each fixture’s `html` byte-for-byte (ordinal equality). Cover every fixture. A Nunjucks-vs-fixture check is freshness only; it does not replace backend parity. See [testing-components.md](testing-components.md).
 4. **Never hand-write component markup in pages** — pages invoke the library API.
 5. **No ad-hoc custom CSS** — Sass pipeline + `govuk-overrides.scss` only; no `!important` ([styles.md](styles.md)).
-6. **Register in navigation** — every shipped component appears in the home/components list with a preview link.
+6. **Register in navigation** — every shipped component appears on `/components` (the preview homepage) with a preview link. The service start page links to that catalogue when demos are enabled.
 
 ## Which sibling to copy (once examples exist)
 

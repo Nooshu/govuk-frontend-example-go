@@ -29,18 +29,18 @@ Invalid answers stay on the same question, with an error summary and the values 
 
 ## Pages
 
-| Path                                 | What it shows                                                                              |
-| ------------------------------------ | ------------------------------------------------------------------------------------------ |
-| `/` and `/cy`                        | Start page. Welsh is the start page and chrome only; the rest of the journey is in English |
-| `/task-list`                         | Task list, then the questions, check your answers, and confirmation                        |
-| `/fees`, `/help`, `/guidance`        | Fees table, help accordion, and guidance tabs                                              |
-| `/updates`, `/cookies`               | Service updates with pagination, and cookie settings                                       |
-| `/accessibility`, `/about`           | Accessibility statement and what this example is                                           |
-| `/components`                        | Every component in this Frontend release. **Links only** — no embedded demos               |
-| `/components/:name`                  | One fixture, with a banner that says whether the macro HTML matches the fixture            |
-| `/components/:name?fixture=`         | A named fixture                                                                            |
-| `/components/:name/fixture?fixture=` | The fixture HTML fragment only. For tests and debugging                                    |
-| `/examples/exit-this-page`           | Exit this page. The button leaves this example and opens the BBC weather forecast          |
+| Path                                 | What it shows                                                                                                                                          |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/` and `/cy`                        | Start page. Welsh is the start page and chrome only; the rest of the journey is in English. When demos are on, links to the component preview homepage |
+| `/task-list`                         | Task list, then the questions, check your answers, and confirmation                                                                                    |
+| `/fees`, `/help`, `/guidance`        | Fees table, help accordion, and guidance tabs                                                                                                          |
+| `/updates`, `/cookies`               | Service updates with pagination, and cookie settings                                                                                                   |
+| `/accessibility`, `/about`           | Accessibility statement and what this example is                                                                                                       |
+| `/components`                        | **Component preview homepage** — every component in this Frontend release as **links only** (no embedded demos)                                        |
+| `/components/:name`                  | One component’s own page: Go `Render` HTML for a fixture, with a banner saying whether it matches the official fixture                                 |
+| `/components/:name?fixture=`         | A named fixture on that component page                                                                                                                 |
+| `/components/:name/fixture?fixture=` | The fixture HTML fragment only. For tests and debugging                                                                                                |
+| `/examples/exit-this-page`           | Exit this page. The button leaves this example and opens the BBC weather forecast                                                                      |
 
 Question pages use one `h1`, `novalidate`, an error summary, and field errors. Answers are kept when validation fails. A page uses a back link or breadcrumbs, not both.
 

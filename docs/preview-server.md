@@ -8,8 +8,9 @@ Local server for human parity checks and pattern demos.
 
 ## Expectations
 
-- Homepage lists components (and patterns) as **links only** — no embedded live demos.
-- A preview surface per component renders **only the selected** fixture, with a parity banner vs official `html`.
+- Service start page links to `/components` when demos are enabled (not in `NODE_ENV=production`).
+- `/components` is the component preview homepage: lists components (and patterns via `/examples`) as **links only** — no embedded live demos.
+- A preview surface per component (`/components/:name`) renders **only the selected** fixture via the Go component library, with a parity banner vs official `html`.
 - A raw-fixture surface returns an HTML **fragment** for automation.
 - Preview and fixture surfaces are Development / Testing only.
 - Preview responses use the same [`baseline/`](../baseline/) headers as production. On local HTTP, pass `secureTransport: false` so HSTS is not sent.

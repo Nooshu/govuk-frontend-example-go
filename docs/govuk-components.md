@@ -40,7 +40,14 @@ Per-component deep dives: add `docs/govuk-<kebab-name>.md` as each ships. Until 
 
 ## Previews
 
-Each component gets a Dev/Testing preview surface listing fixtures and rendering the selection with a parity banner. Index/home lists links only — **no live demos on the homepage**.
+Local preview (when `NODE_ENV` is not `production`):
+
+1. Service start page (`/` or `/cy`) links to **Preview GOV.UK components** → `/components`.
+2. `/components` is the **component preview homepage**: one link per shipped component — **no live demos on that index**.
+3. `/components/:name` is that component’s own page. It lists fixtures and renders the selection via **Go** `internal/govuk` `Render` (same API the service and parity suite use), with a parity banner vs official fixture `html`.
+4. `/components/:name/fixture` returns the raw fixture HTML fragment for automation.
+
+Footer and About also link to the catalogue when demos are enabled.
 
 ## Do not
 

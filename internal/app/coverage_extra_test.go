@@ -199,8 +199,43 @@ func TestDemosCanBeTurnedOff(t *testing.T) {
 	if got := c.get("/components"); got.Code != http.StatusNotFound {
 		t.Errorf("catalogue with demos off = %d, want 404", got.Code)
 	}
-	if got := c.get("/"); got.Code != http.StatusOK {
-		t.Errorf("start page = %d, want 200", got.Code)
+	start := c.get("/")
+	if start.Code != http.StatusOK {
+		t.Errorf("start page = %d, want 200", start.Code)
+	}
+	if strings.Contains(start.Body.String(), `href="/components"`) {
+		t.Error("start page still links to the component catalogue when demos are off")
+	}
+}
+
+func TestStartPageLinksToComponentCatalogueWhenDemosAreOn(t *testing.T) {
+	t.Parallel()
+	c := newClient(t)
+
+	start := c.get("/")
+	if start.Code != http.StatusOK {
+		t.Fatalf("start page = %d, want 200", start.Code)
+	}
+	body := start.Body.String()
+	if !strings.Contains(body, `href="/components"`) || !strings.Contains(body, "Preview GOV.UK components") {
+		t.Error("start page does not link to the component preview homepage")
+	}
+
+	welsh := c.get("/cy")
+	if !strings.Contains(welsh.Body.String(), `href="/components"`) {
+		t.Error("Welsh start page does not link to the component preview homepage")
+	}
+
+	catalogue := c.get("/components")
+	if catalogue.Code != http.StatusOK {
+		t.Fatalf("catalogue = %d, want 200", catalogue.Code)
+	}
+	catalogueBody := catalogue.Body.String()
+	if !strings.Contains(catalogueBody, "preview homepage") {
+		t.Error("catalogue does not describe itself as the preview homepage")
+	}
+	if !strings.Contains(catalogueBody, `href="/components/button"`) {
+		t.Error("catalogue is missing a per-component page link")
 	}
 }
 
