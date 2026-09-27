@@ -122,8 +122,19 @@ func LoadFrom(workingDir func() (string, error)) (*Config, error) {
 
 // DemosEnabled reports whether the component catalogue and example pages are served.
 //
-// They are off in production so a real service does not publish the fixture previews.
+// Precedence:
+//  1. DEMOS_ENABLED — "true"/"1"/"yes" forces on; "false"/"0"/"no" forces off
+//  2. Otherwise off when NODE_ENV=production (hosts such as Render often set that)
+//
+// The public Render demo sets DEMOS_ENABLED=true so previews stay visible even when
+// NODE_ENV is production.
 func DemosEnabled(getenv func(string) string) bool {
+	switch getenv("DEMOS_ENABLED") {
+	case "true", "1", "yes":
+		return true
+	case "false", "0", "no":
+		return false
+	}
 	return getenv("NODE_ENV") != "production"
 }
 

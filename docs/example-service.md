@@ -15,7 +15,7 @@ Opens at <http://127.0.0.1:3000> (server listens on all interfaces by default; u
 
 Public demo hosting: [deploying-on-render.md](deploying-on-render.md).
 
-`NODE_ENV=production` hides the component catalogue and the extra example pages. The licence journey stays available.
+`NODE_ENV=production` hides the component catalogue and the extra example pages unless `DEMOS_ENABLED=true` (set on the Render demo). The licence journey stays available.
 
 ## Start to confirmation
 

@@ -98,7 +98,7 @@ Do not use generic Go HTML libraries to own component markup — they will lose 
 
 - **Config** resolves the repository root (walks up for `go.mod` / `package.json`), reads the pinned `govuk-frontend` version, and points at `dist/stylesheets/application.css` and Frontend’s JS/assets under `node_modules`.
 - **Styles** must be built before tests or start (`npm run build:styles`).
-- **Demos** (catalogue, fixture previews) default on locally; `NODE_ENV=production` turns them off.
+- **Demos** (catalogue, fixture previews) default on locally; `NODE_ENV=production` turns them off unless `DEMOS_ENABLED=true`.
 
 ## Testing architecture
 

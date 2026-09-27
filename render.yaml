@@ -15,7 +15,9 @@ services:
     buildCommand: ./scripts/render-build.sh
     startCommand: ./bin/server
     envVars:
-      # Leave NODE_ENV unset so the component catalogue and demos stay visible for the blog example.
-      # Set NODE_ENV=production in the Render dashboard if you want demos off.
+      # Render often sets NODE_ENV=production; force demos on for the public blog example.
+      # Set DEMOS_ENABLED=false (or remove this) if you want catalogue/previews off.
+      - key: DEMOS_ENABLED
+        value: "true"
       - key: NODE_VERSION
         value: "22"

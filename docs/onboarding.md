@@ -77,15 +77,15 @@ Details: [testing-components.md](testing-components.md).
 
 ## Troubleshooting
 
-| Symptom                        | Likely cause                                               |
-| ------------------------------ | ---------------------------------------------------------- |
-| Parity fails on whitespace     | Renderer ≠ Nunjucks `template.njk` / `{%-` stripping       |
-| Encoding differs (`'` vs `'`)  | Used framework HTML encoder instead of Nunjucks `escape`   |
-| Attribute order differs        | Built attributes in map order, not template / Params order |
-| Preview/fixture 404 in tests   | Demos disabled (`NODE_ENV=production`) or styles not built |
-| Logo unreadable / wrong header | Frontend 5 header classes with Frontend 6+ CSS             |
-| Editing fixtures “fixes” tests | Wrong fix — update renderer                                |
-| `test:go` skips on stylesheet  | Run `npm run build:styles` first                           |
+| Symptom                        | Likely cause                                                                            |
+| ------------------------------ | --------------------------------------------------------------------------------------- |
+| Parity fails on whitespace     | Renderer ≠ Nunjucks `template.njk` / `{%-` stripping                                    |
+| Encoding differs (`'` vs `'`)  | Used framework HTML encoder instead of Nunjucks `escape`                                |
+| Attribute order differs        | Built attributes in map order, not template / Params order                              |
+| Preview/fixture 404 in tests   | Demos disabled (`NODE_ENV=production` without `DEMOS_ENABLED=true`) or styles not built |
+| Logo unreadable / wrong header | Frontend 5 header classes with Frontend 6+ CSS                                          |
+| Editing fixtures “fixes” tests | Wrong fix — update renderer                                                             |
+| `test:go` skips on stylesheet  | Run `npm run build:styles` first                                                        |
 
 More pitfalls: [creating-components.md](creating-components.md).
 

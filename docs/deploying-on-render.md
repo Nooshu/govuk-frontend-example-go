@@ -48,7 +48,8 @@ Uses the committed [`render.yaml`](../render.yaml).
 
 - [ ] `https://<your-service>.onrender.com/health` returns `ok`
 - [ ] Start page loads with GOV.UK styling (`/`)
-- [ ] Component catalogue works (`/components`) — demos stay on when `NODE_ENV` is unset
+- [ ] Component catalogue works (`/components`) — Blueprint sets `DEMOS_ENABLED=true`
+- [ ] Start page shows **Developer previews** / Preview GOV.UK components
 - [ ] A form POST in the licence journey retains the session (cookie)
 
 ## Option B — Manual Web Service
@@ -71,23 +72,25 @@ Use this if you prefer clicking through the UI without a Blueprint.
 4. **Advanced** → **Health Check Path:** `/health`
 5. **Environment** (optional):
 
-   | Key            | Value    | Notes                                                               |
-   | -------------- | -------- | ------------------------------------------------------------------- |
-   | `NODE_VERSION` | `22`     | Matches `.nvmrc` / `package.json` engines                           |
-   | `NODE_ENV`     | _(omit)_ | Omit so demos stay on; set `production` to hide `/components` demos |
-   | `HOST`         | _(omit)_ | Default binds all interfaces; only set if you need a special bind   |
-   | `PORT`         | _(omit)_ | Render injects this automatically                                   |
+   | Key             | Value    | Notes                                                             |
+   | --------------- | -------- | ----------------------------------------------------------------- |
+   | `NODE_VERSION`  | `22`     | Matches `.nvmrc` / `package.json` engines                         |
+   | `DEMOS_ENABLED` | `true`   | Keeps `/components` and Developer previews on (see below)         |
+   | `NODE_ENV`      | _(omit)_ | Render may set `production`; demos still on via `DEMOS_ENABLED`   |
+   | `HOST`          | _(omit)_ | Default binds all interfaces; only set if you need a special bind |
+   | `PORT`          | _(omit)_ | Render injects this automatically                                 |
 
 6. Create the service and wait for the deploy.
 
 ## Environment variables
 
-| Variable       | Required | Default / behaviour                                            |
-| -------------- | -------- | -------------------------------------------------------------- |
-| `PORT`         | Injected | Render sets this; the server reads it via `config.ResolvePort` |
-| `HOST`         | No       | Empty → listen on all interfaces (`:PORT`)                     |
-| `NODE_ENV`     | No       | Unset → demos on; `production` → catalogue/demos off           |
-| `NODE_VERSION` | No       | Set to `22` in the Blueprint so npm tooling matches local      |
+| Variable        | Required | Default / behaviour                                            |
+| --------------- | -------- | -------------------------------------------------------------- |
+| `PORT`          | Injected | Render sets this; the server reads it via `config.ResolvePort` |
+| `HOST`          | No       | Empty → listen on all interfaces (`:PORT`)                     |
+| `DEMOS_ENABLED` | No       | Blueprint sets `true` so catalogue/previews stay on            |
+| `NODE_ENV`      | No       | `production` turns demos off unless `DEMOS_ENABLED` overrides  |
+| `NODE_VERSION`  | No       | Set to `22` in the Blueprint so npm tooling matches local      |
 
 HTTPS terminates at Render. The app already treats `X-Forwarded-Proto: https` as secure (HSTS / `__Host-session` when appropriate).
 
@@ -121,16 +124,16 @@ NODE_ENV=production PORT=3000 ./bin/server
 
 ## Troubleshooting
 
-| Symptom                            | Likely fix                                                                                                                    |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Build fails on `npm ci` / engine   | Ensure `NODE_VERSION=22`; lockfile committed; `engine-strict` in `.npmrc`                                                     |
-| Build fails on Go version          | Render uses latest stable Go 1.x; this module needs Go ≥1.27 — redeploy after Render updates, or switch the service to Docker |
-| Deploy live but connection refused | Confirm start command is `./bin/server` and listen addr is `:PORT` (not only `127.0.0.1`)                                     |
-| HTML without GOV.UK CSS            | Build must run `npm run build:styles`; `dist/stylesheets/` must exist at runtime                                              |
-| Missing Frontend assets / fixtures | Build must run `npm ci` so `node_modules/govuk-frontend` is present                                                           |
-| `/components` 404                  | `NODE_ENV` is `production` — unset it for the blog demo                                                                       |
-| Health check failing               | Hit `/health` in logs; path must be exactly `/health`                                                                         |
-| Session lost between requests      | Expected after free-tier spin-down; or cookie blocked if mixed content                                                        |
+| Symptom                                    | Likely fix                                                                                                                    |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Build fails on `npm ci` / engine           | Ensure `NODE_VERSION=22`; lockfile committed; `engine-strict` in `.npmrc`                                                     |
+| Build fails on Go version                  | Render uses latest stable Go 1.x; this module needs Go ≥1.27 — redeploy after Render updates, or switch the service to Docker |
+| Deploy live but connection refused         | Confirm start command is `./bin/server` and listen addr is `:PORT` (not only `127.0.0.1`)                                     |
+| HTML without GOV.UK CSS                    | Build must run `npm run build:styles`; `dist/stylesheets/` must exist at runtime                                              |
+| Missing Frontend assets / fixtures         | Build must run `npm ci` so `node_modules/govuk-frontend` is present                                                           |
+| `/components` 404 or no Developer previews | Set `DEMOS_ENABLED=true` (Blueprint default), or unset `NODE_ENV` if you are not using the override                           |
+| Health check failing                       | Hit `/health` in logs; path must be exactly `/health`                                                                         |
+| Session lost between requests              | Expected after free-tier spin-down; or cookie blocked if mixed content                                                        |
 
 ## Updating the live demo
 

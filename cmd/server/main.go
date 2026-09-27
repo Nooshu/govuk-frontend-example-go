@@ -7,7 +7,7 @@
 // Start it with `npm start`, which compiles the stylesheet first. PORT chooses the port
 // (default 3000). HOST selects the bind address (empty = all interfaces, for Render and other
 // cloud hosts; use HOST=127.0.0.1 for local-only). NODE_ENV=production turns off the component
-// catalogue and the example pages.
+// catalogue and example pages unless DEMOS_ENABLED=true (used on the public Render demo).
 package main
 
 import (

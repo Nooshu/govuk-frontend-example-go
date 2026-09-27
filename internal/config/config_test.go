@@ -168,6 +168,35 @@ func TestDemosEnabledIsOffInProduction(t *testing.T) {
 	}
 }
 
+func TestDemosEnabledHonoursExplicitOverride(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		env  map[string]string
+		want bool
+	}{
+		{name: "force on over production", env: map[string]string{"DEMOS_ENABLED": "true", "NODE_ENV": "production"}, want: true},
+		{name: "force on with 1", env: map[string]string{"DEMOS_ENABLED": "1", "NODE_ENV": "production"}, want: true},
+		{name: "force on with yes", env: map[string]string{"DEMOS_ENABLED": "yes", "NODE_ENV": "production"}, want: true},
+		{name: "force off over development", env: map[string]string{"DEMOS_ENABLED": "false", "NODE_ENV": "development"}, want: false},
+		{name: "force off with 0", env: map[string]string{"DEMOS_ENABLED": "0"}, want: false},
+		{name: "force off with no", env: map[string]string{"DEMOS_ENABLED": "no"}, want: false},
+		{name: "unknown value falls back to NODE_ENV", env: map[string]string{"DEMOS_ENABLED": "maybe", "NODE_ENV": "production"}, want: false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := config.DemosEnabled(func(key string) string { return test.env[key] })
+			if got != test.want {
+				t.Errorf("DemosEnabled(%v) = %t, want %t", test.env, got, test.want)
+			}
+		})
+	}
+}
+
 func TestResolvePort(t *testing.T) {
 	t.Parallel()
 
