@@ -112,6 +112,8 @@ buildSetCookie('__Host-session', token, { hostPrefix: true });
 
 Defaults from `policy.json`: `Secure`, `HttpOnly`, `SameSite=Lax`, `Path=/`. Use `SameSite=Strict` when the journey can tolerate it. `SameSite=None` requires `Secure`. `__Host-` names must be `Secure`, `Path=/`, and must not set `Domain`.
 
+**Go line:** validate against those rules in `internal/baseline`, then serialize with `http.Cookie.Valid` / `String`. Read session cookies with `http.Request.Cookie`. Compare CSRF tokens with `crypto/subtle.ConstantTimeCompare`. See [tech-stack.md](tech-stack.md).
+
 ## Downloads and logout
 
 Downloads send `Content-Disposition: attachment` plus `X-Content-Type-Options: nosniff`. The default type is `application/octet-stream`. Pass `filename` without a path.

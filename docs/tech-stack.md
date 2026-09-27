@@ -15,22 +15,55 @@ Sync shared docs/dotfiles from the language-agnostic template: [syncing-from-tem
 
 Build on packages that ship with Go before inventing helpers or pulling frameworks:
 
-| Concern                         | Prefer                                                                                           | Avoid / notes                                                                           |
-| ------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| HTTP server and routing         | `net/http` (Go 1.22+ method/path `ServeMux`)                                                     | Gin, Echo, Chi — extra surface without benefit for this example                         |
-| Page document shell             | `html/template` + `embed`                                                                        | Hand-pasted full page HTML                                                              |
-| Component HTML                  | Idiomatic Go ports in `internal/govuk` (`strings.Builder` / helpers) matching fixtures           | Shelling out to Node/Nunjucks; incomplete third-party wrappers that skip fixture parity |
-| Text escaping (Nunjucks parity) | Small local escaper (`&quot;`, `&#39;`, `\` → `&#92;`) in `internal/govuk` / `internal/htmlutil` | Relying only on `html.EscapeString` for fixture text — it does not escape `\`           |
-| JSON (fixtures, policy)         | `encoding/json`                                                                                  |                                                                                         |
-| Gzip                            | `compress/gzip`                                                                                  |                                                                                         |
-| Brotli                          | [`github.com/andybalholm/brotli`](https://github.com/andybalholm/brotli) (no stdlib Brotli)      | Reimplementing Brotli                                                                   |
-| Sessions / tokens / ETags       | `crypto/rand`, `crypto/sha256`                                                                   |                                                                                         |
-| Multipart uploads               | `mime/multipart` via `net/http`                                                                  |                                                                                         |
-| Logging                         | `log/slog`                                                                                       | Ad-hoc `fmt.Println` in handlers                                                        |
-| Tests                           | `testing`, `net/http/httptest`; optional `github.com/google/go-cmp` for HTML diffs               |                                                                                         |
-| Collections                     | `maps`, `slices`, `strings`                                                                      |                                                                                         |
+| Concern                         | Prefer                                                                                             | Avoid / notes                                                                                       |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| HTTP server and routing         | `net/http` (Go 1.22+ method/path `ServeMux`)                                                       | Gin, Echo, Chi — extra surface without benefit for this example                                     |
+| Request cookies                 | `http.Request.Cookie` / `Cookies`                                                                  | Hand-rolled `Cookie` header parsers                                                                 |
+| Set-Cookie serialization        | `http.Cookie` + `Valid` + `String`, after baseline policy checks                                   | Hand-built `Set-Cookie` strings                                                                     |
+| Request body size limits        | `http.MaxBytesReader` (+ `http.MaxBytesError` for 413)                                             | `io.LimitReader` alone for request bodies                                                           |
+| Form fields (urlencoded)        | `net/url.ParseQuery` (or `Request.ParseForm` when the body is still on the request)                |                                                                                                     |
+| Multipart uploads               | `mime/multipart` — this line keeps only the filename, so it does **not** call `ParseMultipartForm` | Storing unvalidated upload bytes in memory                                                          |
+| Page document shell             | `html/template` + `embed`                                                                          | Hand-pasted full page HTML; React/Vue/etc. for UI                                                   |
+| Component HTML                  | Idiomatic Go ports in `internal/govuk` (`strings.Builder` / helpers) matching fixtures             | Shelling out to Node/Nunjucks; incomplete third-party wrappers that skip fixture parity             |
+| Text escaping (Nunjucks parity) | Small local escaper (`&quot;`, `&#39;`, `\` → `&#92;`) in `internal/govuk` / `internal/htmlutil`   | Relying only on `html.EscapeString` / `html/template` for fixture text — they do not match Nunjucks |
+| JSON (fixtures, policy)         | `encoding/json`                                                                                    |                                                                                                     |
+| Gzip                            | `compress/gzip`                                                                                    |                                                                                                     |
+| Brotli                          | [`github.com/andybalholm/brotli`](https://github.com/andybalholm/brotli) (no stdlib Brotli)        | Reimplementing Brotli                                                                               |
+| Sessions / tokens / ETags       | `crypto/rand`, `crypto/sha256`; in-memory `session.Store`                                          |                                                                                                     |
+| CSRF compare                    | `crypto/subtle.ConstantTimeCompare`                                                                | Plain `==` on tokens                                                                                |
+| Multipart uploads (HTTP API)    | `mime/multipart` via `net/http`                                                                    |                                                                                                     |
+| Logging                         | `log/slog`                                                                                         | Ad-hoc `fmt.Println` in handlers                                                                    |
+| Tests                           | `testing`, `net/http/httptest`; optional `github.com/google/go-cmp` for HTML diffs                 |                                                                                                     |
+| Collections                     | `maps`, `slices`, `strings`                                                                        |                                                                                                     |
 
-**Evaluated and not adopted as the primary renderer:** [`github.com/0xnu/govuk-frontend-go`](https://pkg.go.dev/github.com/0xnu/govuk-frontend-go) — uses `html/template`, but component models are incomplete relative to Frontend macros, the recommended path is Gin-centric, assets are embedded separately from this pin, and it does not prove official `fixtures.json` byte-parity. Study patterns if useful; do not replace `internal/govuk`.
+### Evaluated and not adopted
+
+| Library / approach                                                                          | Why not here                                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gin / Echo / Chi                                                                            | `net/http` ServeMux is enough; frameworks add surface without helping Frontend parity                                                                                             |
+| [`unrolled/secure`](https://github.com/unrolled/secure) and similar header middleware       | This line must emit the shared [`baseline/policy.json`](../baseline/policy.json) contract (CSP hash, cache kinds). A generic middleware would drift from the Node baseline oracle |
+| [`alexedwards/scs`](https://github.com/alexedwards/scs), Gorilla sessions                   | Fine for a production service; this example keeps a tiny in-memory `session.Store` so personal answers stay off disk. Swap the store interface when you need Redis/SQL            |
+| Gorilla CSRF / nosurf                                                                       | Double-submit cookie + `crypto/subtle` is enough for the example. Prefer a maintained CSRF package when you add cross-site cookie complexity                                      |
+| [`github.com/0xnu/govuk-frontend-go`](https://pkg.go.dev/github.com/0xnu/govuk-frontend-go) | Incomplete vs Frontend macros; Gin-centric; does not prove official `fixtures.json` byte-parity. Do not replace `internal/govuk`                                                  |
+| [`a-h/templ`](https://github.com/a-h/templ), gomponents, Jet, Pongo2, Quicktemplate         | Fine for **ordinary** Go HTML pages. They do **not** reproduce Nunjucks whitespace, attribute order, or escape rules (`&#39;`, `\`), so they cannot own GOV.UK component HTML     |
+| Calling Nunjucks from Go at request time                                                    | Forbidden here: request-time HTML must be native Go. Node stays for the pin, Sass, and fixture freshness only                                                                     |
+
+### HTML rendering (two layers)
+
+This line splits HTML into two jobs. Different tools fit each:
+
+| Layer                          | What it is                                                        | Choice here                                    | Notes                                                                                                                       |
+| ------------------------------ | ----------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Page shell / service pages** | Layout, forms journey, catalogue chrome around components         | **`html/template` + `embed`** (stdlib)         | Auto-escapes; embeds `.gohtml` files; calls `component` for GOV.UK blocks. Do not invent a second full document template    |
+| **GOV.UK components**          | Every `govuk-*` block; must match official `fixtures.json` `html` | **`internal/govuk` ports** (`strings.Builder`) | Source of truth is Frontend `template.njk` + fixtures. Generic template engines fight attribute order and Nunjucks escaping |
+
+**stdlib `html/template`:** use it for pages. It is the maintained Go default for HTML. Do **not** use it (or `html.EscapeString` alone) to implement component fixtures — Nunjucks escapes `'` as `&#39;` and `\` as `&#92;`, and `{%-` strips whitespace; Go’s escaper does not.
+
+**Popular Go HTML libraries (templ, gomponents, etc.):** good ergonomics for greenfield apps. They are the wrong primary tool for **component** HTML in this template because the parity gate is byte-for-byte equality with GDS fixtures. Optional later for service-only pages only if you keep `internal/govuk` as the component API.
+
+**GOV.UK-specific Go wrappers:** none currently prove full fixture parity for the pinned Frontend release. Keep maintaining `internal/govuk`; re-evaluate a wrapper only if it documents and tests **every** fixture `html` for the same pin.
+
+**Third-party rule:** only add a module when the standard library lacks the feature (today: Brotli). Prefer well-known, actively maintained packages; pin versions in `go.mod`; document the choice in this file.
 
 ## Go conventions
 

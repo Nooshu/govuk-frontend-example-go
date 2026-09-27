@@ -2,6 +2,7 @@ package httpx_test
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -9,21 +10,17 @@ import (
 )
 
 func TestParseCookies(t *testing.T) {
-	got := httpx.ParseCookies(`rod_session=abc123; other=a%20b; =skip; lone; empty=`)
-	if got["rod_session"] != "abc123" {
-		t.Fatalf("session %q", got["rod_session"])
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request.AddCookie(&http.Cookie{Name: "rod_session", Value: "abc123"})
+	request.AddCookie(&http.Cookie{Name: "other", Value: "a b"})
+	if got := httpx.CookieValue(request, "rod_session"); got != "abc123" {
+		t.Fatalf("session %q", got)
 	}
-	if got["other"] != "a b" {
-		t.Fatalf("decoded %q", got["other"])
+	if got := httpx.CookieValue(request, "other"); got != "a b" {
+		t.Fatalf("other %q", got)
 	}
-	if _, ok := got[""]; ok {
-		t.Fatal("empty name should be skipped")
-	}
-	if got["empty"] != "" {
-		t.Fatalf("empty value %q", got["empty"])
-	}
-	if len(httpx.ParseCookies("")) != 0 {
-		t.Fatal("empty header")
+	if got := httpx.CookieValue(request, "missing"); got != "" {
+		t.Fatalf("missing %q", got)
 	}
 }
 

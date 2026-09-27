@@ -345,7 +345,7 @@ func TestSetCookie(t *testing.T) {
 		options     CookieOptions
 	}{
 		{"bad name", "a", CookieOptions{}},
-		{"ok", "a b", CookieOptions{}},
+		{"ok", "a;b", CookieOptions{}},
 		{"ok", "a", CookieOptions{SameSite: "Maybe"}},
 		{"ok", "a", CookieOptions{SameSite: "None", Secure: &secure}},
 		{"ok", "a", CookieOptions{Path: "relative"}},

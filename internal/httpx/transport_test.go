@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,24 +15,19 @@ import (
 )
 
 func TestParseCookiesKeepsInvalidEscapes(t *testing.T) {
-	if len(httpx.ParseCookies("")) != 0 {
-		t.Fatal("empty header was not empty")
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request.Header.Set("Cookie", "rod_session=abc%20def; broken; theme=light%zz; extra=1")
+	if got := httpx.CookieValue(request, "rod_session"); got != "abc%20def" {
+		t.Fatalf("session = %q", got)
 	}
-	got := httpx.ParseCookies(" rod_session=abc%20def; broken; =novalue; theme=light%zz; extra=1")
-	if got["rod_session"] != "abc def" {
-		t.Fatalf("session = %q", got["rod_session"])
+	if got := httpx.CookieValue(request, "theme"); got != "light%zz" {
+		t.Fatalf("theme = %q", got)
 	}
-	if got["theme"] != "light%zz" {
-		t.Fatalf("invalid escape was rewritten: %q", got["theme"])
+	if got := httpx.CookieValue(request, "extra"); got != "1" {
+		t.Fatalf("extra = %q", got)
 	}
-	if _, ok := got["broken"]; ok {
-		t.Fatal("a cookie without '=' was kept")
-	}
-	if got["extra"] != "1" {
-		t.Fatalf("extra = %q", got["extra"])
-	}
-	if _, ok := got[""]; ok {
-		t.Fatal("empty name was kept")
+	if got := httpx.CookieValue(request, "missing"); got != "" {
+		t.Fatalf("missing = %q", got)
 	}
 }
 

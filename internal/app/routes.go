@@ -1,6 +1,7 @@
 package app
 
 import (
+	"crypto/subtle"
 	"errors"
 	"html/template"
 	"net/http"
@@ -400,7 +401,11 @@ func (a *App) postCheckAnswers(current *session.Session) outcome {
 
 func csrfOK(current *session.Session, body *httpx.Body) bool {
 	token := body.Field("csrf")
-	return token != "" && token == current.CSRF
+	if token == "" || current.CSRF == "" {
+		return false
+	}
+	// Constant-time compare avoids leaking the token length or contents via response timing.
+	return subtle.ConstantTimeCompare([]byte(token), []byte(current.CSRF)) == 1
 }
 
 // withReturn keeps the "came from check your answers" flag across the redirect that shows the

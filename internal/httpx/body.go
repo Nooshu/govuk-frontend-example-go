@@ -54,18 +54,22 @@ func (b *Body) Values(name string) []string {
 
 // ReadBody reads and parses a request body, refusing anything larger than maxBytes.
 //
-// The limit is applied while reading rather than after, so an oversized post is rejected without
-// ever being held in memory.
+// Size limiting uses [http.MaxBytesReader] from the standard library. Multipart uploads are
+// still parsed here rather than with [http.Request.ParseMultipartForm], because that helper
+// stores file bytes and this example deliberately keeps only the filename.
 func ReadBody(request *http.Request, maxBytes int64) (*Body, error) {
 	if request.Body == nil {
 		return &Body{Fields: map[string][]string{}}, nil
 	}
-	raw, err := io.ReadAll(io.LimitReader(request.Body, maxBytes+1))
+	limited := http.MaxBytesReader(nil, request.Body, maxBytes)
+	defer limited.Close()
+	raw, err := io.ReadAll(limited)
 	if err != nil {
+		var maxErr *http.MaxBytesError
+		if errors.As(err, &maxErr) {
+			return nil, &BodyError{Status: http.StatusRequestEntityTooLarge, Message: "Payload too large"}
+		}
 		return nil, &BodyError{Status: http.StatusBadRequest, Message: "Could not read the request body"}
-	}
-	if int64(len(raw)) > maxBytes {
-		return nil, &BodyError{Status: http.StatusRequestEntityTooLarge, Message: "Payload too large"}
 	}
 	return ParseBody(request.Header.Get("Content-Type"), raw, maxBytes)
 }

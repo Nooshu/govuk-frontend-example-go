@@ -2,8 +2,7 @@ package baseline
 
 import (
 	"fmt"
-	"regexp"
-	"strconv"
+	"net/http"
 	"strings"
 )
 
@@ -22,30 +21,19 @@ type CookieOptions struct {
 	HostPrefix bool
 }
 
-var (
-	cookieName  = regexp.MustCompile("^[!#$%&'*+\\-.^_`|~0-9A-Za-z]+$")
-	cookieValue = regexp.MustCompile(`^[\x21\x23-\x2B\x2D-\x3A\x3C-\x5B\x5D-\x7E]*$`)
-)
-
 // SetCookie builds a Set-Cookie header value from the policy defaults.
 //
-// It refuses combinations browsers silently reject — SameSite=None without Secure, or a __Host-
-// cookie that is not Secure, not Path=/, or carries a Domain — so a cookie that would be dropped
-// is a start-up error rather than a session that mysteriously never persists.
+// Validation (SameSite=None requires Secure, __Host- rules, Path shape) stays here so a cookie
+// browsers would silently drop is an error. Serialization uses [http.Cookie.String] from the
+// standard library.
 func (p *Policy) SetCookie(name, value string, options CookieOptions) (string, error) {
-	if !cookieName.MatchString(name) {
-		return "", fmt.Errorf("baseline: invalid cookie name: %q", name)
-	}
-	if !cookieValue.MatchString(value) {
-		return "", fmt.Errorf("baseline: invalid cookie value for %q", name)
-	}
-
 	sameSite := options.SameSite
 	if sameSite == "" {
 		sameSite = p.Cookie.SameSite
 	}
-	if sameSite != "Lax" && sameSite != "Strict" && sameSite != "None" {
-		return "", fmt.Errorf("baseline: invalid SameSite: %q", sameSite)
+	mode, err := sameSiteMode(sameSite)
+	if err != nil {
+		return "", err
 	}
 
 	secure := p.Cookie.Secure
@@ -82,17 +70,32 @@ func (p *Policy) SetCookie(name, value string, options CookieOptions) (string, e
 		return "", fmt.Errorf("baseline: Max-Age must not be negative")
 	}
 
-	parts := []string{name + "=" + value}
+	cookie := &http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     path,
+		Secure:   secure,
+		HttpOnly: httpOnly,
+		SameSite: mode,
+	}
 	if options.MaxAge != nil {
-		parts = append(parts, "Max-Age="+strconv.Itoa(*options.MaxAge))
+		cookie.MaxAge = *options.MaxAge
 	}
-	parts = append(parts, "Path="+path)
-	if secure {
-		parts = append(parts, "Secure")
+	if err := cookie.Valid(); err != nil {
+		return "", fmt.Errorf("baseline: invalid cookie: %w", err)
 	}
-	if httpOnly {
-		parts = append(parts, "HttpOnly")
+	return cookie.String(), nil
+}
+
+func sameSiteMode(value string) (http.SameSite, error) {
+	switch value {
+	case "Lax":
+		return http.SameSiteLaxMode, nil
+	case "Strict":
+		return http.SameSiteStrictMode, nil
+	case "None":
+		return http.SameSiteNoneMode, nil
+	default:
+		return 0, fmt.Errorf("baseline: invalid SameSite: %q", value)
 	}
-	parts = append(parts, "SameSite="+sameSite)
-	return strings.Join(parts, "; "), nil
 }

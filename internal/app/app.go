@@ -166,12 +166,12 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // openSession finds the caller's session, creating one when there is no usable cookie.
 func (a *App) openSession(r *http.Request) *session.Session {
-	cookies := httpx.ParseCookies(r.Header.Get("Cookie"))
-	id := cookies[hostSessionCookie]
-	if id == "" {
-		id = cookies[sessionCookie]
+	if id := httpx.CookieValue(r, hostSessionCookie); id != "" {
+		if existing, ok := a.store.Get(id); ok {
+			return existing
+		}
 	}
-	if id != "" {
+	if id := httpx.CookieValue(r, sessionCookie); id != "" {
 		if existing, ok := a.store.Get(id); ok {
 			return existing
 		}
