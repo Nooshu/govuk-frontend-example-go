@@ -48,9 +48,6 @@ func (a *App) routes() *http.ServeMux {
 	}))
 
 	// The application itself.
-	mux.Handle("GET /task-list", a.page(func(current *session.Session, _ *http.Request) (outcome, error) {
-		return outcome{view: new(taskListView(current))}, nil
-	}))
 	mux.Handle("GET /check-answers", a.page(func(current *session.Session, _ *http.Request) (outcome, error) {
 		return a.checkAnswersGet(current), nil
 	}))
@@ -264,8 +261,10 @@ func (a *App) postStep(step service.Step, body *httpx.Body, current *session.Ses
 
 func (a *App) validateStep(step service.Step, body *httpx.Body) []service.FieldError {
 	switch step.ID {
+	case service.StepLicenceLength:
+		return service.ValidateLicenceLength(body.Field("licence-length"))
 	case service.StepName:
-		return service.ValidateName(body.Field("first-name"), body.Field("last-name"))
+		return service.ValidateName(body.Field("full-name"))
 	case service.StepDateOfBirth:
 		return service.ValidateDateOfBirth(
 			body.Field("date-of-birth-day"),
@@ -273,32 +272,19 @@ func (a *App) validateStep(step service.Step, body *httpx.Body) []service.FieldE
 			body.Field("date-of-birth-year"),
 			a.now(),
 		)
-	case service.StepEmail:
-		return service.ValidateEmail(body.Field("email"))
-	case service.StepContactPreference:
-		return service.ValidateContactPreference(body.Field("contact-by"), body.Field("telephone"))
 	case service.StepWhereYouWillFish:
-		return service.ValidateRegions(body.Values("regions"))
-	case service.StepLicenceLength:
-		return service.ValidateLicenceLength(body.Field("licence-length"))
-	case service.StepStartMonth:
-		return service.ValidateStartMonth(body.Field("start-month"), a.now())
-	case service.StepAddress:
-		return service.ValidateAddress(body.Field("address-line-1"), body.Field("town"), body.Field("postcode"))
-	case service.StepEvidence:
-		filename, _ := uploadedName(body)
-		return service.ValidateEvidence(filename)
-	case service.StepAdditionalDetails:
-		return service.ValidateAdditionalDetails(body.Field("additional-details"))
+		return service.ValidateCountry(body.Field("country"))
 	default:
-		return service.ValidatePassword(body.Field("password"), body.Field("password-confirm"))
+		return service.ValidateEmail(body.Field("email"))
 	}
 }
 
 func applyStep(step service.Step, body *httpx.Body, application service.Application, valid bool) service.Application {
 	switch step.ID {
+	case service.StepLicenceLength:
+		return service.SaveLicence(application, body.Field("licence-length"), valid)
 	case service.StepName:
-		return service.SaveName(application, body.Field("first-name"), body.Field("last-name"), valid)
+		return service.SaveName(application, body.Field("full-name"), valid)
 	case service.StepDateOfBirth:
 		return service.SaveDate(
 			application,
@@ -307,42 +293,11 @@ func applyStep(step service.Step, body *httpx.Body, application service.Applicat
 			body.Field("date-of-birth-year"),
 			valid,
 		)
-	case service.StepEmail:
-		return service.SaveEmail(application, body.Field("email"), valid)
-	case service.StepContactPreference:
-		return service.SaveContact(application, body.Field("contact-by"), body.Field("telephone"), valid)
 	case service.StepWhereYouWillFish:
-		return service.SaveRegions(application, body.Values("regions"), valid)
-	case service.StepLicenceLength:
-		return service.SaveLicence(application, body.Field("licence-length"), valid)
-	case service.StepStartMonth:
-		return service.SaveMonth(application, body.Field("start-month"), valid)
-	case service.StepAddress:
-		return service.SaveAddress(application, service.Address{
-			Line1:    body.Field("address-line-1"),
-			Line2:    body.Field("address-line-2"),
-			Town:     body.Field("town"),
-			Postcode: body.Field("postcode"),
-		}, valid)
-	case service.StepEvidence:
-		filename, hasFile := uploadedName(body)
-		return service.SaveEvidence(application, filename, hasFile, valid)
-	case service.StepAdditionalDetails:
-		return service.SaveDetails(application, body.Field("additional-details"), valid)
+		return service.SaveCountry(application, body.Field("country"), valid)
 	default:
-		return service.SavePassword(application, valid)
+		return service.SaveEmail(application, body.Field("email"), valid)
 	}
-}
-
-// uploadedName returns the safe base name of the evidence upload.
-//
-// The file's bytes are never stored; only the name is shown back to the applicant, and only
-// after it has been checked.
-func uploadedName(body *httpx.Body) (string, bool) {
-	if body.Upload == nil || body.Upload.FieldName != "evidence" {
-		return "", false
-	}
-	return service.SafeFilename(body.Upload.Filename)
 }
 
 // fixtureFragment serves the official fixture HTML on its own, so a preview can be compared

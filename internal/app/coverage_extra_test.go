@@ -22,8 +22,7 @@ func TestEveryQuestionPageRenders(t *testing.T) {
 	t.Parallel()
 	c := newClient(t)
 	for _, path := range []string{
-		"/name", "/date-of-birth", "/email", "/contact-preference", "/where-you-will-fish",
-		"/licence-length", "/start-month", "/address", "/evidence", "/additional-details", "/create-a-password",
+		"/licence-length", "/name", "/date-of-birth", "/where-you-will-fish", "/email",
 	} {
 		reply := c.get(path)
 		if reply.Code != http.StatusOK {
@@ -133,7 +132,7 @@ func TestResponsesUseTheBaseline(t *testing.T) {
 func TestSessionCookieLookup(t *testing.T) {
 	t.Parallel()
 	c := newClient(t)
-	c.post("/name", url.Values{"first-name": {"Ada"}, "last-name": {"Lovelace"}})
+	c.post("/name", url.Values{"full-name": {"Ada Lovelace"}})
 	id := c.cookies["rod_session"]
 	if id == "" {
 		t.Fatal("no session cookie")
@@ -141,7 +140,7 @@ func TestSessionCookieLookup(t *testing.T) {
 
 	kept := httptest.NewRequest(http.MethodGet, "/name", nil)
 	kept.AddCookie(&http.Cookie{Name: "__Host-session", Value: id})
-	if !strings.Contains(c.do(kept).Body.String(), "Ada") {
+	if !strings.Contains(c.do(kept).Body.String(), "Ada Lovelace") {
 		t.Fatal("the __Host- cookie did not find the session")
 	}
 
@@ -149,7 +148,7 @@ func TestSessionCookieLookup(t *testing.T) {
 	fresh.AddCookie(&http.Cookie{Name: "rod_session", Value: "not-a-session"})
 	recorder := httptest.NewRecorder()
 	c.handler.ServeHTTP(recorder, fresh)
-	if strings.Contains(recorder.Body.String(), "Ada") {
+	if strings.Contains(recorder.Body.String(), "Ada Lovelace") {
 		t.Fatal("an unknown session cookie reused another applicant's answers")
 	}
 }
@@ -158,8 +157,8 @@ func TestRejectedPosts(t *testing.T) {
 	t.Parallel()
 	c := newClient(t)
 
-	if location := c.post("/check-answers", url.Values{}).Header().Get("Location"); location != "/name" {
-		t.Errorf("incomplete submit redirected to %q, want /name", location)
+	if location := c.post("/check-answers", url.Values{}).Header().Get("Location"); location != "/licence-length" {
+		t.Errorf("incomplete submit redirected to %q, want /licence-length", location)
 	}
 
 	oversized := httptest.NewRequest(http.MethodPost, "/name", strings.NewReader(strings.Repeat("a", config.MaxBodyBytes+1)))
@@ -168,20 +167,16 @@ func TestRejectedPosts(t *testing.T) {
 		t.Errorf("oversized post = %d, want 413", got.Code)
 	}
 
-	plain := httptest.NewRequest(http.MethodPost, "/name", strings.NewReader("first-name=Ada"))
+	plain := httptest.NewRequest(http.MethodPost, "/name", strings.NewReader("full-name=Ada"))
 	plain.Header.Set("Content-Type", "text/plain")
 	if got := c.do(plain); got.Code != http.StatusUnsupportedMediaType {
 		t.Errorf("plain post = %d, want 415", got.Code)
 	}
 
-	broken := httptest.NewRequest(http.MethodPost, "/name", strings.NewReader("first-name=%zz"))
+	broken := httptest.NewRequest(http.MethodPost, "/name", strings.NewReader("full-name=%zz"))
 	broken.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	if got := c.do(broken); got.Code != http.StatusBadRequest {
 		t.Errorf("malformed post = %d, want 400", got.Code)
-	}
-
-	if location := c.upload("/evidence", "other", "note.pdf", "bytes").Header().Get("Location"); location != "/additional-details" {
-		t.Errorf("a file on the wrong field redirected to %q", location)
 	}
 
 	reject := c.post("/cookie-choices", url.Values{"cookies": {"reject"}, "returnPath": {"/help"}})

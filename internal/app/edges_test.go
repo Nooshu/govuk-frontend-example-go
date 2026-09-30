@@ -106,7 +106,7 @@ func TestDefaultsAndFailurePaths(t *testing.T) {
 			t.Fatal(err)
 		}
 		recorder := httptest.NewRecorder()
-		failing.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/contact-preference", nil))
+		failing.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/name", nil))
 		if recorder.Code != http.StatusInternalServerError || !strings.Contains(recorder.Body.String(), "<html") {
 			t.Fatalf("status %d", recorder.Code)
 		}

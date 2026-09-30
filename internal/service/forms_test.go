@@ -1,20 +1,12 @@
 package service_test
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/Nooshu/govuk-frontend-example-go/internal/render"
 	"github.com/Nooshu/govuk-frontend-example-go/internal/service"
 )
-
-func stub() render.Renderer {
-	return render.Func(func(name string, _ map[string]any) (string, error) {
-		return "<" + name + ">", nil
-	})
-}
 
 // option walks nested component options, which are plain maps.
 func option(t *testing.T, params map[string]any, path ...string) any {
@@ -57,18 +49,15 @@ func TestErrorSummaryIsOnlyBuiltWhenThereAreErrors(t *testing.T) {
 
 func TestFieldsRetainTheAnswerAndCarryTheError(t *testing.T) {
 	t.Parallel()
-	application := service.SaveName(service.NewApplication(), "Ada", "Lovelace", true)
-	errs := []service.FieldError{{Field: "last-name", Href: "#last-name", Text: "Enter your last name"}}
+	application := service.SaveName(service.NewApplication(), "Ada Lovelace", true)
+	errs := []service.FieldError{{Field: "full-name", Href: "#full-name", Text: "Enter your full name"}}
 
-	params := service.NameFields(application, errs)
-	if got := option(t, params, "firstName", "value"); got != "Ada" {
-		t.Errorf("the first name input holds %v, want Ada", got)
+	params := service.NameField(application, errs)
+	if got := option(t, params, "fullName", "value"); got != "Ada Lovelace" {
+		t.Errorf("the name input holds %v, want Ada Lovelace", got)
 	}
-	if got := option(t, params, "firstName", "errorMessage"); got != nil {
-		t.Error("a field with no error carries an error message")
-	}
-	if got := option(t, params, "lastName", "errorMessage", "text"); got != "Enter your last name" {
-		t.Errorf("the last name error is %v", got)
+	if got := option(t, params, "fullName", "errorMessage", "text"); got != "Enter your full name" {
+		t.Errorf("the name error is %v", got)
 	}
 }
 
@@ -79,23 +68,14 @@ func TestEachQuestionBuildsItsComponentOptions(t *testing.T) {
 	if got := option(t, service.EmailField(application, nil), "email", "value"); got != "ada@example.com" {
 		t.Errorf("the email input holds %v", got)
 	}
+	if got := option(t, service.EmailField(application, nil), "email", "hint", "text"); !strings.Contains(fmt.Sprint(got), "browser session") {
+		t.Errorf("the email hint is %v", got)
+	}
 	if got := option(t, service.DateField(application, nil), "dateOfBirth", "namePrefix"); got != "date-of-birth" {
 		t.Errorf("the date input prefix is %v", got)
 	}
-	if got := option(t, service.MonthField(application, nil, now), "select", "id"); got != "start-month" {
-		t.Errorf("the select id is %v", got)
-	}
-	if got := option(t, service.AddressFields(application, nil), "postcode", "value"); got != "SW1A 1AA" {
-		t.Errorf("the postcode input holds %v", got)
-	}
-	if got := option(t, service.EvidenceField(application, nil), "currentFile"); got != "licence.pdf" {
-		t.Errorf("the evidence question shows %v as the current file", got)
-	}
-	if got := option(t, service.DetailsField(application, nil), "details", "maxlength"); got != 200 {
-		t.Errorf("the character count limit is %v, want 200", got)
-	}
-	if got := option(t, service.PasswordFields(nil), "password", "autocomplete"); got != "new-password" {
-		t.Errorf("the password input autocomplete is %v", got)
+	if got := option(t, service.DateField(application, nil), "dateOfBirth", "hint", "text"); got != "For example, 31 3 1980" {
+		t.Errorf("the date hint is %v", got)
 	}
 }
 
@@ -110,27 +90,12 @@ func TestQuestionsCarryTheirErrorMessages(t *testing.T) {
 		"date of birth": {"date-of-birth", func(errs []service.FieldError) map[string]any {
 			return service.DateField(application, errs)
 		}, []string{"dateOfBirth", "errorMessage", "text"}},
-		"where you will fish": {"regions", func(errs []service.FieldError) map[string]any {
-			return service.RegionFields(application, errs)
-		}, []string{"checkboxes", "errorMessage", "text"}},
+		"where you will fish": {"country", func(errs []service.FieldError) map[string]any {
+			return service.CountryFields(application, errs)
+		}, []string{"radios", "errorMessage", "text"}},
 		"licence length": {"licence-length", func(errs []service.FieldError) map[string]any {
 			return service.LicenceFields(application, errs)
 		}, []string{"radios", "errorMessage", "text"}},
-		"start month": {"start-month", func(errs []service.FieldError) map[string]any {
-			return service.MonthField(application, errs, now)
-		}, []string{"select", "errorMessage", "text"}},
-		"evidence": {"evidence", func(errs []service.FieldError) map[string]any {
-			return service.EvidenceField(application, errs)
-		}, []string{"upload", "errorMessage", "text"}},
-		"additional details": {"additional-details", func(errs []service.FieldError) map[string]any {
-			return service.DetailsField(application, errs)
-		}, []string{"details", "errorMessage", "text"}},
-		"password": {"password", func(errs []service.FieldError) map[string]any {
-			return service.PasswordFields(errs)
-		}, []string{"password", "errorMessage", "text"}},
-		"password confirmation": {"password-confirm", func(errs []service.FieldError) map[string]any {
-			return service.PasswordFields(errs)
-		}, []string{"confirm", "errorMessage", "text"}},
 		"cookie choice": {"analytics", func(errs []service.FieldError) map[string]any {
 			return service.CookieFields("", errs)
 		}, []string{"radios", "errorMessage", "text"}},
@@ -149,83 +114,37 @@ func TestQuestionsCarryTheirErrorMessages(t *testing.T) {
 	}
 }
 
-func TestTheContactQuestionRevealsTheTelephoneInput(t *testing.T) {
+func TestTheCountryQuestionOffersEnglandWalesScotland(t *testing.T) {
 	t.Parallel()
-	application := service.SaveContact(service.NewApplication(), "telephone", "01632 960 001", true)
-	params, err := service.ContactFields(stub(), application, nil)
-	if err != nil {
-		t.Fatalf("ContactFields: %v", err)
+	application := service.SaveCountry(service.NewApplication(), "Wales", true)
+	items, _ := option(t, service.CountryFields(application, nil), "radios", "items").([]any)
+	if len(items) != len(service.Countries()) {
+		t.Fatalf("the question has %d items, want one per country", len(items))
 	}
-	items, _ := option(t, params, "radios", "items").([]any)
-	if len(items) != 2 {
-		t.Fatalf("the question has %d options, want 2", len(items))
+	second, _ := items[1].(map[string]any)
+	if second["checked"] != true || second["value"] != "Wales" {
+		t.Errorf("the applicant's choice was not retained: %v", second)
 	}
-	telephone, _ := items[1].(map[string]any)
-	conditional, _ := telephone["conditional"].(map[string]any)
-	if conditional["html"] != "<input>" {
-		t.Errorf("the revealed content is %v, want the rendered input", conditional["html"])
-	}
-	if telephone["checked"] != true {
-		t.Error("the applicant's choice was not retained")
+	hint := option(t, service.CountryFields(application, nil), "radios", "hint", "text")
+	if !strings.Contains(fmt.Sprint(hint), "fictional") {
+		t.Errorf("the country hint is %v", hint)
 	}
 }
 
-func TestTheContactQuestionReportsARendererFailure(t *testing.T) {
+func TestTheLicenceQuestionDoesNotShowFees(t *testing.T) {
 	t.Parallel()
-	broken := render.Func(func(string, map[string]any) (string, error) {
-		return "", errors.New("no such component")
-	})
-	if _, err := service.ContactFields(broken, service.NewApplication(), nil); err == nil {
-		t.Error("a renderer failure was swallowed")
-	}
-}
-
-func TestTheRegionQuestionOffersAnExclusiveOption(t *testing.T) {
-	t.Parallel()
-	application := service.SaveRegions(service.NewApplication(), []string{service.NotSure}, true)
-	items, _ := option(t, service.RegionFields(application, nil), "checkboxes", "items").([]any)
-	if len(items) != len(service.Regions())+2 {
-		t.Fatalf("the question has %d items, want one per region plus a divider and an opt-out", len(items))
-	}
-	last, _ := items[len(items)-1].(map[string]any)
-	if last["behaviour"] != "exclusive" {
-		t.Error("the opt-out is not exclusive, so it could be combined with a region")
-	}
-	if last["checked"] != true {
-		t.Error("the applicant's choice was not retained")
-	}
-	divider, _ := items[len(items)-2].(map[string]any)
-	if divider["divider"] != "or" {
-		t.Errorf("the divider reads %v, want or", divider["divider"])
-	}
-}
-
-func TestTheLicenceQuestionShowsTheFee(t *testing.T) {
-	t.Parallel()
-	application := service.SaveLicence(service.NewApplication(), "12-month", true)
+	application := service.SaveLicence(service.NewApplication(), "12-months", true)
 	items, _ := option(t, service.LicenceFields(application, nil), "radios", "items").([]any)
 	if len(items) != len(service.LicenceLengths()) {
 		t.Fatalf("the question has %d options", len(items))
 	}
 	first, _ := items[0].(map[string]any)
-	if text, _ := first["text"].(string); !strings.Contains(text, "£") {
-		t.Errorf("the option reads %q, want it to include the fee", text)
+	if text, _ := first["text"].(string); strings.Contains(text, "£") {
+		t.Errorf("the option reads %q, want no fee", text)
 	}
 	last, _ := items[len(items)-1].(map[string]any)
 	if last["checked"] != true {
 		t.Error("the applicant's choice was not retained")
-	}
-}
-
-func TestTheStartMonthQuestionOffersTwelveMonthsAndAPrompt(t *testing.T) {
-	t.Parallel()
-	items, _ := option(t, service.MonthField(service.NewApplication(), nil, now), "select", "items").([]any)
-	if len(items) != 13 {
-		t.Fatalf("the select has %d options, want 12 months and a prompt", len(items))
-	}
-	prompt, _ := items[0].(map[string]any)
-	if prompt["value"] != "" || prompt["selected"] != true {
-		t.Errorf("the prompt is %v", prompt)
 	}
 }
 
@@ -252,7 +171,7 @@ func TestContentPagesBuildTheirComponentOptions(t *testing.T) {
 	t.Parallel()
 	table := service.FeesTable()
 	rows, _ := table["rows"].([]any)
-	if len(rows) != len(service.LicenceLengths()) {
+	if len(rows) != len(service.LicenceFees()) {
 		t.Errorf("the fees table has %d rows", len(rows))
 	}
 	if table["firstCellIsHeader"] != true {
@@ -269,8 +188,11 @@ func TestContentPagesBuildTheirComponentOptions(t *testing.T) {
 
 func TestTheConfirmationPanelEscapesTheReference(t *testing.T) {
 	t.Parallel()
-	panel := service.ConfirmationPanel(`RL<script>"'&`)
+	panel := service.ConfirmationPanel(`FR<script>"'&`)
 	html := fmt.Sprint(panel["html"])
+	if !strings.Contains(html, "Your example reference number") {
+		t.Errorf("the panel does not name the example reference: %q", html)
+	}
 	if strings.Contains(html, "<script>") {
 		t.Errorf("the reference was not escaped: %q", html)
 	}

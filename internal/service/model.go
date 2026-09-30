@@ -4,35 +4,23 @@ package service
 
 import "slices"
 
-// Contact methods the applicant can choose on the contact-preference question.
-const (
-	ContactByEmail     = "email"
-	ContactByTelephone = "telephone"
-)
-
 // Licence lengths the applicant can choose.
 const (
-	LicenceOneDay    = "1-day"
-	LicenceEightDay  = "8-day"
-	LicenceTwelveMth = "12-month"
+	LicenceOneDay     = "1-day"
+	LicenceEightDays  = "8-days"
+	LicenceTwelveMths = "12-months"
 )
 
 // StepID identifies one question page.
 type StepID string
 
-// Question paths, in the order the task list walks them.
+// Question paths, in journey order.
 const (
-	StepName              StepID = "name"
-	StepDateOfBirth       StepID = "date-of-birth"
-	StepEmail             StepID = "email"
-	StepContactPreference StepID = "contact-preference"
-	StepWhereYouWillFish  StepID = "where-you-will-fish"
-	StepLicenceLength     StepID = "licence-length"
-	StepStartMonth        StepID = "start-month"
-	StepAddress           StepID = "address"
-	StepEvidence          StepID = "evidence"
-	StepAdditionalDetails StepID = "additional-details"
-	StepCreateAPassword   StepID = "create-a-password"
+	StepLicenceLength    StepID = "licence-length"
+	StepName             StepID = "name"
+	StepDateOfBirth      StepID = "date-of-birth"
+	StepWhereYouWillFish StepID = "where-you-will-fish"
+	StepEmail            StepID = "email"
 )
 
 // Step is one question page in the journey.
@@ -47,23 +35,11 @@ type Step struct {
 
 // steps are the question pages in journey order.
 var steps = []Step{
-	{ID: StepName, Path: "/name", Heading: "What is your name?"},
+	{ID: StepLicenceLength, Path: "/licence-length", Heading: "How long do you need the licence for?"},
+	{ID: StepName, Path: "/name", Heading: "What is your full name?"},
 	{ID: StepDateOfBirth, Path: "/date-of-birth", Heading: "What is your date of birth?"},
-	{ID: StepEmail, Path: "/email", Heading: "What is your email address?"},
-	{ID: StepContactPreference, Path: "/contact-preference", Heading: "How should we contact you?"},
 	{ID: StepWhereYouWillFish, Path: "/where-you-will-fish", Heading: "Where will you fish?"},
-	{ID: StepLicenceLength, Path: "/licence-length", Heading: "How long do you need a licence for?"},
-	{ID: StepStartMonth, Path: "/start-month", Heading: "When should the licence start?"},
-	{ID: StepAddress, Path: "/address", Heading: "What is your address?"},
-	{ID: StepEvidence, Path: "/evidence", Heading: "Upload evidence of a concession"},
-	{ID: StepAdditionalDetails, Path: "/additional-details", Heading: "Is there anything else we should know?"},
-	{ID: StepCreateAPassword, Path: "/create-a-password", Heading: "Create a password"},
-}
-
-// optionalSteps are the questions an applicant can skip and still submit.
-var optionalSteps = map[StepID]bool{
-	StepEvidence:          true,
-	StepAdditionalDetails: true,
+	{ID: StepEmail, Path: "/email", Heading: "What is your email address?"},
 }
 
 // Steps returns the question pages in journey order.
@@ -73,42 +49,23 @@ func Steps() []Step {
 	return slices.Clone(steps)
 }
 
-// Optional reports whether a step can be left incomplete.
-func Optional(id StepID) bool {
-	return optionalSteps[id]
-}
-
-// Application holds the answers collected for one rod licence application.
-//
-// The password itself is never stored; only [Application.PasswordCreated] records that one was
-// accepted.
+// Application holds the answers collected for one fishing rod licence application.
 type Application struct {
-	FirstName         string
-	LastName          string
-	Day               string
-	Month             string
-	Year              string
-	Email             string
-	ContactBy         string
-	Telephone         string
-	Regions           []string
-	LicenceLength     string
-	StartMonth        string
-	AddressLine1      string
-	AddressLine2      string
-	Town              string
-	Postcode          string
-	EvidenceFilename  string
-	AdditionalDetails string
-	PasswordCreated   bool
-	Submitted         bool
-	Reference         string
-	Completed         []StepID
+	LicenceLength string
+	FullName      string
+	Day           string
+	Month         string
+	Year          string
+	Country       string
+	Email         string
+	Submitted     bool
+	Reference     string
+	Completed     []StepID
 }
 
 // NewApplication returns an empty application with no completed steps.
 func NewApplication() Application {
-	return Application{Regions: []string{}, Completed: []StepID{}}
+	return Application{Completed: []StepID{}}
 }
 
 // IsCompleted reports whether the applicant has finished a step.
@@ -173,23 +130,23 @@ func UnmarkCompleted(completed []StepID, id StepID) []StepID {
 	return result
 }
 
-// RequiredStepsComplete reports whether every required question is complete, which is when the
+// RequiredStepsComplete reports whether every question is complete, which is when the
 // applicant may check their answers.
 func RequiredStepsComplete(application Application) bool {
 	for _, step := range steps {
-		if !Optional(step.ID) && !application.IsCompleted(step.ID) {
+		if !application.IsCompleted(step.ID) {
 			return false
 		}
 	}
 	return true
 }
 
-// FirstIncompleteStep returns the first required question that is not complete.
+// FirstIncompleteStep returns the first question that is not complete.
 //
 // It reports false when the applicant can go straight to check-your-answers.
 func FirstIncompleteStep(application Application) (Step, bool) {
 	for _, step := range steps {
-		if !Optional(step.ID) && !application.IsCompleted(step.ID) {
+		if !application.IsCompleted(step.ID) {
 			return step, true
 		}
 	}

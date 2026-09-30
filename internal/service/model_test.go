@@ -12,7 +12,20 @@ func TestTheJourneyIsAChainOfQuestions(t *testing.T) {
 	if len(steps) == 0 {
 		t.Fatal("the journey has no questions")
 	}
+	wantIDs := []service.StepID{
+		service.StepLicenceLength,
+		service.StepName,
+		service.StepDateOfBirth,
+		service.StepWhereYouWillFish,
+		service.StepEmail,
+	}
+	if len(steps) != len(wantIDs) {
+		t.Fatalf("got %d steps, want %d", len(steps), len(wantIDs))
+	}
 	for index, step := range steps {
+		if step.ID != wantIDs[index] {
+			t.Errorf("step %d is %s, want %s", index, step.ID, wantIDs[index])
+		}
 		if step.Path != "/"+string(step.ID) {
 			t.Errorf("%s is served from %q, want /%s", step.ID, step.Path, step.ID)
 		}
@@ -40,16 +53,16 @@ func TestTheJourneyIsAChainOfQuestions(t *testing.T) {
 
 func TestStepsAreFoundByIDAndPath(t *testing.T) {
 	t.Parallel()
-	step, ok := service.StepByID("name")
-	if !ok || step.Path != "/name" {
-		t.Errorf("StepByID(\"name\") = %+v, %t", step, ok)
+	step, ok := service.StepByID("licence-length")
+	if !ok || step.Path != "/licence-length" {
+		t.Errorf("StepByID(\"licence-length\") = %+v, %t", step, ok)
 	}
 	if _, ok := service.StepByID("not-a-step"); ok {
 		t.Error("an unknown id was treated as a question")
 	}
-	step, ok = service.StepByPath("/create-a-password")
-	if !ok || step.ID != service.StepCreateAPassword {
-		t.Errorf("StepByPath(\"/create-a-password\") = %+v, %t", step, ok)
+	step, ok = service.StepByPath("/name")
+	if !ok || step.ID != service.StepName {
+		t.Errorf("StepByPath(\"/name\") = %+v, %t", step, ok)
 	}
 	if _, ok := service.StepByPath("/fees"); ok {
 		t.Error("a content page was treated as a question")
@@ -74,41 +87,32 @@ func TestMarkingStepsCompleteDoesNotDuplicateThem(t *testing.T) {
 	if len(completed) != 1 || completed[0] != service.StepEmail {
 		t.Errorf("after unmarking, completed = %v", completed)
 	}
-	if got := service.UnmarkCompleted(completed, service.StepAddress); len(got) != 1 {
+	if got := service.UnmarkCompleted(completed, service.StepLicenceLength); len(got) != 1 {
 		t.Errorf("unmarking a step that was never complete changed the list: %v", got)
 	}
 }
 
-func TestOnlyOptionalQuestionsCanBeSkipped(t *testing.T) {
+func TestEveryQuestionMustBeComplete(t *testing.T) {
 	t.Parallel()
 	application := service.NewApplication()
 	if service.RequiredStepsComplete(application) {
 		t.Fatal("an empty application is ready to submit")
 	}
 	first, ok := service.FirstIncompleteStep(application)
-	if !ok || first.ID != service.StepName {
-		t.Errorf("the first incomplete question is %s, want name", first.ID)
+	if !ok || first.ID != service.StepLicenceLength {
+		t.Errorf("the first incomplete question is %s, want licence-length", first.ID)
 	}
 
 	for _, step := range service.Steps() {
-		if service.Optional(step.ID) {
-			continue
-		}
 		application.Completed = service.MarkCompleted(application.Completed, step.ID)
 	}
 	if !service.RequiredStepsComplete(application) {
-		t.Error("an application with every required question answered is not ready")
+		t.Error("an application with every question answered is not ready")
 	}
 	if _, ok := service.FirstIncompleteStep(application); ok {
 		t.Error("a ready application still reports an incomplete question")
 	}
-	if !service.Optional(service.StepEvidence) || !service.Optional(service.StepAdditionalDetails) {
-		t.Error("the optional questions are not marked optional")
-	}
-	if service.Optional(service.StepName) {
-		t.Error("the name question is optional")
-	}
-	if !application.IsCompleted(service.StepName) {
+	if !application.IsCompleted(service.StepLicenceLength) {
 		t.Error("IsCompleted does not see a completed step")
 	}
 }
@@ -116,10 +120,10 @@ func TestOnlyOptionalQuestionsCanBeSkipped(t *testing.T) {
 func TestANewApplicationIsEmpty(t *testing.T) {
 	t.Parallel()
 	application := service.NewApplication()
-	if len(application.Completed) != 0 || len(application.Regions) != 0 {
+	if len(application.Completed) != 0 || application.FullName != "" || application.Country != "" {
 		t.Errorf("a new application is not empty: %+v", application)
 	}
-	if application.Submitted || application.PasswordCreated {
+	if application.Submitted {
 		t.Error("a new application is already submitted")
 	}
 }

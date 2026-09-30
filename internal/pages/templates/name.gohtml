@@ -1,6 +1,4 @@
 {{ template "form-open" . }}
-          <h1 class="govuk-heading-l">{{ .Heading }}</h1>
-          {{ component "input" .Context.firstName }}
-          {{ component "input" .Context.lastName }}
+          {{ component "input" .Context.fullName }}
 {{- template "continue-button" . }}
 {{- template "form-close" . }}

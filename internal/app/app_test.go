@@ -1,11 +1,9 @@
 package app_test
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"log/slog"
-	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -23,8 +21,7 @@ import (
 	"github.com/Nooshu/govuk-frontend-example-go/internal/render"
 )
 
-// now is the clock every test uses, so the start-month list and the age check never depend on
-// when the suite runs.
+// now is the clock every test uses, so the age check never depends on when the suite runs.
 var now = time.Date(2026, time.March, 1, 12, 0, 0, 0, time.UTC)
 
 // stubComponents stands in for GOV.UK Frontend. These tests are about routing, validation, and
@@ -125,10 +122,10 @@ func (c *client) csrf() string {
 	if c.token != "" {
 		return c.token
 	}
-	page := c.get("/name")
+	page := c.get("/licence-length")
 	match := csrfPattern.FindStringSubmatch(page.Body.String())
 	if match == nil {
-		c.t.Fatalf("no CSRF token on /name (status %d)", page.Code)
+		c.t.Fatalf("no CSRF token on /licence-length (status %d)", page.Code)
 	}
 	c.token = match[1]
 	return c.token
@@ -142,17 +139,16 @@ func TestTheApplicantCanApplyForALicence(t *testing.T) {
 	if start.Code != http.StatusOK {
 		t.Fatalf("GET / = %d, want 200", start.Code)
 	}
-	if !strings.Contains(start.Body.String(), "Apply for a rod fishing licence") {
+	if !strings.Contains(start.Body.String(), "Apply for a fishing rod licence") {
 		t.Error("the start page does not name the service")
 	}
-
-	if got := c.get("/task-list").Code; got != http.StatusOK {
-		t.Fatalf("GET /task-list = %d, want 200", got)
+	if !strings.Contains(start.Body.String(), "/licence-length") {
+		t.Error("Start now does not go to the first question")
 	}
 
-	// Check-your-answers is closed until every required question is answered.
-	if location := c.get("/check-answers").Header().Get("Location"); location != "/name" {
-		t.Errorf("GET /check-answers redirected to %q, want /name", location)
+	// Check-your-answers is closed until every question is answered.
+	if location := c.get("/check-answers").Header().Get("Location"); location != "/licence-length" {
+		t.Errorf("GET /check-answers redirected to %q, want /licence-length", location)
 	}
 
 	for _, step := range journey() {
@@ -172,6 +168,13 @@ func TestTheApplicantCanApplyForALicence(t *testing.T) {
 	if got := summary.Header().Get("Cache-Control"); got != "no-store" {
 		t.Errorf("check-answers Cache-Control = %q, want no-store", got)
 	}
+	summaryBody := summary.Body.String()
+	if !strings.Contains(summaryBody, "Accept and continue") {
+		t.Error("check-answers does not use Accept and continue")
+	}
+	if !strings.Contains(summaryBody, "31 3 1980") {
+		t.Error("check-answers does not show the date of birth as day month year")
+	}
 
 	submitted := c.post("/check-answers", url.Values{})
 	if location := submitted.Header().Get("Location"); location != "/confirmation" {
@@ -182,8 +185,15 @@ func TestTheApplicantCanApplyForALicence(t *testing.T) {
 	if confirmation.Code != http.StatusOK {
 		t.Fatalf("GET /confirmation = %d, want 200", confirmation.Code)
 	}
-	if !strings.Contains(confirmation.Body.String(), "Application complete") {
+	confirmationBody := confirmation.Body.String()
+	if !strings.Contains(confirmationBody, "Application complete") {
 		t.Error("the confirmation page does not say the application is complete")
+	}
+	if !strings.Contains(confirmationBody, "Your example reference number") {
+		t.Error("the confirmation page does not show the example reference label")
+	}
+	if !strings.Contains(confirmationBody, `href="/components"`) {
+		t.Error("the confirmation page does not link back to the component list")
 	}
 
 	// Submitting again reaches the same confirmation rather than creating a second application.
@@ -203,28 +213,15 @@ type journeyStep struct {
 
 func journey() []journeyStep {
 	return []journeyStep{
-		{"/name", url.Values{"first-name": {"Ada"}, "last-name": {"Lovelace"}}, "/date-of-birth"},
+		{"/licence-length", url.Values{"licence-length": {"12-months"}}, "/name"},
+		{"/name", url.Values{"full-name": {"Ada Lovelace"}}, "/date-of-birth"},
 		{"/date-of-birth", url.Values{
-			"date-of-birth-day":   {"10"},
-			"date-of-birth-month": {"12"},
-			"date-of-birth-year":  {"1990"},
-		}, "/email"},
-		{"/email", url.Values{"email": {"ada@example.com"}}, "/contact-preference"},
-		{"/contact-preference", url.Values{"contact-by": {"email"}}, "/where-you-will-fish"},
-		{"/where-you-will-fish", url.Values{"regions": {"north-west", "wales"}}, "/licence-length"},
-		{"/licence-length", url.Values{"licence-length": {"12-month"}}, "/start-month"},
-		{"/start-month", url.Values{"start-month": {"2026-04"}}, "/address"},
-		{"/address", url.Values{
-			"address-line-1": {"1 Example Street"},
-			"town":           {"Exampleton"},
-			"postcode":       {"sw1a 1aa"},
-		}, "/evidence"},
-		{"/evidence", url.Values{}, "/additional-details"},
-		{"/additional-details", url.Values{"additional-details": {"Nothing else"}}, "/create-a-password"},
-		{"/create-a-password", url.Values{
-			"password":         {"correct horse"},
-			"password-confirm": {"correct horse"},
-		}, "/check-answers"},
+			"date-of-birth-day":   {"31"},
+			"date-of-birth-month": {"3"},
+			"date-of-birth-year":  {"1980"},
+		}, "/where-you-will-fish"},
+		{"/where-you-will-fish", url.Values{"country": {"England"}}, "/email"},
+		{"/email", url.Values{"email": {"ada@example.com"}}, "/check-answers"},
 	}
 }
 
@@ -241,7 +238,7 @@ func TestAFailedAnswerReturnsToItsQuestionWithAnErrorSummary(t *testing.T) {
 	t.Parallel()
 	c := newClient(t)
 
-	reply := c.post("/name", url.Values{"first-name": {""}, "last-name": {""}})
+	reply := c.post("/name", url.Values{"full-name": {""}})
 	if reply.Code != http.StatusSeeOther {
 		t.Fatalf("POST /name = %d, want 303", reply.Code)
 	}
@@ -278,9 +275,8 @@ func TestChangingAnAnswerReturnsToCheckYourAnswers(t *testing.T) {
 	}
 
 	reply := c.post("/name", url.Values{
-		"first-name": {"Grace"},
-		"last-name":  {"Hopper"},
-		"returnTo":   {"check-answers"},
+		"full-name": {"Grace Hopper"},
+		"returnTo":  {"check-answers"},
 	})
 	if location := reply.Header().Get("Location"); location != "/check-answers" {
 		t.Errorf("a changed answer redirected to %q, want /check-answers", location)
@@ -295,61 +291,17 @@ func TestAFailedChangeKeepsTheReturnFlag(t *testing.T) {
 	t.Parallel()
 	c := newClient(t)
 
-	reply := c.post("/name", url.Values{"first-name": {""}, "returnTo": {"check-answers"}})
+	reply := c.post("/name", url.Values{"full-name": {""}, "returnTo": {"check-answers"}})
 	if location := reply.Header().Get("Location"); location != "/name?return=check-answers" {
 		t.Errorf("a failed change redirected to %q, want /name?return=check-answers", location)
 	}
-}
-
-func TestAnEvidenceUploadKeepsOnlyItsName(t *testing.T) {
-	t.Parallel()
-	c := newClient(t)
-
-	reply := c.upload("/evidence", "evidence", "concession.pdf", "not a real pdf")
-	if location := reply.Header().Get("Location"); location != "/additional-details" {
-		t.Fatalf("uploading redirected to %q, want /additional-details", location)
-	}
-	if !strings.Contains(c.get("/evidence").Body.String(), "Current file: concession.pdf") {
-		t.Error("the question does not show the uploaded file name")
-	}
-
-	rejected := c.upload("/evidence", "evidence", "virus.exe", "MZ")
-	if location := rejected.Header().Get("Location"); location != "/evidence" {
-		t.Errorf("an unsupported file redirected to %q, want /evidence", location)
-	}
-	if !strings.Contains(c.get("/evidence").Body.String(), "Current file: concession.pdf") {
-		t.Error("a rejected upload should not erase the previous file name")
-	}
-}
-
-func (c *client) upload(path, field, filename, content string) *httptest.ResponseRecorder {
-	c.t.Helper()
-	token := c.csrf()
-	var body bytes.Buffer
-	writer := multipart.NewWriter(&body)
-	if err := writer.WriteField("csrf", token); err != nil {
-		c.t.Fatalf("WriteField: %v", err)
-	}
-	part, err := writer.CreateFormFile(field, filename)
-	if err != nil {
-		c.t.Fatalf("CreateFormFile: %v", err)
-	}
-	if _, err := part.Write([]byte(content)); err != nil {
-		c.t.Fatalf("writing the upload: %v", err)
-	}
-	if err := writer.Close(); err != nil {
-		c.t.Fatalf("closing the multipart writer: %v", err)
-	}
-	request := httptest.NewRequest(http.MethodPost, path, &body)
-	request.Header.Set("Content-Type", writer.FormDataContentType())
-	return c.do(request)
 }
 
 func TestAPostWithoutAMatchingTokenIsTreatedAsAnExpiredSession(t *testing.T) {
 	t.Parallel()
 	c := newClient(t)
 
-	request := httptest.NewRequest(http.MethodPost, "/name", strings.NewReader("first-name=Ada&csrf=wrong"))
+	request := httptest.NewRequest(http.MethodPost, "/name", strings.NewReader("full-name=Ada&csrf=wrong"))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	reply := c.do(request)
 
@@ -411,11 +363,11 @@ func TestTheCookiesPageSavesAndReportsTheChoice(t *testing.T) {
 	if saved.Code != http.StatusSeeOther {
 		t.Fatalf("saving cookie settings = %d, want 303", saved.Code)
 	}
-	if !strings.Contains(c.get("/cookies").Body.String(), "notification-banner") {
+	if !strings.Contains(c.get("/cookies").Body.String(), "Your cookie settings were saved") {
 		t.Error("the cookies page does not confirm that the settings were saved")
 	}
 	// The confirmation is shown once.
-	if strings.Contains(c.get("/cookies").Body.String(), "notification-banner") {
+	if strings.Contains(c.get("/cookies").Body.String(), "Your cookie settings were saved") {
 		t.Error("the confirmation is still shown after it has been read")
 	}
 
@@ -543,8 +495,8 @@ func TestStartingAgainClearsTheAnswers(t *testing.T) {
 	if location := c.get("/new-application").Header().Get("Location"); location != "/" {
 		t.Fatal("starting again did not return to the start page")
 	}
-	if location := c.get("/check-answers").Header().Get("Location"); location != "/name" {
-		t.Errorf("after starting again, check-answers redirected to %q, want /name", location)
+	if location := c.get("/check-answers").Header().Get("Location"); location != "/licence-length" {
+		t.Errorf("after starting again, check-answers redirected to %q, want /licence-length", location)
 	}
 }
 
@@ -552,8 +504,8 @@ func TestConfirmationIsOnlyReachableAfterSubmitting(t *testing.T) {
 	t.Parallel()
 	c := newClient(t)
 
-	if location := c.get("/confirmation").Header().Get("Location"); location != "/task-list" {
-		t.Errorf("GET /confirmation before submitting redirected to %q, want /task-list", location)
+	if location := c.get("/confirmation").Header().Get("Location"); location != "/" {
+		t.Errorf("GET /confirmation before submitting redirected to %q, want /", location)
 	}
 }
 

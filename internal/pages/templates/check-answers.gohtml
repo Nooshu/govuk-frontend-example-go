@@ -1,5 +1,5 @@
 {{ template "form-open" . }}
           <h1 class="govuk-heading-l">{{ .Heading }}</h1>
           {{ component "summary-list" (dict "rows" .Context.rows) }}
-          {{ component "button" (dict "text" "Submit application") }}
+          {{ component "button" (dict "text" "Accept and continue") }}
 {{- template "form-close" . }}

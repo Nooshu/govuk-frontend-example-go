@@ -20,10 +20,10 @@ func TestPageTitle(t *testing.T) {
 		errors           bool
 		want             string
 	}{
-		{"Apply for a rod fishing licence", "Apply for a rod fishing licence", false, "Apply for a rod fishing licence – GOV.UK"},
-		{"What is your name?", "Apply for a rod fishing licence", false, "What is your name? – Apply for a rod fishing licence – GOV.UK"},
-		{"What is your name?", "Apply for a rod fishing licence", true, "Error: What is your name? – Apply for a rod fishing licence – GOV.UK"},
-		{"Apply for a rod fishing licence", "Apply for a rod fishing licence", true, "Error: Apply for a rod fishing licence – GOV.UK"},
+		{"Apply for a fishing rod licence", "Apply for a fishing rod licence", false, "Apply for a fishing rod licence – GOV.UK"},
+		{"What is your full name?", "Apply for a fishing rod licence", false, "What is your full name? – Apply for a fishing rod licence – GOV.UK"},
+		{"What is your full name?", "Apply for a fishing rod licence", true, "Error: What is your full name? – Apply for a fishing rod licence – GOV.UK"},
+		{"Apply for a fishing rod licence", "Apply for a fishing rod licence", true, "Error: Apply for a fishing rod licence – GOV.UK"},
 	}
 	for _, tc := range cases {
 		if got := htmlutil.PageTitle(tc.heading, tc.service, tc.errors); got != tc.want {

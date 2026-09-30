@@ -390,7 +390,7 @@ func cookieBanner(current *session.Session) map[string]any {
 	}
 	return map[string]any{
 		"messages": []any{map[string]any{
-			"headingText": "Cookies on Apply for a rod fishing licence",
+			"headingText": "Cookies on Apply for a fishing rod licence",
 			"text":        "We use analytics cookies to understand how you use this example service. This example does not set analytics cookies.",
 			"actions": []any{
 				map[string]any{"text": "Accept analytics cookies", "type": "submit", "name": "cookies", "value": "accept"},

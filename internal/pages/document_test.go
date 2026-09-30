@@ -19,7 +19,7 @@ func TestRenderDocuments(t *testing.T) {
 	english := session.New()
 	html, err := renderer.Render(View{
 		Template:     "start",
-		Heading:      "Apply for a rod fishing licence",
+		Heading:      "Apply for a fishing rod licence",
 		ShowFeedback: true,
 		Context:      map[string]any{},
 	}, english, "/start?from=home")
@@ -79,21 +79,20 @@ func TestRenderDocuments(t *testing.T) {
 	withErrors.CookieChoice = session.ChoiceAccept
 	errorHTML, err := renderer.Render(View{
 		Template:  "name",
-		Heading:   "What is your name?",
+		Heading:   "What is your full name?",
 		HasErrors: true,
-		BackLink:  map[string]any{"text": "Back", "href": "/task-list"},
+		BackLink:  map[string]any{"text": "Back", "href": "/licence-length"},
 		Personal:  true,
 		Context: map[string]any{
 			"errorSummary": map[string]any{"titleText": "There is a problem"},
 			"returnTo":     "check-answers",
-			"firstName":    map[string]any{"name": "first-name"},
-			"lastName":     map[string]any{"name": "last-name"},
+			"fullName":     map[string]any{"name": "full-name"},
 		},
 	}, withErrors, "/name")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(errorHTML, "Error: What is your name?") {
+	if !strings.Contains(errorHTML, "Error: What is your full name?") {
 		t.Fatal("error title missing")
 	}
 	if strings.Contains(errorHTML, "cookie-banner") && strings.Contains(errorHTML, "Cookies on Apply") {
@@ -111,25 +110,20 @@ func TestRenderDocuments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	address, err := renderer.Render(View{
-		Template:     "address",
-		Heading:      "Address",
-		BackLink:     map[string]any{"href": "/start-month", "text": "Back"},
+	email, err := renderer.Render(View{
+		Template: "email",
+		Heading:  "What is your email address?",
+		BackLink: map[string]any{"href": "/where-you-will-fish", "text": "Back"},
 		ExitThisPage: map[string]any{"redirectUrl": "https://www.bbc.co.uk/weather"},
 		Context: map[string]any{
-			"fieldset": map[string]any{"legend": map[string]any{"text": "Address"}},
-			"line1":    map[string]any{"name": "address-line-1"},
-			"line2":    nil,
-			"town":     map[string]any{"name": "town"},
-			"postcode": map[string]any{"name": "postcode"},
-			"enctype":  "multipart/form-data",
+			"email": map[string]any{"name": "email"},
 		},
-	}, session.New(), "/address")
+	}, session.New(), "/email")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(address, "exit-this-page") || !strings.Contains(address, "multipart/form-data") {
-		t.Fatal("address page did not compose its slots")
+	if !strings.Contains(email, "exit-this-page") {
+		t.Fatal("email page did not compose its slots")
 	}
 
 	demos := newTestRenderer(t, func(string, map[string]any) (string, error) {
@@ -226,7 +220,7 @@ func newTestRenderer(t *testing.T, renderFn render.Func) *Renderer {
 			return Assets{StylesheetHref: "/assets/application.css", AppModuleHref: "/assets/app.mjs"}
 		},
 		JSEnabledSnippet: "snippet",
-		ServiceName:      "Apply for a rod fishing licence",
+		ServiceName:      "Apply for a fishing rod licence",
 		ServiceNameCy:    "Gwneud cais am drwydded bysgota",
 		FrontendVersion:  "6.5.1",
 	})

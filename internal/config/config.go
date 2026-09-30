@@ -14,7 +14,7 @@ import (
 )
 
 // ServiceName is the English service name used in the header, page titles, and phase banner.
-const ServiceName = "Apply for a rod fishing licence"
+const ServiceName = "Apply for a fishing rod licence"
 
 // ServiceNameCy is the Welsh service name used on the Welsh start page.
 const ServiceNameCy = "Gwneud cais am drwydded bysgota"

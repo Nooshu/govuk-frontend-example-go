@@ -34,26 +34,20 @@ func equal(got, want []string) bool {
 func TestValidateName(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		first, last string
-		want        []string
+		name string
+		want []string
 	}{
-		"both given":    {"Ada", "Lovelace", nil},
-		"trimmed":       {"  Ada  ", " Lovelace ", nil},
-		"both missing":  {"", "   ", []string{"first-name", "last-name"}},
-		"first missing": {"", "Lovelace", []string{"first-name"}},
-		"last missing":  {"Ada", "", []string{"last-name"}},
-		"first too long": {
-			strings.Repeat("a", 101), "Lovelace", []string{"first-name"},
-		},
-		"last too long": {
-			"Ada", strings.Repeat("a", 101), []string{"last-name"},
-		},
+		"given":     {"Ada Lovelace", nil},
+		"trimmed":   {"  Ada Lovelace  ", nil},
+		"missing":   {"", []string{"full-name"}},
+		"too short": {"A", []string{"full-name"}},
+		"too long":  {strings.Repeat("a", 101), []string{"full-name"}},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			if got := fields(service.ValidateName(test.first, test.last)); !equal(got, test.want) {
-				t.Errorf("ValidateName(%q, %q) failed on %v, want %v", test.first, test.last, got, test.want)
+			if got := fields(service.ValidateName(test.name)); !equal(got, test.want) {
+				t.Errorf("ValidateName(%q) failed on %v, want %v", test.name, got, test.want)
 			}
 		})
 	}
@@ -65,21 +59,19 @@ func TestValidateDateOfBirth(t *testing.T) {
 		day, month, year string
 		want             string
 	}{
-		"a real date":      {"10", "12", "1990", ""},
-		"missing day":      {"", "12", "1990", "must include a day"},
-		"missing month":    {"10", "", "1990", "must include a day"},
-		"missing year":     {"10", "12", "", "must include a day"},
-		"not numbers":      {"tenth", "12", "1990", "must be a real date"},
-		"month too long":   {"10", "123", "1990", "must be a real date"},
-		"two-digit year":   {"10", "12", "90", "must be a real date"},
-		"31 February":      {"31", "2", "1990", "must be a real date"},
-		"month 13":         {"10", "13", "1990", "must be a real date"},
-		"in the future":    {"2", "3", "2026", "must be in the past"},
-		"exactly 13 today": {"1", "3", "2013", ""},
-		"a day under 13":   {"2", "3", "2013", "13 or over"},
-		"under 13 by month": {
-			"1", "4", "2013", "13 or over",
-		},
+		"a real date":       {"10", "12", "1990", ""},
+		"missing day":       {"", "12", "1990", "Enter your date of birth"},
+		"missing month":     {"10", "", "1990", "Enter your date of birth"},
+		"missing year":      {"10", "12", "", "Enter your date of birth"},
+		"not numbers":       {"tenth", "12", "1990", "Enter a real date of birth"},
+		"month too long":    {"10", "123", "1990", "Enter a real date of birth"},
+		"two-digit year":    {"10", "12", "90", "Enter a real date of birth"},
+		"31 February":       {"31", "2", "1990", "Enter a real date of birth"},
+		"month 13":          {"10", "13", "1990", "Enter a real date of birth"},
+		"in the future":     {"2", "3", "2026", "must be in the past"},
+		"exactly 13 today":  {"1", "3", "2013", ""},
+		"a day under 13":    {"2", "3", "2013", "at least 13"},
+		"under 13 by month": {"1", "4", "2013", "at least 13"},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -115,134 +107,31 @@ func TestValidateEmail(t *testing.T) {
 	}
 }
 
-func TestValidateContactPreference(t *testing.T) {
+func TestValidateCountry(t *testing.T) {
 	t.Parallel()
-	tests := map[string]struct {
-		contactBy, telephone string
-		want                 []string
-	}{
-		"email":                 {"email", "", nil},
-		"telephone with number": {"telephone", "01632 960 001", nil},
-		"nothing chosen":        {"", "", []string{"contact-by"}},
-		"unknown choice":        {"pigeon", "", []string{"contact-by"}},
-		"telephone without a number": {
-			"telephone", "  ", []string{"telephone"},
-		},
-		"a number that is not one": {"email", "not a number", []string{"telephone"}},
+	for _, country := range []string{"England", "Wales", "Scotland"} {
+		if got := service.ValidateCountry(country); len(got) != 0 {
+			t.Errorf("ValidateCountry(%q) failed", country)
+		}
 	}
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			if got := fields(service.ValidateContactPreference(test.contactBy, test.telephone)); !equal(got, test.want) {
-				t.Errorf("got %v, want %v", got, test.want)
-			}
-		})
+	if got := service.ValidateCountry(""); len(got) != 1 {
+		t.Error("an empty country was accepted")
+	}
+	if got := service.ValidateCountry("atlantis"); len(got) != 1 {
+		t.Error("an unknown country was accepted")
 	}
 }
 
-func TestValidateRegions(t *testing.T) {
+func TestValidateLicenceLength(t *testing.T) {
 	t.Parallel()
-	tests := map[string]struct {
-		regions []string
-		want    string
-	}{
-		"one region":          {[]string{"wales"}, ""},
-		"several regions":     {[]string{"wales", "midlands"}, ""},
-		"not decided":         {[]string{service.NotSure}, ""},
-		"nothing selected":    {nil, "Select where you will fish"},
-		"not decided and one": {[]string{service.NotSure, "wales"}, "or select that you have not decided"},
-		"unknown region":      {[]string{"atlantis"}, "Select where you will fish"},
-	}
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			got := service.ValidateRegions(test.regions)
-			if test.want == "" {
-				if len(got) != 0 {
-					t.Fatalf("want no errors, got %q", got[0].Text)
-				}
-				return
-			}
-			if len(got) != 1 || !strings.Contains(got[0].Text, test.want) {
-				t.Fatalf("got %v, want a message containing %q", got, test.want)
-			}
-		})
-	}
-}
-
-func TestValidateLicenceLengthAndStartMonth(t *testing.T) {
-	t.Parallel()
-	if got := service.ValidateLicenceLength("12-month"); len(got) != 0 {
+	if got := service.ValidateLicenceLength("12-months"); len(got) != 0 {
 		t.Error("a known licence length was rejected")
 	}
 	if got := service.ValidateLicenceLength("forever"); len(got) != 1 {
 		t.Error("an unknown licence length was accepted")
 	}
-	if got := service.ValidateStartMonth("2026-03", now); len(got) != 0 {
-		t.Error("the current month was rejected")
-	}
-	if got := service.ValidateStartMonth("2020-01", now); len(got) != 1 {
-		t.Error("a month in the past was accepted")
-	}
-}
-
-func TestValidateAddress(t *testing.T) {
-	t.Parallel()
-	tests := map[string]struct {
-		line1, town, postcode string
-		want                  []string
-	}{
-		"complete":         {"1 Example Street", "Exampleton", "SW1A 1AA", nil},
-		"lower case entry": {"1 Example Street", "Exampleton", "sw1a1aa", nil},
-		"nothing":          {"", "", "", []string{"address-line-1", "town", "postcode"}},
-		"line 1 too long": {
-			strings.Repeat("a", 101), "Exampleton", "SW1A 1AA", []string{"address-line-1"},
-		},
-		"postcode too short": {"1 Example Street", "Exampleton", "SW1", []string{"postcode"}},
-		"not a postcode":     {"1 Example Street", "Exampleton", "NOTAPOSTCODE", []string{"postcode"}},
-	}
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			if got := fields(service.ValidateAddress(test.line1, test.town, test.postcode)); !equal(got, test.want) {
-				t.Errorf("got %v, want %v", got, test.want)
-			}
-		})
-	}
-}
-
-func TestValidateOptionalQuestions(t *testing.T) {
-	t.Parallel()
-	for _, accepted := range []string{"", "licence.pdf", "PHOTO.JPEG", "scan.jpg", "scan.png"} {
-		if got := service.ValidateEvidence(accepted); len(got) != 0 {
-			t.Errorf("ValidateEvidence(%q) failed", accepted)
-		}
-	}
-	if got := service.ValidateEvidence("virus.exe"); len(got) != 1 {
-		t.Error("an unsupported file type was accepted")
-	}
-
-	if got := service.ValidateAdditionalDetails(""); len(got) != 0 {
-		t.Error("empty details were rejected")
-	}
-	if got := service.ValidateAdditionalDetails(strings.Repeat("é", 200)); len(got) != 0 {
-		t.Error("200 characters were rejected; the limit counts characters, not bytes")
-	}
-	if got := service.ValidateAdditionalDetails(strings.Repeat("a", 201)); len(got) != 1 {
-		t.Error("201 characters were accepted")
-	}
-}
-
-func TestValidatePassword(t *testing.T) {
-	t.Parallel()
-	if got := service.ValidatePassword("correct horse", "correct horse"); len(got) != 0 {
-		t.Error("a matching password was rejected")
-	}
-	if got := fields(service.ValidatePassword("short", "short")); !equal(got, []string{"password"}) {
-		t.Errorf("a short password reported %v", got)
-	}
-	if got := fields(service.ValidatePassword("correct horse", "battery staple")); !equal(got, []string{"password-confirm"}) {
-		t.Errorf("a mismatch reported %v", got)
+	if got := service.ValidateLicenceLength("12-month"); len(got) != 1 {
+		t.Error("the old 12-month value was accepted")
 	}
 }
 
@@ -258,31 +147,9 @@ func TestValidateCookieChoice(t *testing.T) {
 	}
 }
 
-func TestNormalisePostcode(t *testing.T) {
-	t.Parallel()
-	tests := map[string]string{
-		"sw1a1aa":   "SW1A 1AA",
-		" SW1A 1AA": "SW1A 1AA",
-		"m11ae":     "M1 1AE",
-		"M1":        "",
-		"":          "",
-	}
-	for input, want := range tests {
-		if got := service.NormalisePostcode(input); got != want {
-			t.Errorf("NormalisePostcode(%q) = %q, want %q", input, got, want)
-		}
-	}
-}
-
 func TestNarrowingPostedValues(t *testing.T) {
 	t.Parallel()
-	if service.AsContactBy("email") != "email" || service.AsContactBy("telephone") != "telephone" {
-		t.Error("a known contact method was dropped")
-	}
-	if service.AsContactBy("pigeon") != "" {
-		t.Error("an unknown contact method was kept")
-	}
-	for _, known := range []string{"1-day", "8-day", "12-month"} {
+	for _, known := range []string{"1-day", "8-days", "12-months"} {
 		if service.AsLicenceLength(known) != known {
 			t.Errorf("licence length %q was dropped", known)
 		}

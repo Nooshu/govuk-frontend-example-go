@@ -1,6 +1,7 @@
 package session_test
 
 import (
+	"strings"
 	"sync"
 	"testing"
 	"testing/synctest"
@@ -44,11 +45,17 @@ func TestNewIsNotStored(t *testing.T) {
 }
 
 func TestReferenceFor(t *testing.T) {
-	if got := session.ReferenceFor("abcdef123456"); got != "RLABCDEF" {
+	if got := session.ReferenceFor("abcdef123456"); got != "FR82400018" {
 		t.Fatalf("got %q", got)
 	}
-	if got := session.ReferenceFor("ab"); got != "RLAB" {
+	if got := session.ReferenceFor("ab"); got != "FR00000171" {
 		t.Fatalf("short id: got %q", got)
+	}
+	if got := session.ReferenceFor("zzzzzzzz"); got != "FR00000000" {
+		t.Fatalf("invalid hex should return FR00000000, got %q", got)
+	}
+	if !strings.HasPrefix(session.ReferenceFor("deadbeef"), "FR") {
+		t.Fatal("reference must start with FR")
 	}
 }
 

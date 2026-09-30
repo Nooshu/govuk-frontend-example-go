@@ -5,6 +5,7 @@ package session
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -101,13 +102,24 @@ func (s *MemoryStore) Save(session *Session) {
 
 // ReferenceFor builds the confirmation reference shown to the applicant.
 //
-// It is derived from the session id so the same application always quotes the same reference.
+// It is derived from the session id so the same application always quotes the same reference:
+// `FR` plus eight decimal digits.
 func ReferenceFor(sessionID string) string {
 	prefix := sessionID
-	if len(prefix) > 6 {
-		prefix = prefix[:6]
+	if len(prefix) > 8 {
+		prefix = prefix[:8]
 	}
-	return "RL" + strings.ToUpper(prefix)
+	value, err := strconv.ParseUint(prefix, 16, 64)
+	if err != nil {
+		value = 0
+	}
+	digits := strconv.FormatUint(value, 10)
+	if len(digits) < 8 {
+		digits = strings.Repeat("0", 8-len(digits)) + digits
+	} else if len(digits) > 8 {
+		digits = digits[len(digits)-8:]
+	}
+	return "FR" + digits
 }
 
 func randomHex(size int) string {

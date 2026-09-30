@@ -1,8 +1,5 @@
-// Package service holds the rod fishing licence example journey.
+// Package service holds the fishing rod licence example journey.
 //
-// It models applicant answers, step order, validation, save handlers, and the
-// field builders that emit GOV.UK component options for the page layer. Domain
-// rules stay here; HTTP routing and sessions stay in package app.
-//
-// See docs/example-service.md and docs/content-and-forms.md.
+// It owns the answers, the question order, validation, and the component options each page
+// needs. The HTTP handlers call into this package and keep no journey logic of their own.
 package service

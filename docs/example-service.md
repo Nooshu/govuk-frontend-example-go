@@ -1,6 +1,6 @@
 # Example service
 
-**Apply for a rod fishing licence** is the reference GOV.UK service in this repository. It is an example. It does not take payment, send email, or issue a licence.
+**Apply for a fishing rod licence** is the reference GOV.UK service in this repository. It is an example. It does not take payment, send email, or issue a licence.
 
 Every HTML page shows an **Important** notification banner (“This is a live demo. It is not a real government service.”), styled yellow via `.app-demo-banner` so it stands out from the blue header/footer, and a phase banner that repeats that it is a demonstration. Search engines are told to stay away: `meta robots` and `X-Robots-Tag` are `noindex, nofollow`, and `/robots.txt` disallows all paths.
 
@@ -24,19 +24,18 @@ Public demo hosting: [deploying-on-render.md](deploying-on-render.md).
 The journey is one service, from the start page through to confirmation.
 
 1. Start at `/` (English) or `/cy` (Welsh start page only). Choose **Start now**.
-2. The task list at `/task-list` links to each question.
-3. Answer the questions in order: name, date of birth, email, contact preference, where you will fish, licence length, start month, address, evidence (optional), additional details (optional), and password.
-4. Check your answers at `/check-answers`. Change links return to a question and then come back.
-5. Submit. The confirmation page at `/confirmation` shows a reference. The password is not shown.
+2. Answer the questions in order: licence length, full name, date of birth, where you will fish, and email.
+3. Check your answers at `/check-answers`. Change links return to a question and then come back.
+4. Accept and continue. The confirmation page at `/confirmation` shows an example reference.
 
-Invalid answers stay on the same question, with an error summary and the values you entered. You cannot open confirmation until the required questions are complete.
+Invalid answers stay on the same question, with an error summary and the values you entered. You cannot open confirmation until the questions are complete.
 
 ## Pages
 
 | Path                                 | What it shows                                                                                                                                          |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `/` and `/cy`                        | Start page. Welsh is the start page and chrome only; the rest of the journey is in English. When demos are on, links to the component preview homepage |
-| `/task-list`                         | Task list, then the questions, check your answers, and confirmation                                                                                    |
+| `/licence-length` through `/email`   | Question pages, then check your answers and confirmation                                                                                               |
 | `/fees`, `/help`, `/guidance`        | Fees table, help accordion, and guidance tabs                                                                                                          |
 | `/updates`, `/cookies`               | Service updates with pagination, and cookie settings                                                                                                   |
 | `/accessibility`, `/about`           | Accessibility statement and what this example is                                                                                                       |
@@ -50,7 +49,7 @@ Question pages use one `h1`, `novalidate`, an error summary, and field errors. A
 
 ## Responses
 
-Pages and assets use the shared [baseline](frontend-security.md). Public HTML that sets the session cookie is `private, no-cache`, with a strong `ETag`. Question, task list, check your answers, confirmation, and cookie settings pages are `no-store`. The compiled Sass stylesheet (`application.css`), Frontend script, and the external `initAll()` module are fingerprinted and cached as immutable. The `js-enabled` snippet is the one line hashed in `baseline/policy.json`.
+Pages and assets use the shared [baseline](frontend-security.md). Public HTML that sets the session cookie is `private, no-cache`, with a strong `ETag`. Question, check your answers, confirmation, and cookie settings pages are `no-store`. The compiled Sass stylesheet (`application.css`), Frontend script, and the external `initAll()` module are fingerprinted and cached as immutable. The `js-enabled` snippet is the one line hashed in `baseline/policy.json`.
 
 The server compresses with Brotli when the browser sends `Accept-Encoding: br`. Gzip is only used when the browser does not advertise `br`. Local `npm start` is HTTP, so the session cookie is not `Secure` and responses do not send HSTS.
 
@@ -64,12 +63,10 @@ This runs the shared baseline suite and the Sass pipeline tests at **100%** line
 
 Component tests render **every** official fixture shipped with the pinned `govuk-frontend` release, including hidden fixtures. The comparison is Go `Render` output against the fixture `html` string. The renderer trims only the outer whitespace of its own output so that output can equal the fixture. Tests do not edit fixture HTML and do not normalise it before comparing.
 
-The service tests walk the licence journey, including validation, retained answers, check your answers, confirmation, cookies, Welsh, file upload, and the catalogue.
+The service tests walk the licence journey, including validation, retained answers, check your answers, confirmation, cookies, Welsh, and the catalogue.
 
 ## Limits
 
 - Sessions are stored in memory and end when the process stops.
-- The password is checked and then discarded. It is not stored or shown again.
 - A cookie choice is stored. This example does not set analytics cookies.
-- An upload stores the file name only, and only for PDF, PNG, or JPG.
 - Using this repo does not make a service assessment-ready. See [service-assessment-readiness.md](service-assessment-readiness.md).

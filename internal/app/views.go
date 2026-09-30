@@ -1,6 +1,6 @@
 package app
 
-// Page handlers and view models for the rod licence journey and demos.
+// Page handlers and view models for the fishing rod licence journey and demos.
 
 import (
 	"net/http"
@@ -26,7 +26,7 @@ func startView(lang string) pages.View {
 	return pages.View{
 		Template:     "start",
 		Status:       http.StatusOK,
-		Heading:      pick("Apply for a rod fishing licence", "Gwneud cais am drwydded bysgota"),
+		Heading:      pick("Apply for a fishing rod licence", "Gwneud cais am drwydded bysgota"),
 		Lang:         lang,
 		ShowFeedback: true,
 		Context: map[string]any{
@@ -37,7 +37,7 @@ func startView(lang string) pages.View {
 			"timing": pick("Applying takes about 10 minutes.", "Mae’n cymryd tua 10 munud."),
 			"startButton": map[string]any{
 				"text":          pick("Start now", "Dechrau nawr"),
-				"href":          "/task-list",
+				"href":          "/licence-length",
 				"isStartButton": true,
 			},
 			"notification": map[string]any{
@@ -63,22 +63,11 @@ func startView(lang string) pages.View {
 			"details": map[string]any{
 				"summaryText": pick("What you will need", "Beth fydd ei angen arnoch"),
 				"html": pick(
-					`<ul class="govuk-list govuk-list--bullet"><li>Your name</li><li>Your date of birth</li><li>Your address</li></ul>`,
-					`<ul class="govuk-list govuk-list--bullet"><li>Eich enw</li><li>Eich dyddiad geni</li><li>Eich cyfeiriad</li></ul>`,
+					`<ul class="govuk-list govuk-list--bullet"><li>How long you need the licence</li><li>Your name</li><li>Your date of birth</li><li>The country where you will fish</li><li>Your email address</li></ul>`,
+					`<ul class="govuk-list govuk-list--bullet"><li>Pa mor hir mae angen y drwydded</li><li>Eich enw</li><li>Eich dyddiad geni</li><li>Y wlad lle byddwch yn pysgota</li><li>Eich cyfeiriad e-bost</li></ul>`,
 				),
 			},
 		},
-	}
-}
-
-func taskListView(current *session.Session) pages.View {
-	return pages.View{
-		Template: "task-list",
-		Status:   http.StatusOK,
-		Heading:  "Your application",
-		BackLink: map[string]any{"text": "Back", "href": "/"},
-		Personal: true,
-		Context:  map[string]any{"sections": service.TaskSections(current.Application)},
 	}
 }
 
@@ -86,13 +75,13 @@ func taskListView(current *session.Session) pages.View {
 //
 // The back link goes to check-your-answers when the applicant came from there, so changing one
 // answer returns them to their summary rather than walking them through the rest of the journey
-// again.
+// again. Otherwise it follows the linear journey, with the first question linking back to start.
 func (a *App) stepView(step service.Step, current *session.Session, r *http.Request, errs []service.FieldError) (pages.View, error) {
 	returnTo := ""
 	if r.URL.Query().Get("return") == "check-answers" {
 		returnTo = "check-answers"
 	}
-	back := "/task-list"
+	back := "/"
 	if returnTo != "" {
 		back = "/check-answers"
 	} else if previous, ok := service.PreviousStep(step.ID); ok {
@@ -123,35 +112,21 @@ func (a *App) stepView(step service.Step, current *session.Session, r *http.Requ
 func (a *App) stepContext(step service.Step, current *session.Session, errs []service.FieldError) (map[string]any, error) {
 	application := current.Application
 	switch step.ID {
-	case service.StepName:
-		return service.NameFields(application, errs), nil
-	case service.StepDateOfBirth:
-		return service.DateField(application, errs), nil
-	case service.StepEmail:
-		return service.EmailField(application, errs), nil
-	case service.StepContactPreference:
-		return service.ContactFields(a.components, application, errs)
-	case service.StepWhereYouWillFish:
-		return service.RegionFields(application, errs), nil
 	case service.StepLicenceLength:
 		return service.LicenceFields(application, errs), nil
-	case service.StepStartMonth:
-		return service.MonthField(application, errs, a.now()), nil
-	case service.StepAddress:
-		return service.AddressFields(application, errs), nil
-	case service.StepEvidence:
-		context := service.EvidenceField(application, errs)
-		context["enctype"] = "multipart/form-data"
-		return context, nil
-	case service.StepAdditionalDetails:
-		return service.DetailsField(application, errs), nil
+	case service.StepName:
+		return service.NameField(application, errs), nil
+	case service.StepDateOfBirth:
+		return service.DateField(application, errs), nil
+	case service.StepWhereYouWillFish:
+		return service.CountryFields(application, errs), nil
 	default:
-		return service.PasswordFields(errs), nil
+		return service.EmailField(application, errs), nil
 	}
 }
 
-// checkAnswersGet shows the summary, but only once every required question is answered and
-// before the application is submitted.
+// checkAnswersGet shows the summary, but only once every question is answered and before the
+// application is submitted.
 func (a *App) checkAnswersGet(current *session.Session) outcome {
 	if current.Application.Submitted {
 		return outcome{redirect: "/confirmation"}
@@ -163,16 +138,16 @@ func (a *App) checkAnswersGet(current *session.Session) outcome {
 		Template:    "check-answers",
 		Status:      http.StatusOK,
 		Heading:     "Check your answers",
-		BackLink:    map[string]any{"text": "Back", "href": "/create-a-password"},
+		BackLink:    map[string]any{"text": "Back", "href": "/email"},
 		MainClasses: "govuk-main-wrapper--l",
 		Personal:    true,
-		Context:     map[string]any{"rows": service.SummaryRows(current.Application, a.now())},
+		Context:     map[string]any{"rows": service.SummaryRows(current.Application)},
 	}}
 }
 
 func confirmationGet(current *session.Session) outcome {
 	if !current.Application.Submitted {
-		return outcome{redirect: "/task-list"}
+		return outcome{redirect: "/"}
 	}
 	return outcome{view: &pages.View{
 		Template:     "confirmation",
