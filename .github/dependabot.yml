@@ -5,9 +5,7 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
-    # Prefer exact bumps that match save-exact / pinned package.json entries.
     versioning-strategy: increase
-    # Slow day-0 malicious publishes: wait a few days before opening version PRs.
     cooldown:
       default-days: 3
       semver-major-days: 7
