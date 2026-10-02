@@ -155,22 +155,39 @@ func ResolvePort(getenv func(string) string) (int, error) {
 	return port, nil
 }
 
-// ResolveListenAddr returns the TCP address for [net.Listen].
+// ResolveListen returns the network and address for [net.Listen].
 //
 // PORT chooses the port ([DefaultPort] when unset). HOST chooses the interface:
-//   - unset or empty — all interfaces (`:PORT`), required on Render and similar hosts
-//   - `127.0.0.1` — local-only binding for a locked-down laptop
-//   - `0.0.0.0` — explicit all-interfaces bind
-func ResolveListenAddr(getenv func(string) string) (string, error) {
+//   - unset or empty — 0.0.0.0, the IPv4 wildcard
+//   - 127.0.0.1 — local-only binding for a locked-down laptop
+//   - an IPv6 literal — that address, on tcp6
+//
+// The default is IPv4 on purpose. [net.Listen] with network "tcp" and an
+// unspecified address (":PORT" or "0.0.0.0:PORT") opens an IPv6 socket, which
+// logs as [::]:PORT. Render's port scan only detects an IPv4 listener on
+// 0.0.0.0, so that socket makes a healthy process fail deploy with
+// "no open ports detected". See https://render.com/docs/web-services#port-binding.
+func ResolveListen(getenv func(string) string) (network, address string, err error) {
 	port, err := ResolvePort(getenv)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	host := getenv("HOST")
 	if host == "" {
-		return fmt.Sprintf(":%d", port), nil
+		host = "0.0.0.0"
 	}
-	return net.JoinHostPort(host, strconv.Itoa(port)), nil
+	return listenNetwork(host), net.JoinHostPort(host, strconv.Itoa(port)), nil
+}
+
+// listenNetwork picks tcp4 unless host is an IPv6 literal.
+//
+// A non-IP host such as "localhost" stays on tcp4 so the socket is an IPv4
+// listener. IPv6 literals need tcp6, or Listen rejects the address.
+func listenNetwork(host string) string {
+	if ip := net.ParseIP(host); ip != nil && ip.To4() == nil {
+		return "tcp6"
+	}
+	return "tcp4"
 }
 
 func isRoot(dir string) bool {

@@ -6,12 +6,12 @@ Authoritative Render docs: [Language support](https://render.com/docs/language-s
 
 ## What this repo already includes
 
-| File                                                    | Role                                                      |
-| ------------------------------------------------------- | --------------------------------------------------------- |
-| [`render.yaml`](../render.yaml)                         | Blueprint: free web service, build/start, `/health` check |
-| [`scripts/render-build.sh`](../scripts/render-build.sh) | `npm ci` → Sass → `go build -o bin/server`                |
-| `cmd/server`                                            | Binds all interfaces by default; honours Render’s `PORT`  |
-| `GET /health`                                           | Plain `ok` for Render health checks                       |
+| File                                                    | Role                                                            |
+| ------------------------------------------------------- | --------------------------------------------------------------- |
+| [`render.yaml`](../render.yaml)                         | Blueprint: free web service, build/start, `/health` check       |
+| [`scripts/render-build.sh`](../scripts/render-build.sh) | `npm ci` → Sass → `go build -o bin/server`                      |
+| `cmd/server`                                            | Binds `0.0.0.0` with `tcp4` by default; honours Render’s `PORT` |
+| `GET /health`                                           | Plain `ok` for Render health checks                             |
 
 Build artefacts kept at runtime: `bin/server`, `node_modules/govuk-frontend`, `dist/stylesheets/application.css`.
 
@@ -73,13 +73,13 @@ Use this if you prefer clicking through the UI without a Blueprint.
 4. **Advanced** → **Health Check Path:** `/health`
 5. **Environment** (optional):
 
-   | Key             | Value    | Notes                                                             |
-   | --------------- | -------- | ----------------------------------------------------------------- |
-   | `NODE_VERSION`  | `22`     | Matches `.nvmrc` / `package.json` engines                         |
-   | `DEMOS_ENABLED` | `true`   | Keeps `/components` and Developer previews on (see below)         |
-   | `NODE_ENV`      | _(omit)_ | Render may set `production`; demos still on via `DEMOS_ENABLED`   |
-   | `HOST`          | _(omit)_ | Default binds all interfaces; only set if you need a special bind |
-   | `PORT`          | _(omit)_ | Render injects this automatically                                 |
+   | Key             | Value    | Notes                                                               |
+   | --------------- | -------- | ------------------------------------------------------------------- |
+   | `NODE_VERSION`  | `22`     | Matches `.nvmrc` / `package.json` engines                           |
+   | `DEMOS_ENABLED` | `true`   | Keeps `/components` and Developer previews on (see below)           |
+   | `NODE_ENV`      | _(omit)_ | Render may set `production`; demos still on via `DEMOS_ENABLED`     |
+   | `HOST`          | _(omit)_ | Default is `0.0.0.0` on IPv4; set `127.0.0.1` only for a local bind |
+   | `PORT`          | _(omit)_ | Render injects this automatically                                   |
 
 6. Create the service and wait for the deploy.
 
@@ -88,7 +88,7 @@ Use this if you prefer clicking through the UI without a Blueprint.
 | Variable        | Required | Default / behaviour                                            |
 | --------------- | -------- | -------------------------------------------------------------- |
 | `PORT`          | Injected | Render sets this; the server reads it via `config.ResolvePort` |
-| `HOST`          | No       | Empty → listen on all interfaces (`:PORT`)                     |
+| `HOST`          | No       | Empty → `0.0.0.0` on `tcp4`. An IPv6 literal uses `tcp6`       |
 | `DEMOS_ENABLED` | No       | Blueprint sets `true` so catalogue/previews stay on            |
 | `NODE_ENV`      | No       | `production` turns demos off unless `DEMOS_ENABLED` overrides  |
 | `NODE_VERSION`  | No       | Set to `22` in the Blueprint so npm tooling matches local      |
@@ -125,16 +125,17 @@ NODE_ENV=production PORT=3000 ./bin/server
 
 ## Troubleshooting
 
-| Symptom                                    | Likely fix                                                                                                                    |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| Build fails on `npm ci` / engine           | Ensure `NODE_VERSION=22`; lockfile committed; `engine-strict` in `.npmrc`                                                     |
-| Build fails on Go version                  | Render uses latest stable Go 1.x; this module needs Go ≥1.27 — redeploy after Render updates, or switch the service to Docker |
-| Deploy live but connection refused         | Confirm start command is `./bin/server` and listen addr is `:PORT` (not only `127.0.0.1`)                                     |
-| HTML without GOV.UK CSS                    | Build must run `npm run build:styles`; `dist/stylesheets/` must exist at runtime                                              |
-| Missing Frontend assets / fixtures         | Build must run `npm ci` so `node_modules/govuk-frontend` is present                                                           |
-| `/components` 404 or no Developer previews | Set `DEMOS_ENABLED=true` (Blueprint default), or unset `NODE_ENV` if you are not using the override                           |
-| Health check failing                       | Hit `/health` in logs; path must be exactly `/health`                                                                         |
-| Session lost between requests              | Expected after free-tier spin-down; or cookie blocked if mixed content                                                        |
+| Symptom                                       | Likely fix                                                                                                                                         |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Build fails on `npm ci` / engine              | Ensure `NODE_VERSION=22`; lockfile committed; `engine-strict` in `.npmrc`                                                                          |
+| Build fails on Go version                     | Render uses latest stable Go 1.x; this module needs Go ≥1.27 — redeploy after Render updates, or switch the service to Docker                      |
+| Port scan timeout; log shows `addr=[::]:PORT` | Go opened an IPv6 socket. Render only detects IPv4 on `0.0.0.0`. This service listens with `tcp4`. Redeploy; the log must show `addr=0.0.0.0:PORT` |
+| Deploy live but connection refused            | Confirm start command is `./bin/server` and the log shows `addr=0.0.0.0:PORT` (a `127.0.0.1` bind is unreachable)                                  |
+| HTML without GOV.UK CSS                       | Build must run `npm run build:styles`; `dist/stylesheets/` must exist at runtime                                                                   |
+| Missing Frontend assets / fixtures            | Build must run `npm ci` so `node_modules/govuk-frontend` is present                                                                                |
+| `/components` 404 or no Developer previews    | Set `DEMOS_ENABLED=true` (Blueprint default), or unset `NODE_ENV` if you are not using the override                                                |
+| Health check failing                          | Hit `/health` in logs; path must be exactly `/health`                                                                                              |
+| Session lost between requests                 | Expected after free-tier spin-down; or cookie blocked if mixed content                                                                             |
 
 ## Updating the live demo
 

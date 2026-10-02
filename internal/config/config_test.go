@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"errors"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -235,28 +236,43 @@ func TestResolvePort(t *testing.T) {
 	}
 }
 
-func TestResolveListenAddr(t *testing.T) {
+func TestResolveListen(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
 		environ map[string]string
-		want    string
+		network string
+		address string
 		wantErr bool
 	}{
 		"defaults": {
-			want: ":3000",
+			network: "tcp4",
+			address: "0.0.0.0:3000",
 		},
 		"port only": {
 			environ: map[string]string{"PORT": "8080"},
-			want:    ":8080",
+			network: "tcp4",
+			address: "0.0.0.0:8080",
 		},
 		"explicit all interfaces": {
 			environ: map[string]string{"HOST": "0.0.0.0", "PORT": "10000"},
-			want:    "0.0.0.0:10000",
+			network: "tcp4",
+			address: "0.0.0.0:10000",
 		},
 		"loopback only": {
 			environ: map[string]string{"HOST": "127.0.0.1", "PORT": "3000"},
-			want:    "127.0.0.1:3000",
+			network: "tcp4",
+			address: "127.0.0.1:3000",
+		},
+		"ipv6 loopback": {
+			environ: map[string]string{"HOST": "::1", "PORT": "3000"},
+			network: "tcp6",
+			address: "[::1]:3000",
+		},
+		"hostname stays on ipv4": {
+			environ: map[string]string{"HOST": "localhost", "PORT": "3000"},
+			network: "tcp4",
+			address: "localhost:3000",
 		},
 		"invalid port": {
 			environ: map[string]string{"PORT": "nope"},
@@ -273,20 +289,43 @@ func TestResolveListenAddr(t *testing.T) {
 				}
 				return test.environ[key]
 			}
-			got, err := config.ResolveListenAddr(getenv)
+			network, address, err := config.ResolveListen(getenv)
 			if test.wantErr {
 				if err == nil {
-					t.Fatalf("ResolveListenAddr = %q, want an error", got)
+					t.Fatalf("ResolveListen = %s %s, want an error", network, address)
 				}
 				return
 			}
 			if err != nil {
-				t.Fatalf("ResolveListenAddr: %v", err)
+				t.Fatalf("ResolveListen: %v", err)
 			}
-			if got != test.want {
-				t.Errorf("ResolveListenAddr = %q, want %q", got, test.want)
+			if network != test.network || address != test.address {
+				t.Errorf("ResolveListen = %s %s, want %s %s", network, address, test.network, test.address)
 			}
 		})
+	}
+}
+
+func TestResolveListenBindsIPv4ByDefault(t *testing.T) {
+	t.Parallel()
+
+	network, address, err := config.ResolveListen(func(key string) string {
+		if key == "PORT" {
+			return "0"
+		}
+		return ""
+	})
+	if err != nil {
+		t.Fatalf("ResolveListen: %v", err)
+	}
+	listener, err := net.Listen(network, address)
+	if err != nil {
+		t.Fatalf("Listen(%s, %s): %v", network, address, err)
+	}
+	t.Cleanup(func() { _ = listener.Close() })
+
+	if got := listener.Addr().String(); !strings.HasPrefix(got, "0.0.0.0:") {
+		t.Fatalf("listener = %s, want an IPv4 wildcard on 0.0.0.0", got)
 	}
 }
 

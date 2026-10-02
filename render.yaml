@@ -21,3 +21,7 @@ services:
         value: "true"
       - key: NODE_VERSION
         value: "22"
+      # Go's "tcp" listen on an unspecified address is an IPv6 socket ([::]),
+      # which Render's port scan does not detect. 0.0.0.0 plus tcp4 is IPv4.
+      - key: HOST
+        value: "0.0.0.0"

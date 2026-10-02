@@ -76,7 +76,7 @@ tests/                    # Node tests for baseline + Sass
 
 ## Request lifecycle
 
-1. **Listen** — `cmd/server` binds `127.0.0.1` (local example), configures read/write/idle timeouts.
+1. **Listen** — `cmd/server` binds `0.0.0.0` on `tcp4` (so hosts such as Render detect the port) and configures read/write/idle timeouts. `HOST=127.0.0.1` limits that to loopback.
 2. **Route** — `app` ServeMux matches method + path (service steps, assets, demos when enabled).
 3. **Session** — open or create a session; set `rod_session` or `__Host-session` when HTTPS-shaped.
 4. **Handler** — validate POST (CSRF, body limits), update answers, choose view model.

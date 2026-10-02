@@ -5,9 +5,9 @@
 // the Sass pipeline, and component HTML comes from the Go port of Frontend's macros.
 //
 // Start it with `npm start`, which compiles the stylesheet first. PORT chooses the port
-// (default 3000). HOST selects the bind address (empty = all interfaces, for Render and other
-// cloud hosts; use HOST=127.0.0.1 for local-only). NODE_ENV=production turns off the component
-// catalogue and example pages unless DEMOS_ENABLED=true (used on the public Render demo).
+// (default 3000). HOST selects the bind address (empty = 0.0.0.0 on tcp4, which Render's
+// port scan can see; use HOST=127.0.0.1 for local-only). NODE_ENV=production turns off the
+// component catalogue and example pages unless DEMOS_ENABLED=true (used on the public Render demo).
 package main
 
 import (
@@ -43,7 +43,7 @@ func run(logger *slog.Logger) error {
 	if err != nil {
 		return err
 	}
-	addr, err := config.ResolveListenAddr(os.Getenv)
+	network, addr, err := config.ResolveListen(os.Getenv)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func run(logger *slog.Logger) error {
 		ErrorLog:          slog.NewLogLogger(logger.Handler(), slog.LevelWarn),
 	}
 
-	listener, err := net.Listen("tcp", addr)
+	listener, err := net.Listen(network, addr)
 	if err != nil {
 		return fmt.Errorf("listening on %s: %w", addr, err)
 	}
