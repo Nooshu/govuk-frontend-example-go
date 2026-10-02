@@ -1,0 +1,917 @@
+---
+description: Build a GOV.UK Frontend compatible server-rendered implementation using Go and html/template
+alwaysApply: true
+---
+
+# Project goal
+
+Build a server-rendered UK government service using Go and its standard `html/template` package that produces HTML compatible with GOV.UK Frontend.
+
+The project demonstrates that GOV.UK Frontend is independent of Nunjucks, Node.js, and client-side frontend frameworks.
+
+The authoritative rendering contract is the official GOV.UK Frontend fixture output belonging to the exact version installed by this project.
+
+Target 100% fixture parity for every implemented component.
+
+# Architecture
+
+```text
+GOV.UK Frontend fixture
+        |
+        v
+Go fixture model
+        |
+        v
+Go component model
+        |
+        v
+html/template
+        |
+        v
+Server-rendered HTML
+        |
+        v
+DOM comparison
+        |
+        v
+Expected GOV.UK HTML
+```
+
+The application must server-render the complete core experience.
+
+JavaScript may progressively enhance the resulting HTML using official GOV.UK Frontend JavaScript.
+
+Do not build a client-rendered application.
+
+# Technology
+
+Prefer the Go standard library wherever practical.
+
+Use:
+
+- current stable Go
+- `net/http`
+- `html/template`
+- `testing`
+- `encoding/json` where required
+- `gopkg.in/yaml.v3` for YAML fixture data
+- `golang.org/x/net/html` for standards-aware HTML parsing
+- Go modules
+
+Do not introduce a web framework unless it provides a clear requirement that cannot reasonably be satisfied by `net/http`.
+
+Do not introduce a third-party template engine.
+
+Use Go's standard `html/template` package.
+
+Keep third-party dependencies to a sensible minimum.
+
+# GOV.UK Frontend
+
+Pin an explicit GOV.UK Frontend version.
+
+GOV.UK Frontend is authoritative for:
+
+- component behaviour
+- component options
+- expected HTML
+- CSS
+- JavaScript
+- fonts
+- images and other assets
+- accessibility-related markup
+- ARIA attributes
+- data attributes
+
+Do not reimplement GOV.UK Frontend CSS.
+
+Do not reimplement GOV.UK Frontend client-side JavaScript.
+
+Use the official GOV.UK Frontend package as the source of frontend assets.
+
+# Component fixtures
+
+Use the official GOV.UK Frontend component fixtures belonging to the exact installed GOV.UK Frontend version.
+
+The fixtures are the compatibility contract.
+
+Before implementing a component:
+
+1. Inspect all upstream fixtures for the component.
+2. Inspect the expected HTML.
+3. Inspect the upstream Nunjucks macro when necessary to understand rendering behaviour.
+4. Understand the complete component API and interactions between options.
+5. Design an idiomatic Go component model.
+6. Implement the component using `html/template`.
+7. Run every applicable fixture against it.
+
+The upstream Nunjucks implementation may be studied as a behavioural reference.
+
+Nunjucks must not be required to render the Go implementation.
+
+Do not design the component around only the first, simplest, or currently failing fixture.
+
+# Component architecture
+
+Represent GOV.UK component options using Go structs.
+
+For example:
+
+```go
+type ButtonOptions struct {
+    Text       string
+    HTML       TrustedHTML
+    Type       string
+    Classes    string
+    Attributes map[string]string
+    Disabled   bool
+}
+```
+
+Use named types or constants where they genuinely improve safety and readability.
+
+Do not create unnecessary abstractions simply to reproduce patterns from TypeScript, Java, or another language.
+
+Prefer zero values where their semantics are clear and appropriate.
+
+Use pointers where it is genuinely necessary to distinguish:
+
+- an omitted value
+- a supplied zero value
+
+Do not use pointers indiscriminately.
+
+Keep component APIs explicit and understandable.
+
+Do not expose `html/template` implementation details through the public component API.
+
+A component must be renderable independently of an HTTP handler or request.
+
+Keep these concerns separate:
+
+- HTTP routing and handlers
+- application/domain logic
+- GOV.UK component models
+- template rendering
+- template helper functions
+- fixture loading
+- fixture mapping
+- HTML parsing and comparison
+- tests
+
+Do not put application business logic into templates.
+
+# Suggested project structure
+
+Prefer a simple structure similar to:
+
+```text
+cmd/
+  server/
+    main.go
+
+internal/
+  govuk/
+    components/
+      button.go
+      input.go
+      textarea.go
+      select.go
+      radios.go
+      checkboxes.go
+      error_summary.go
+
+    rendering/
+      renderer.go
+      functions.go
+
+    fixtures/
+      loader.go
+      mapper.go
+      compare.go
+
+  web/
+    handlers/
+
+templates/
+  govuk/
+    components/
+      button.html
+      input.html
+      textarea.html
+      select.html
+      radios.html
+      checkboxes.html
+      error-summary.html
+
+static/
+  govuk/
+
+tests/
+```
+
+Adapt the structure where a simpler arrangement is appropriate.
+
+Do not create packages merely for architectural symmetry.
+
+Follow normal Go package conventions.
+
+# html/template
+
+Use Go's standard `html/template` package.
+
+Take advantage of its contextual escaping.
+
+Templates should produce the minimum HTML structure required by GOV.UK Frontend.
+
+Do not introduce arbitrary wrapper elements.
+
+Do not change elements simply because another structure is easier to template.
+
+Preserve:
+
+- elements
+- element ordering
+- classes
+- attributes
+- IDs
+- names
+- values
+- ARIA relationships
+- data attributes
+- error markup
+- hint markup
+- fieldsets
+- legends
+- conditional content
+- nested component structures
+
+Keep template logic straightforward.
+
+Use template actions for normal rendering decisions.
+
+Where rendering logic becomes complicated, perform the transformation in Go and pass a suitable view model to the template.
+
+Do not create large amounts of application logic inside templates.
+
+# Template composition
+
+Use named templates to compose GOV.UK components where appropriate.
+
+For example:
+
+```gotemplate
+{{ define "govukButton" }}
+<button
+  type="{{ .Type }}"
+  class="govuk-button{{ with .Classes }} {{ . }}{{ end }}"
+  data-module="govuk-button"
+>
+  {{ .Text }}
+</button>
+{{ end }}
+```
+
+Reusable subcomponents should be composed rather than duplicated.
+
+Examples include:
+
+- labels
+- hints
+- error messages
+- fieldsets
+- legends
+- form groups
+
+Composition must not introduce differences from expected GOV.UK Frontend HTML.
+
+# Template loading
+
+Parse templates during application startup rather than reparsing them on every request.
+
+Fail application startup clearly if required templates cannot be parsed.
+
+Where practical, consider Go's `embed` package for templates and static resources that belong to the Go application.
+
+Do not make development convenience more important than production correctness.
+
+# Escaping and security
+
+Use `html/template` specifically because it provides contextual HTML escaping.
+
+Ordinary strings must be treated as untrusted.
+
+A GOV.UK Frontend option named `text` must be escaped.
+
+Do not convert normal strings to `template.HTML`.
+
+GOV.UK Frontend options named `html` require an explicit trusted HTML mechanism.
+
+If required, define a small abstraction such as:
+
+```go
+type TrustedHTML string
+```
+
+Only convert an explicitly trusted value to `template.HTML` at the rendering boundary.
+
+Never convert arbitrary user-controlled input to `template.HTML`.
+
+Never use `template.HTML` merely to make a fixture pass.
+
+Do not disable or bypass Go's normal contextual escaping without a clear, documented reason.
+
+The distinction between text and trusted HTML must be deliberate and testable.
+
+# Template helper functions
+
+Use `template.FuncMap` only where it makes templates clearer.
+
+Template functions must be:
+
+- deterministic
+- small
+- easy to test
+- concerned with rendering
+
+Do not hide substantial application logic inside template functions.
+
+Do not create helpers that return `template.HTML` unless their purpose is specifically to produce controlled trusted markup.
+
+Any helper returning trusted markup requires dedicated security tests.
+
+# Attributes
+
+Support arbitrary GOV.UK Frontend attributes where the upstream component exposes an `attributes` option.
+
+Do not concatenate arbitrary raw attribute strings.
+
+Render attribute names and values safely.
+
+Pay particular attention to:
+
+- `id`
+- `name`
+- `value`
+- `type`
+- `role`
+- `aria-*`
+- `data-*`
+- `disabled`
+- `checked`
+- `selected`
+- `autocomplete`
+- `for`
+
+Boolean attributes must follow valid HTML semantics.
+
+Attribute handling must be deterministic.
+
+If maps are used internally, do not rely on Go map iteration order where output ordering matters.
+
+Sort attribute keys before rendering if deterministic ordering is required.
+
+# Determinism
+
+Rendering must be deterministic.
+
+The same component options must produce equivalent output on every execution.
+
+Remember that Go deliberately does not guarantee map iteration order.
+
+Never depend on map iteration order for:
+
+- attributes
+- classes
+- fixture processing
+- expected rendering order
+
+Sort keys explicitly where ordering affects deterministic output or testing.
+
+# Fixture models
+
+Use dedicated Go structs for fixture data where practical.
+
+Fixture representations do not have to be identical to the public component API.
+
+Keep fixture parsing concerns separate from component rendering concerns.
+
+Use YAML struct tags appropriately.
+
+For example:
+
+```go
+type Fixture struct {
+    Name    string         `yaml:"name"`
+    Options map[string]any `yaml:"options"`
+    HTML    string         `yaml:"html"`
+}
+```
+
+Prefer stronger typing once the fixture structure is understood.
+
+Avoid spreading `map[string]any` throughout component rendering code.
+
+Convert generic fixture data into strongly typed component options at the fixture boundary.
+
+# Fixture testing
+
+Fixture testing must be data-driven.
+
+For every supported fixture:
+
+1. Load the upstream fixture data.
+2. Identify the component and fixture.
+3. Deserialize its options.
+4. Map the fixture options into the appropriate Go component model.
+5. Render the component using `html/template`.
+6. Obtain the expected GOV.UK Frontend HTML.
+7. Parse the actual HTML.
+8. Parse the expected HTML.
+9. Compare meaningful DOM structures.
+10. Produce a useful diagnostic diff when they differ.
+
+A new upstream fixture should normally be testable without adding a new Go test function.
+
+Use table-driven tests.
+
+For example:
+
+```go
+func TestButtonFixtures(t *testing.T) {
+    fixtures := loadButtonFixtures(t)
+
+    for _, fixture := range fixtures {
+        t.Run(fixture.Name, func(t *testing.T) {
+            actual := renderButton(t, fixture.Options)
+
+            assertHTMLEqual(
+                t,
+                fixture.HTML,
+                actual,
+            )
+        })
+    }
+}
+```
+
+# HTML parsing and comparison
+
+Use `golang.org/x/net/html` or another standards-aware Go HTML parser.
+
+Do not rely exclusively on raw string equality.
+
+Template engines may produce semantically irrelevant differences in whitespace or serialisation.
+
+Normalisation must be conservative.
+
+It may normalise genuinely insignificant differences where HTML semantics are unchanged.
+
+It must not hide differences involving:
+
+- missing elements
+- additional elements
+- element types
+- element ordering
+- text content
+- attributes
+- attribute values
+- classes
+- IDs
+- names
+- values
+- ARIA attributes
+- data attributes
+- form semantics
+- accessibility relationships
+
+Document every normalisation rule.
+
+Every non-trivial normalisation rule must have tests demonstrating:
+
+1. the irrelevant difference it intentionally ignores
+2. meaningful differences it still detects
+
+When a fixture parity test fails, assume the component implementation is incorrect before assuming the comparator is incorrect.
+
+Do not weaken the comparator merely to increase the fixture pass rate.
+
+# Useful failure output
+
+Fixture failures should be easy to diagnose.
+
+Where practical, report:
+
+- fixture name
+- component name
+- expected structure
+- actual structure
+- first meaningful difference
+
+Do not require developers to inspect an enormous raw HTML dump to identify a simple missing attribute.
+
+# Testing
+
+Use Go's standard `testing` package.
+
+Prefer table-driven tests.
+
+Use `t.Run()` for named fixture cases.
+
+Use `t.Helper()` in testing helpers.
+
+Tests must cover:
+
+- every supported official fixture
+- default options
+- optional options
+- text escaping
+- trusted HTML
+- custom classes
+- arbitrary attributes
+- IDs
+- ARIA attributes
+- data attributes
+- errors
+- hints
+- nested content
+- form values
+- checked states
+- selected states
+- disabled states
+- complex components
+- comparator behaviour
+- fixture parsing
+
+Do not introduce a third-party assertion framework unless it provides a clear benefit.
+
+Prefer standard Go testing where practical.
+
+# HTTP server
+
+Prefer `net/http`.
+
+Use modern standard-library routing capabilities where they meet the application's requirements.
+
+Handlers should be small.
+
+Handlers should:
+
+1. receive and validate HTTP input
+2. call application logic
+3. construct view/component models
+4. render the response
+
+Do not embed substantial GOV.UK component rendering logic directly inside handlers.
+
+# Error handling
+
+Return errors explicitly.
+
+Do not silently ignore template errors.
+
+Do not silently ignore fixture parsing errors.
+
+Wrap errors with useful context where appropriate using `%w`.
+
+For example:
+
+```go
+return fmt.Errorf("render govuk button: %w", err)
+```
+
+Avoid `panic` in normal request processing.
+
+A startup failure caused by invalid embedded templates may reasonably terminate the application.
+
+Tests should fail clearly when fixture loading or rendering fails.
+
+# Context
+
+Use `context.Context` for request-scoped cancellation, deadlines, and values where appropriate.
+
+Pass context explicitly.
+
+Do not store contexts in structs.
+
+Do not add context parameters to pure component rendering functions unless they genuinely require request-scoped behaviour.
+
+GOV.UK component rendering should normally be deterministic and independent of request context.
+
+# Concurrency
+
+Go provides excellent concurrency primitives, but do not introduce goroutines simply because they are available.
+
+Component rendering normally does not require explicit concurrency.
+
+Use concurrency only where it provides a clear application benefit.
+
+Always consider:
+
+- cancellation
+- error propagation
+- goroutine lifetime
+- shared state
+- race conditions
+
+The application must pass race detection where practical.
+
+# Shared state
+
+Avoid mutable global state.
+
+Parsed templates may be safely shared where Go's template concurrency guarantees allow it.
+
+Treat component options as request-specific values.
+
+Do not mutate shared template or component state during rendering.
+
+# Progressive enhancement
+
+The initial HTTP response must contain the complete core content and controls required for the journey.
+
+Use official GOV.UK Frontend JavaScript to progressively enhance components requiring client-side behaviour.
+
+The Go implementation is responsible for producing the correct initial HTML.
+
+Do not use JavaScript to repair incorrectly rendered server-side markup.
+
+Do not make JavaScript responsible for constructing essential initial component content.
+
+# Assets
+
+Use the official GOV.UK Frontend package as the source of:
+
+- CSS
+- JavaScript
+- fonts
+- images
+- other distributed assets
+
+Pin the GOV.UK Frontend version.
+
+Provide a reproducible mechanism for obtaining or building those assets.
+
+Node.js may be used as development/build tooling where required to obtain GOV.UK Frontend assets.
+
+Node.js must not participate in application runtime rendering.
+
+Do not silently depend on a CDN version that can change independently of the application.
+
+# Dependency management
+
+Use Go modules.
+
+Commit:
+
+```text
+go.mod
+go.sum
+```
+
+Keep dependencies minimal.
+
+Prefer the standard library where it provides an appropriate solution.
+
+Use established modules where third-party functionality is genuinely useful.
+
+Do not add a dependency for functionality that can be implemented clearly and safely with a few lines of standard-library Go.
+
+Run:
+
+```bash
+go mod tidy
+```
+
+after dependency changes.
+
+Review changes to `go.mod` and `go.sum`.
+
+# Dependency security
+
+Use appropriate Go vulnerability tooling.
+
+Where available in the development and CI environment, run:
+
+```bash
+govulncheck ./...
+```
+
+Keep Go and dependencies supported and up to date.
+
+Do not blindly update dependencies without running the complete test and fixture suite.
+
+# Formatting
+
+All Go source must be formatted using standard Go tooling.
+
+Run:
+
+```bash
+gofmt
+```
+
+or:
+
+```bash
+go fmt ./...
+```
+
+Do not introduce custom formatting conventions that conflict with normal Go style.
+
+# Static analysis
+
+Run:
+
+```bash
+go vet ./...
+```
+
+Use additional established static analysis tooling only where it provides clear value.
+
+Do not introduce large linting configurations merely to enforce subjective style preferences.
+
+# Race detection
+
+Where practical, CI should run:
+
+```bash
+go test -race ./...
+```
+
+This is particularly useful if the application introduces shared rendering infrastructure or concurrency.
+
+# Code quality
+
+Follow idiomatic Go.
+
+Prefer:
+
+- small packages
+- explicit dependencies
+- simple structs
+- composition
+- interfaces defined by consumers when genuinely useful
+- table-driven tests
+- explicit error handling
+- standard-library functionality
+- straightforward templates
+- clear package names
+
+Avoid:
+
+- Java-style class hierarchies
+- unnecessary interfaces
+- interfaces with only one implementation unless they provide genuine value
+- excessive abstraction
+- generic abstractions without a concrete need
+- mutable global state
+- reflection where normal Go is clearer
+- HTML string concatenation
+- premature concurrency
+- unnecessary JavaScript
+- architecture copied directly from TypeScript or another implementation
+
+Do not create getters and setters simply to imitate object-oriented languages.
+
+Do not create an interface solely to make a struct mockable.
+
+Design the Go implementation as Go.
+
+# Performance
+
+Do not prematurely optimise component rendering.
+
+Correctness and fixture parity come first.
+
+However:
+
+- parse templates once rather than once per request
+- avoid unnecessary allocations where obvious
+- avoid unnecessary reflection
+- do not perform filesystem template discovery on every request
+- keep request paths simple
+
+Benchmark only where there is a meaningful performance question.
+
+Use Go benchmarks where appropriate:
+
+```go
+func BenchmarkButtonRender(b *testing.B) {
+    // ...
+}
+```
+
+Do not sacrifice readability or correctness for speculative micro-optimisation.
+
+# Accessibility
+
+Accessibility-related markup is part of the compatibility contract.
+
+Preserve expected:
+
+- semantic HTML
+- labels
+- legends
+- fieldsets
+- IDs
+- `for` relationships
+- hint associations
+- error associations
+- `aria-describedby`
+- `aria-labelledby`
+- roles
+- live regions
+- visually hidden content
+
+Do not change accessibility markup because an alternative appears equivalent without first confirming that it remains compatible with the GOV.UK Frontend contract.
+
+Fixture parity does not replace wider accessibility testing.
+
+The resulting example service should still follow WCAG 2.2 AA and GOV.UK accessibility guidance.
+
+# Forbidden shortcuts
+
+Never:
+
+- modify an upstream fixture to make a test pass
+- modify expected HTML to match the Go implementation
+- special-case an individual fixture by name
+- hard-code expected fixture output
+- copy pre-rendered fixture HTML into a component
+- weaken the comparator to hide a genuine difference
+- invoke Nunjucks at application runtime
+- invoke Node.js to generate production component HTML
+- call another GOV.UK implementation at runtime
+- use React, Vue, Angular, Svelte, or another client-side framework to construct core GOV.UK component markup
+- replace GOV.UK Frontend CSS
+- unnecessarily replace GOV.UK Frontend JavaScript
+- bypass `html/template` escaping to make tests pass
+- use JavaScript to repair server-rendered fixture incompatibilities
+
+If a fixture cannot currently be implemented correctly, leave the limitation visible and document it rather than cheating the compatibility test.
+
+# CI
+
+CI must at minimum run:
+
+```bash
+go fmt ./...
+go vet ./...
+go test ./...
+```
+
+Where practical also run:
+
+```bash
+go test -race ./...
+govulncheck ./...
+```
+
+CI must execute the complete GOV.UK Frontend fixture parity suite.
+
+Any fixture parity failure must fail CI.
+
+# GOV.UK Frontend upgrades
+
+Treat a GOV.UK Frontend upgrade as a compatibility event.
+
+When upgrading:
+
+1. Update the pinned GOV.UK Frontend version.
+2. Obtain the fixtures belonging to that exact version.
+3. Do not modify the Go implementation initially.
+4. Run the complete existing fixture suite against the new fixtures.
+5. Inspect failures.
+6. Determine whether failures represent legitimate upstream changes.
+7. Update Go component models and templates where necessary.
+8. Rerun the complete suite.
+9. Update documentation where the public component API changes.
+
+Do not modify new fixtures to preserve old behaviour.
+
+Fixture failures during an upgrade are useful because they identify exactly where the independent implementation has diverged from the new GOV.UK Frontend contract.
+
+# Definition of done
+
+A GOV.UK component is complete only when:
+
+- it is server-rendered using Go and `html/template`
+- it is independently renderable from an HTTP handler
+- it has no Nunjucks runtime rendering dependency
+- it has no Node.js runtime rendering dependency
+- it uses official GOV.UK Frontend assets
+- every supported upstream fixture passes
+- ordinary text escaping is tested
+- trusted HTML behaviour is tested
+- arbitrary attributes are tested
+- accessibility-related markup matches expected output
+- the DOM comparator has not been weakened
+- no fixture-specific hacks exist
+- Go formatting and static analysis pass
+- all tests pass
+- CI passes
+
+The primary success metric is fixture parity, not visual similarity.
+
+The implementation should demonstrate that idiomatic Go can independently produce the same GOV.UK Frontend HTML contract as the reference implementation without requiring a frontend framework.
