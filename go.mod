@@ -4,7 +4,7 @@ go 1.27.0
 
 toolchain go1.27.1
 
-require github.com/andybalholm/brotli v1.2.5
+require github.com/andybalholm/brotli v1.2.6
 
 require (
 	github.com/BurntSushi/toml v1.4.1-0.20240526193622-a339e1f7089c // indirect
