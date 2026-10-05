@@ -8,4 +8,14 @@
     "MD041": false,
   },
   "globs": ["**/*.md", "**/*.mdc", "!node_modules/**", "!.git/**"],
+  // Sibling rule sections, each with its own h1. Other Markdown files keep MD025.
+  "overrides": [
+    {
+      "filter": [".cursor/rules/govuk-frontend-go.mdc"],
+      "config": {
+        "MD025": false,
+      },
+      "combine": "merge",
+    },
+  ],
 }
