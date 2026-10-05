@@ -18,7 +18,7 @@
     "lint:md": "markdownlint-cli2",
     "verify:docs": "npm run format:check && npm run lint:md",
     "lint:go": "go vet ./... && go fix -diff ./... && go tool staticcheck ./...",
-    "audit:npm": "npm audit --audit-level=high && npm audit signatures && node scripts/check-npm-lockfile.mjs",
+    "audit:npm": "node --test tests/audit-npm.test.mjs && node scripts/audit-npm.mjs && npm audit signatures && node scripts/check-npm-lockfile.mjs",
     "start": "npm run build:styles && go run ./cmd/server",
     "test:baseline": "node --test --experimental-test-coverage --test-coverage-include='baseline/**/*.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/baseline.test.mjs",
     "test:styles": "node --test --experimental-test-coverage --test-coverage-include='scripts/build-styles.mjs' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 tests/styles.test.mjs",
