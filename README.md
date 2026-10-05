@@ -1,7 +1,9 @@
 # GOV.UK Frontend example (Go)
 
 > [!IMPORTANT]
-> You are free to fork this repository and use it for your own purposes, and to modify and maintain it as you see fit.
+> You are free to fork, modify, and maintain this repository for your own use.
+>
+> This includes using and adapting it within your department, organisation, or project.
 
 > [!WARNING]
 > 🚨 **Example repository only**
