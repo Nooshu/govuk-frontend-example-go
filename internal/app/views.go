@@ -76,7 +76,7 @@ func startView(lang string) pages.View {
 // The back link goes to check-your-answers when the applicant came from there, so changing one
 // answer returns them to their summary rather than walking them through the rest of the journey
 // again. Otherwise it follows the linear journey, with the first question linking back to start.
-func (a *App) stepView(step service.Step, current *session.Session, r *http.Request, errs []service.FieldError) (pages.View, error) {
+func (a *App) stepView(step service.Step, current *session.Session, r *http.Request, errs []service.FieldError) pages.View {
 	returnTo := ""
 	if r.URL.Query().Get("return") == "check-answers" {
 		returnTo = "check-answers"
@@ -87,10 +87,7 @@ func (a *App) stepView(step service.Step, current *session.Session, r *http.Requ
 	} else if previous, ok := service.PreviousStep(step.ID); ok {
 		back = previous.Path
 	}
-	context, err := a.stepContext(step, current, errs)
-	if err != nil {
-		return pages.View{}, err
-	}
+	context := a.stepContext(step, current, errs)
 	if summary, ok := service.ErrorSummary(errs); ok {
 		context["errorSummary"] = summary
 	}
@@ -106,22 +103,22 @@ func (a *App) stepView(step service.Step, current *session.Session, r *http.Requ
 		BackLink:    map[string]any{"text": "Back", "href": back},
 		MainClasses: "govuk-main-wrapper--l",
 		Context:     context,
-	}, nil
+	}
 }
 
-func (a *App) stepContext(step service.Step, current *session.Session, errs []service.FieldError) (map[string]any, error) {
+func (a *App) stepContext(step service.Step, current *session.Session, errs []service.FieldError) map[string]any {
 	application := current.Application
 	switch step.ID {
 	case service.StepLicenceLength:
-		return service.LicenceFields(application, errs), nil
+		return service.LicenceFields(application, errs)
 	case service.StepName:
-		return service.NameField(application, errs), nil
+		return service.NameField(application, errs)
 	case service.StepDateOfBirth:
-		return service.DateField(application, errs), nil
+		return service.DateField(application, errs)
 	case service.StepWhereYouWillFish:
-		return service.CountryFields(application, errs), nil
+		return service.CountryFields(application, errs)
 	default:
-		return service.EmailField(application, errs), nil
+		return service.EmailField(application, errs)
 	}
 }
 
