@@ -224,10 +224,7 @@ func (a *App) serveAsset(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) stepGet(step service.Step) func(*session.Session, *http.Request) (outcome, error) {
 	return func(current *session.Session, r *http.Request) (outcome, error) {
-		view, err := a.stepView(step, current, r, a.errorsFor(current, step.Path))
-		if err != nil {
-			return outcome{}, err
-		}
+		view := a.stepView(step, current, r, a.errorsFor(current, step.Path))
 		return outcome{view: &view}, nil
 	}
 }
