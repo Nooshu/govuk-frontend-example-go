@@ -5,8 +5,11 @@
 >
 > This includes using and adapting it within your department, organisation, or project.
 
+<!-- Separate alerts. Prettier collapses the two blank lines markdownlint MD028 would accept. -->
+
 > [!WARNING]
-> ### 🚨 Example repository only
+>
+> **🚨 Example repository only**
 >
 > This repository is a **demonstration only**. It will not be actively maintained or supported.
 >
