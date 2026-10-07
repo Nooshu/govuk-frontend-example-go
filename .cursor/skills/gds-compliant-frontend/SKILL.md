@@ -50,6 +50,8 @@ Local index: [`docs/guidance-sources.md`](../../../docs/guidance-sources.md).
 
 ## Upgrading Frontend
 
+**Pipeline gate:** do not start or finish a Frontend (or any other) dependency bump while CI is red — follow [`../safe-dependency-updates/SKILL.md`](../safe-dependency-updates/SKILL.md).
+
 **Always** read https://github.com/alphagov/govuk-frontend/releases/latest before changing the pin, then follow [`docs/upgrading-govuk-frontend.md`](../../../docs/upgrading-govuk-frontend.md). Refresh fixtures from the same version; fix the Go renderers — never edit fixture `html`.
 
 ## Test coverage and HTML parity
@@ -63,7 +65,7 @@ Local index: [`docs/guidance-sources.md`](../../../docs/guidance-sources.md).
 
 1. This line is **Go**. Prefer the standard library. Record exceptions in [`docs/tech-stack.md`](../../../docs/tech-stack.md). Keep the npm tree minimal and lockfile-strict ([`docs/npm-security.md`](../../../docs/npm-security.md)); use `npm ci` / `npm run audit:npm`.
 2. Never hand-paste `govuk-*` component HTML; call `internal/govuk` / the page renderer.
-3. Upgrade only after reviewing the [latest release](https://github.com/alphagov/govuk-frontend/releases/latest).
+3. Upgrade only after reviewing the [latest release](https://github.com/alphagov/govuk-frontend/releases/latest), with CI green per [`safe-dependency-updates`](../safe-dependency-updates/SKILL.md).
 4. New components: [`docs/creating-components.md`](../../../docs/creating-components.md). Patterns: [`docs/creating-patterns.md`](../../../docs/creating-patterns.md).
 5. HTTP responses use [`baseline/`](../../../baseline/) through `internal/baseline`. Compress with Brotli (`br`); Gzip is only the fallback when the client does not advertise `br`. Playbooks: [`docs/frontend-performance.md`](../../../docs/frontend-performance.md), [`docs/frontend-security.md`](../../../docs/frontend-security.md).
 6. Compile CSS via Sass (`styles/application.scss` → Frontend `@use` → `govuk-overrides.scss` last). Never use `!important` in service CSS. Playbook: [`docs/styles.md`](../../../docs/styles.md).

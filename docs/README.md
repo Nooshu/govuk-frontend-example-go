@@ -4,10 +4,10 @@ All lasting project detail lives here. Keep root [`AGENTS.md`](../AGENTS.md) sli
 
 This folder is written for **two audiences**. Same facts; different entry points.
 
-| Audience             | Start here                                                                                                                 | Style                                                   |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| **Human developers** | [onboarding.md](onboarding.md), [CONTRIBUTING.md](../CONTRIBUTING.md)                                                      | Narrative, repo map, how to run/verify, troubleshooting |
-| **AI coding agents** | [`AGENTS.md`](../AGENTS.md), [`.cursor/skills/gds-compliant-frontend/`](../.cursor/skills/gds-compliant-frontend/SKILL.md) | Dense playbooks, checklists, non-negotiables            |
+| Audience             | Start here                                                                                                                                                                                                                  | Style                                                   |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| **Human developers** | [onboarding.md](onboarding.md), [CONTRIBUTING.md](../CONTRIBUTING.md)                                                                                                                                                       | Narrative, repo map, how to run/verify, troubleshooting |
+| **AI coding agents** | [`AGENTS.md`](../AGENTS.md), [`.cursor/skills/gds-compliant-frontend/`](../.cursor/skills/gds-compliant-frontend/SKILL.md), [`.cursor/skills/safe-dependency-updates/`](../.cursor/skills/safe-dependency-updates/SKILL.md) | Dense playbooks, checklists, non-negotiables            |
 
 How we keep docs dual-purpose: [documentation-structure.md](documentation-structure.md).
 
@@ -34,12 +34,13 @@ How we keep docs dual-purpose: [documentation-structure.md](documentation-struct
 
 ## For AI agents
 
-| Doc                                                                                           | Purpose                                                 |
-| --------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [`AGENTS.md`](../AGENTS.md)                                                                   | Slim playbook — always start here in agent sessions     |
-| [`.cursor/skills/gds-compliant-frontend/`](../.cursor/skills/gds-compliant-frontend/SKILL.md) | Project skill (template shape, guidance URLs, coverage) |
-| [`.cursor/rules/`](../.cursor/rules/)                                                         | Always-on consistency rules                             |
-| Playbooks below                                                                               | Upgrade, create component/pattern, testing, UI rules    |
+| Doc                                                                                             | Purpose                                                        |
+| ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [`AGENTS.md`](../AGENTS.md)                                                                     | Slim playbook — always start here in agent sessions            |
+| [`.cursor/skills/gds-compliant-frontend/`](../.cursor/skills/gds-compliant-frontend/SKILL.md)   | Project skill (template shape, guidance URLs, coverage)        |
+| [`.cursor/skills/safe-dependency-updates/`](../.cursor/skills/safe-dependency-updates/SKILL.md) | Dependency bumps — **green CI required** before start/complete |
+| [`.cursor/rules/`](../.cursor/rules/)                                                           | Always-on consistency rules                                    |
+| Playbooks below                                                                                 | Upgrade, create component/pattern, testing, UI rules           |
 
 Agents should still open human-oriented docs when onboarding a teammate or explaining “why”.
 

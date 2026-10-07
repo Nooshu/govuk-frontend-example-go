@@ -3,7 +3,7 @@
   ============================================================
   Base: Go line of GDS-compliant frontends (Go + GOV.UK Frontend)
   Sync shared docs from Nooshu/govuk-frontend-example (see docs/syncing-from-template.md)
-  Detail lives in /docs and .cursor/skills/gds-compliant-frontend
+  Detail lives in /docs and .cursor/skills/ (gds-compliant-frontend, safe-dependency-updates)
   ============================================================ -->
 
 ♛ GOV.UK
@@ -20,7 +20,7 @@ Language-agnostic template (shared playbooks): https://github.com/Nooshu/govuk-f
 
 **LIVE guidance** — [Design System feedback](https://design-system.service.gov.uk/community/feedback/).
 
-Skill: [`.cursor/skills/gds-compliant-frontend/SKILL.md`](.cursor/skills/gds-compliant-frontend/SKILL.md). Purpose: [`docs/project-purpose.md`](docs/project-purpose.md). Stack: [`docs/tech-stack.md`](docs/tech-stack.md).
+Skills: [`.cursor/skills/gds-compliant-frontend/SKILL.md`](.cursor/skills/gds-compliant-frontend/SKILL.md), [`.cursor/skills/safe-dependency-updates/SKILL.md`](.cursor/skills/safe-dependency-updates/SKILL.md). Purpose: [`docs/project-purpose.md`](docs/project-purpose.md). Stack: [`docs/tech-stack.md`](docs/tech-stack.md).
 
 ## Priorities (in order)
 
@@ -34,16 +34,16 @@ Details: [`docs/priorities.md`](docs/priorities.md).
 
 ## Start here
 
-| Audience                    | Doc                                                                                                                     |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Human developers**        | [`docs/onboarding.md`](docs/onboarding.md), [`CONTRIBUTING.md`](CONTRIBUTING.md)                                        |
-| **AI agents (this file)**   | Keep reading; skill: [`.cursor/skills/gds-compliant-frontend/SKILL.md`](.cursor/skills/gds-compliant-frontend/SKILL.md) |
-| Dual-audience docs map      | [`docs/documentation-structure.md`](docs/documentation-structure.md), [`docs/README.md`](docs/README.md)                |
-| Project purpose             | [`docs/project-purpose.md`](docs/project-purpose.md)                                                                    |
-| Why Go / architecture       | [`docs/why-go.md`](docs/why-go.md), [`docs/architecture.md`](docs/architecture.md)                                      |
-| Official guidance URLs      | [`docs/guidance-sources.md`](docs/guidance-sources.md)                                                                  |
-| Stack / language (Go)       | [`docs/tech-stack.md`](docs/tech-stack.md), [`docs/go-conventions.md`](docs/go-conventions.md)                          |
-| Sync from agnostic template | [`docs/syncing-from-template.md`](docs/syncing-from-template.md)                                                        |
+| Audience                    | Doc                                                                                                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Human developers**        | [`docs/onboarding.md`](docs/onboarding.md), [`CONTRIBUTING.md`](CONTRIBUTING.md)                                                                                           |
+| **AI agents (this file)**   | Keep reading; skills: [gds-compliant-frontend](.cursor/skills/gds-compliant-frontend/SKILL.md), [safe-dependency-updates](.cursor/skills/safe-dependency-updates/SKILL.md) |
+| Dual-audience docs map      | [`docs/documentation-structure.md`](docs/documentation-structure.md), [`docs/README.md`](docs/README.md)                                                                   |
+| Project purpose             | [`docs/project-purpose.md`](docs/project-purpose.md)                                                                                                                       |
+| Why Go / architecture       | [`docs/why-go.md`](docs/why-go.md), [`docs/architecture.md`](docs/architecture.md)                                                                                         |
+| Official guidance URLs      | [`docs/guidance-sources.md`](docs/guidance-sources.md)                                                                                                                     |
+| Stack / language (Go)       | [`docs/tech-stack.md`](docs/tech-stack.md), [`docs/go-conventions.md`](docs/go-conventions.md)                                                                             |
+| Sync from agnostic template | [`docs/syncing-from-template.md`](docs/syncing-from-template.md)                                                                                                           |
 
 **Language rule:** This line is **Go**. **Every** feature and code change must follow Go’s **latest** best practices (modules, `internal/`, tests, `npm run lint:go`, packaging) as recorded in [`docs/tech-stack.md`](docs/tech-stack.md) — without weakening the non-negotiables below. Prefer the standard library (`net/http`, `html/template`, `compress/gzip`, `crypto/*`, `log/slog`, `encoding/json/v2`) and only well-known deps where stdlib lacks a feature (e.g. `andybalholm/brotli`). Generate HTML **natively in Go**; do not call Node to render.
 
@@ -66,7 +66,7 @@ Details: [`docs/priorities.md`](docs/priorities.md).
 9. **Progressive enhancement** — core tasks work without Frontend JS; keep `js-enabled` / `govuk-frontend-supported` and `initAll()`.
 10. **Do not ship unreleased GOV.UK chrome** — wait for Frontend release + fixtures. See [`docs/govuk-frontend-roadmap.md`](docs/govuk-frontend-roadmap.md).
 11. **100% code coverage** — functions, branches, and statements at **100%** for application/library code under test; CI must fail below that. Do not weaken fixture HTML equality to chase coverage. See [`docs/testing-components.md`](docs/testing-components.md).
-12. **Always review the latest release notes** before upgrading — https://github.com/alphagov/govuk-frontend/releases/latest — then follow [`docs/upgrading-govuk-frontend.md`](docs/upgrading-govuk-frontend.md).
+12. **Dependency and Frontend upgrades need a green pipeline** — follow [`.cursor/skills/safe-dependency-updates/SKILL.md`](.cursor/skills/safe-dependency-updates/SKILL.md). For `govuk-frontend`, also read https://github.com/alphagov/govuk-frontend/releases/latest and [`docs/upgrading-govuk-frontend.md`](docs/upgrading-govuk-frontend.md).
 13. **Performance and security baseline** — every response uses [`baseline/`](baseline/) policy via `internal/baseline` (cache kind, OWASP headers, CSP hash for the `js-enabled` snippet). Sync that directory from the template; do not invent a weaker set. Compress with Brotli first (`andybalholm/brotli`); Gzip is the fallback. See [`docs/frontend-performance.md`](docs/frontend-performance.md) and [`docs/frontend-security.md`](docs/frontend-security.md).
 14. **Split finished work into focused commits** — once a coherent piece of code or docs is complete, create **specific** commits with **comprehensive** messages (why, contract impact, how to verify). Do not leave a large mixed working tree; do not squash unrelated concerns into one commit. This applies to agents and humans using this template.
 15. **Document every change for humans and agents** — no feature, prompt-driven change, or behaviour lands without dual-audience docs updated in the right place (`/docs` detail, `AGENTS.md` / skill / rules links when contracts change, onboarding or CONTRIBUTING when workflow changes). Aim for easier onboarding and maintenance. See [`docs/documentation-structure.md`](docs/documentation-structure.md).
@@ -76,30 +76,31 @@ Using this repo does **not** make a service assessment-ready. See [`docs/service
 
 ## Agent playbooks
 
-| Task                                | Doc                                                                    |
-| ----------------------------------- | ---------------------------------------------------------------------- |
-| Sync from agnostic template         | [`docs/syncing-from-template.md`](docs/syncing-from-template.md)       |
-| Upgrade GOV.UK Frontend             | [`docs/upgrading-govuk-frontend.md`](docs/upgrading-govuk-frontend.md) |
-| Add a component                     | [`docs/creating-components.md`](docs/creating-components.md)           |
-| Add a pattern                       | [`docs/creating-patterns.md`](docs/creating-patterns.md)               |
-| Layout / chrome                     | [`docs/layout-chrome.md`](docs/layout-chrome.md)                       |
-| Fixture / parity testing            | [`docs/testing-components.md`](docs/testing-components.md)             |
-| Example service                     | [`docs/example-service.md`](docs/example-service.md)                   |
-| Deploy on Render                    | [`docs/deploying-on-render.md`](docs/deploying-on-render.md)           |
-| Page shell                          | [`docs/page-shell.md`](docs/page-shell.md)                             |
-| Frontend performance                | [`docs/frontend-performance.md`](docs/frontend-performance.md)         |
-| Frontend security                   | [`docs/frontend-security.md`](docs/frontend-security.md)               |
-| npm tooling security                | [`docs/npm-security.md`](docs/npm-security.md)                         |
-| Accessibility                       | [`docs/accessibility.md`](docs/accessibility.md)                       |
-| Content & forms                     | [`docs/content-and-forms.md`](docs/content-and-forms.md)               |
-| Design tokens (colour, type, space) | [`docs/design-tokens.md`](docs/design-tokens.md)                       |
-| Styles / Sass cascade               | [`docs/styles.md`](docs/styles.md)                                     |
-| Dual-audience documentation         | [`docs/documentation-structure.md`](docs/documentation-structure.md)   |
-| Why Go                              | [`docs/why-go.md`](docs/why-go.md)                                     |
-| Architecture                        | [`docs/architecture.md`](docs/architecture.md)                         |
-| Go conventions (comments, lint)     | [`docs/go-conventions.md`](docs/go-conventions.md)                     |
-| Guidance sources                    | [`docs/guidance-sources.md`](docs/guidance-sources.md)                 |
-| Authoritative links                 | [`docs/authoritative-references.md`](docs/authoritative-references.md) |
+| Task                                | Doc                                                                                                                          |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Sync from agnostic template         | [`docs/syncing-from-template.md`](docs/syncing-from-template.md)                                                             |
+| Upgrade GOV.UK Frontend             | [`docs/upgrading-govuk-frontend.md`](docs/upgrading-govuk-frontend.md)                                                       |
+| Safe dependency updates             | [`.cursor/skills/safe-dependency-updates/SKILL.md`](.cursor/skills/safe-dependency-updates/SKILL.md) — **green CI required** |
+| Add a component                     | [`docs/creating-components.md`](docs/creating-components.md)                                                                 |
+| Add a pattern                       | [`docs/creating-patterns.md`](docs/creating-patterns.md)                                                                     |
+| Layout / chrome                     | [`docs/layout-chrome.md`](docs/layout-chrome.md)                                                                             |
+| Fixture / parity testing            | [`docs/testing-components.md`](docs/testing-components.md)                                                                   |
+| Example service                     | [`docs/example-service.md`](docs/example-service.md)                                                                         |
+| Deploy on Render                    | [`docs/deploying-on-render.md`](docs/deploying-on-render.md)                                                                 |
+| Page shell                          | [`docs/page-shell.md`](docs/page-shell.md)                                                                                   |
+| Frontend performance                | [`docs/frontend-performance.md`](docs/frontend-performance.md)                                                               |
+| Frontend security                   | [`docs/frontend-security.md`](docs/frontend-security.md)                                                                     |
+| npm tooling security                | [`docs/npm-security.md`](docs/npm-security.md)                                                                               |
+| Accessibility                       | [`docs/accessibility.md`](docs/accessibility.md)                                                                             |
+| Content & forms                     | [`docs/content-and-forms.md`](docs/content-and-forms.md)                                                                     |
+| Design tokens (colour, type, space) | [`docs/design-tokens.md`](docs/design-tokens.md)                                                                             |
+| Styles / Sass cascade               | [`docs/styles.md`](docs/styles.md)                                                                                           |
+| Dual-audience documentation         | [`docs/documentation-structure.md`](docs/documentation-structure.md)                                                         |
+| Why Go                              | [`docs/why-go.md`](docs/why-go.md)                                                                                           |
+| Architecture                        | [`docs/architecture.md`](docs/architecture.md)                                                                               |
+| Go conventions (comments, lint)     | [`docs/go-conventions.md`](docs/go-conventions.md)                                                                           |
+| Guidance sources                    | [`docs/guidance-sources.md`](docs/guidance-sources.md)                                                                       |
+| Authoritative links                 | [`docs/authoritative-references.md`](docs/authoritative-references.md)                                                       |
 
 ## Quick page review
 
@@ -123,8 +124,4 @@ Before finishing a page change:
 
 ## Watching upstream
 
-**Before every Frontend upgrade:** read https://github.com/alphagov/govuk-frontend/releases/latest (currently documents releases such as [v6.5.1](https://github.com/alphagov/govuk-frontend/releases/latest)).
-
-Also: [roadmap](https://design-system.service.gov.uk/community/roadmap/), [upcoming](https://design-system.service.gov.uk/community/upcoming-components-patterns/), [all releases](https://github.com/alphagov/govuk-frontend/releases). Local: [`docs/govuk-frontend-roadmap.md`](docs/govuk-frontend-roadmap.md).
-
-Upgrade only via [`docs/upgrading-govuk-frontend.md`](docs/upgrading-govuk-frontend.md). Do not invent dark mode, AI patterns, or unofficial chrome.
+Dependency bumps (npm, language packages, Dependabot) and Frontend pin changes: [`.cursor/skills/safe-dependency-updates/SKILL.md`](.cursor/skills/safe-dependency-updates/SKILL.md) (**CI must be green** before start and before complete). `govuk-frontend` still uses [`docs/upgrading-govuk-frontend.md`](docs/upgrading-govuk-frontend.md).

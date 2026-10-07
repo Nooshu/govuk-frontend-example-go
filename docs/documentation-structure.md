@@ -71,8 +71,9 @@ Applies to this **Go** line **and** to the shared Node tooling synced from the a
 
 1. [../AGENTS.md](../AGENTS.md)
 2. Skill: `gds-compliant-frontend`
-3. Relevant playbook under `/docs`
-4. [guidance-sources.md](guidance-sources.md) when policy is unclear
+3. Skill: `safe-dependency-updates` when bumping packages, reviewing Dependabot PRs, or changing lockfiles (CI must be green)
+4. Relevant playbook under `/docs`
+5. [guidance-sources.md](guidance-sources.md) when policy is unclear
 
 ## Consistency tooling
 
