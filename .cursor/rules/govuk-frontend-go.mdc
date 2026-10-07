@@ -64,7 +64,7 @@ Do not introduce a third-party template engine.
 
 Use Go's standard `html/template` package.
 
-Keep third-party dependencies to a sensible minimum.
+Keep third-party dependencies to a sensible minimum — see [safe-dependency-updates](../skills/safe-dependency-updates/SKILL.md).
 
 # GOV.UK Frontend
 
@@ -658,48 +658,9 @@ Node.js must not participate in application runtime rendering.
 
 Do not silently depend on a CDN version that can change independently of the application.
 
-# Dependency management
+# Dependencies
 
-Use Go modules.
-
-Commit:
-
-```text
-go.mod
-go.sum
-```
-
-Keep dependencies minimal.
-
-Prefer the standard library where it provides an appropriate solution.
-
-Use established modules where third-party functionality is genuinely useful.
-
-Do not add a dependency for functionality that can be implemented clearly and safely with a few lines of standard-library Go.
-
-Run:
-
-```bash
-go mod tidy
-```
-
-after dependency changes.
-
-Review changes to `go.mod` and `go.sum`.
-
-# Dependency security
-
-Use appropriate Go vulnerability tooling.
-
-Where available in the development and CI environment, run:
-
-```bash
-govulncheck ./...
-```
-
-Keep Go and dependencies supported and up to date.
-
-Do not blindly update dependencies without running the complete test and fixture suite.
+Dependency updates, lockfiles, audits, and Dependabot / Renovate review follow [`.cursor/skills/safe-dependency-updates/SKILL.md`](../skills/safe-dependency-updates/SKILL.md). Keep the dependency surface small; prefer platform / standard-library APIs first. Do **not** start or complete dependency changes while CI is red.
 
 # Formatting
 
