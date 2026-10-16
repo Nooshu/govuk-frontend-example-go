@@ -1,5 +1,11 @@
 # GOV.UK Frontend example (Go)
 
+> [!NOTE]
+>
+> This repository was written for **[Building Services to GDS Standards Without a Frontend Framework](https://nooshu.com/blog/2026/10/15/building-services-to-gds-standards-without-a-frontend-framework/)**.
+
+<!-- Separate alerts. Prettier collapses the two blank lines markdownlint MD028 would accept. -->
+
 > [!IMPORTANT]
 > You are free to fork, modify, and maintain this repository for your own use.
 >
