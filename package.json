@@ -28,8 +28,8 @@
     "sync:template": "./scripts/sync-from-template.sh"
   },
   "devDependencies": {
-    "markdownlint-cli2": "0.23.3",
-    "prettier": "3.9.9",
+    "markdownlint-cli2": "0.24.0",
+    "prettier": "3.9.10",
     "sass": "1.105.1"
   },
   "dependencies": {
