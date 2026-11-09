@@ -1,0 +1,12 @@
+.git
+.github
+.cursor
+.idea
+.vscode
+node_modules
+bin
+dist
+docs
+coverage
+*.md
+.DS_Store

@@ -124,9 +124,9 @@ func LoadFrom(workingDir func() (string, error)) (*Config, error) {
 //
 // Precedence:
 //  1. DEMOS_ENABLED — "true"/"1"/"yes" forces on; "false"/"0"/"no" forces off
-//  2. Otherwise off when NODE_ENV=production (hosts such as Render often set that)
+//  2. Otherwise off when NODE_ENV=production (container hosts often set that)
 //
-// The public Render demo sets DEMOS_ENABLED=true so previews stay visible even when
+// The public Cloud Run demo sets DEMOS_ENABLED=true so previews stay visible even when
 // NODE_ENV is production.
 func DemosEnabled(getenv func(string) string) bool {
 	switch getenv("DEMOS_ENABLED") {
@@ -142,7 +142,7 @@ func DemosEnabled(getenv func(string) string) bool {
 //
 // It returns [DefaultPort] when PORT is unset or empty, and an error when PORT is set to
 // something that is not a port number, so a typo fails loudly instead of silently binding 3000.
-// Cloud hosts such as Render inject PORT automatically.
+// Cloud Run injects PORT automatically.
 func ResolvePort(getenv func(string) string) (int, error) {
 	raw := getenv("PORT")
 	if raw == "" {
@@ -164,9 +164,8 @@ func ResolvePort(getenv func(string) string) (int, error) {
 //
 // The default is IPv4 on purpose. [net.Listen] with network "tcp" and an
 // unspecified address (":PORT" or "0.0.0.0:PORT") opens an IPv6 socket, which
-// logs as [::]:PORT. Render's port scan only detects an IPv4 listener on
-// 0.0.0.0, so that socket makes a healthy process fail deploy with
-// "no open ports detected". See https://render.com/docs/web-services#port-binding.
+// logs as [::]:PORT. Cloud Run detects an IPv4 listener on 0.0.0.0. An
+// IPv6-only socket makes a healthy process fail deploy with no open port.
 func ResolveListen(getenv func(string) string) (network, address string, err error) {
 	port, err := ResolvePort(getenv)
 	if err != nil {

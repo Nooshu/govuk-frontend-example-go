@@ -5,9 +5,9 @@
 // the Sass pipeline, and component HTML comes from the Go port of Frontend's macros.
 //
 // Start it with `npm start`, which compiles the stylesheet first. PORT chooses the port
-// (default 3000). HOST selects the bind address (empty = 0.0.0.0 on tcp4, which Render's
-// port scan can see; use HOST=127.0.0.1 for local-only). NODE_ENV=production turns off the
-// component catalogue and example pages unless DEMOS_ENABLED=true (used on the public Render demo).
+// (default 3000). HOST selects the bind address (empty = 0.0.0.0 on tcp4, which Cloud Run
+// can see; use HOST=127.0.0.1 for local-only). NODE_ENV=production turns off the
+// component catalogue and example pages unless DEMOS_ENABLED=true (used on the public Cloud Run demo).
 package main
 
 import (

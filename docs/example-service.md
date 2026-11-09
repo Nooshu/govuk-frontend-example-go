@@ -13,11 +13,11 @@ npm ci
 npm start
 ```
 
-Opens at <http://127.0.0.1:3000>. The server binds `0.0.0.0` with IPv4 (`tcp4`) by default, which is the listener [Render](https://render.com/docs/web-services#port-binding) detects. Use `HOST=127.0.0.1` to bind loopback only. Set `PORT` to use another port.
+Opens at <http://127.0.0.1:3000>. The server binds `0.0.0.0` with IPv4 (`tcp4`) by default, which is the listener Cloud Run detects. Use `HOST=127.0.0.1` to bind loopback only. Set `PORT` to use another port.
 
-Public demo hosting: [deploying-on-render.md](deploying-on-render.md).
+Public demo hosting: [deploying-on-cloud-run.md](deploying-on-cloud-run.md).
 
-`NODE_ENV=production` hides the component catalogue and the extra example pages unless `DEMOS_ENABLED=true` (set on the Render demo). The licence journey stays available.
+`NODE_ENV=production` hides the component catalogue and the extra example pages unless `DEMOS_ENABLED=true` (set on the Cloud Run demo). The licence journey stays available.
 
 ## Start to confirmation
 
