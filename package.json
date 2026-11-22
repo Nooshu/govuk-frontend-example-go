@@ -33,6 +33,6 @@
     "sass": "1.105.1"
   },
   "dependencies": {
-    "govuk-frontend": "6.5.1"
+    "govuk-frontend": "6.6.0"
   }
 }
